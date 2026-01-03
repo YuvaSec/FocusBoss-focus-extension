@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FocusBoss</title>
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body>
+    <div class="app popup">
+      <header class="app-header">
+        <div>
+          <h1 class="app-title">FocusBoss</h1>
+          <p id="status">Popup booting...</p>
+        </div>
+        <span class="chip">Focus</span>
+      </header>
+
+      <main class="app-main">
+        <section class="card view" data-view="home">
+          <div class="row">
+            <div>
+              <h2>Focus Mode</h2>
+              <p>Keep distractions out.</p>
+            </div>
+            <label class="toggle">
+              <input id="focusToggle" type="checkbox" />
+              <span></span>
+            </label>
+          </div>
+          <div class="row" style="margin-top: 12px;">
+            <p>Turn off until</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+              <button class="chip" data-temp-off="1h">1h</button>
+              <button class="chip" data-temp-off="eod">End of day</button>
+              <button class="chip" data-temp-off="manual">Manual</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card view" data-view="home">
+          <h2>Interventions</h2>
+          <p class="list-sub">Pick how FocusBoss stops distractions.</p>
+          <div id="interventionList" class="list-items" style="margin-top: 10px;"></div>
+        </section>
+
+        <section class="card view hidden" data-view="lists">
+          <h2>Lists</h2>
+          <p>Blocked, allowed, and advanced rules.</p>
+
+          <div class="segmented" id="listTypeControl" style="margin-top: 12px;">
+            <button data-list="blocked" class="active">Blocked</button>
+            <button data-list="allowed">Allowed</button>
+            <button data-list="advanced">Advanced</button>
+          </div>
+
+          <div id="entryTypeRow" class="segmented" style="margin-top: 10px;">
+            <button data-entry="domain" class="active">Websites</button>
+            <button data-entry="keyword">Keywords</button>
+            <button disabled style="opacity: 0;">.</button>
+          </div>
+
+          <div id="listEditor" style="margin-top: 12px;">
+            <div class="row">
+              <input id="listInput" class="text-input" placeholder="Add site or keyword" />
+              <button id="listAddButton" class="btn">Add</button>
+            </div>
+            <div id="listItems" class="list-items" style="margin-top: 12px;"></div>
+          </div>
+
+          <div id="advancedEditor" class="hidden" style="margin-top: 12px;">
+            <textarea
+              id="advancedRules"
+              class="text-input"
+              rows="6"
+              placeholder="# one rule per line&#10;!example.com/private/*&#10;example.com/*"
+            ></textarea>
+            <div class="row" style="margin-top: 10px;">
+              <p>Wildcards: * and ?</p>
+              <button id="advancedSave" class="btn">Save</button>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="card view hidden" data-view="timer">
+          <h2>Timer</h2>
+          <p>Pomodoro and strict sessions.</p>
+        </section>
+
+        <section class="card view hidden" data-view="stats">
+          <h2>Stats</h2>
+          <p>Focus and distraction insights.</p>
+        </section>
+
+        <section class="card view hidden" data-view="settings">
+          <h2>Settings</h2>
+          <div class="row">
+            <div>
+              <p>Theme</p>
+              <p>Dark, light, or system.</p>
+            </div>
+            <div class="segmented" id="themeControl">
+              <button data-theme="dark">Dark</button>
+              <button data-theme="light">Light</button>
+              <button data-theme="system">System</button>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <p>Blocking style</p>
+                <button class="icon-btn" data-open-modal="blockingInfo" aria-label="Blocking style info">?</button>
+              </div>
+              <p>Overlay on page or redirect.</p>
+            </div>
+            <div style="display: grid; justify-items: end; gap: 6px;">
+              <label class="toggle">
+                <input id="overlayToggle" type="checkbox" />
+                <span></span>
+              </label>
+              <span id="overlayLabel" class="list-sub">Overlay</span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <nav class="app-nav">
+        <button class="nav-btn active" data-target="home">Home</button>
+        <button class="nav-btn" data-target="lists">Lists</button>
+        <button class="nav-btn" data-target="timer">Timer</button>
+        <button class="nav-btn" data-target="stats">Stats</button>
+        <button class="nav-btn" data-target="settings">Settings</button>
+      </nav>
+    </div>
+
+    <div id="interventionModal" class="modal hidden" data-modal="intervention" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="row">
+          <div>
+            <h3 id="interventionTitle">Intervention</h3>
+            <p id="interventionHint" class="list-sub">Customize the copy and timing.</p>
+          </div>
+          <button id="interventionClose" class="btn btn-small" data-close-modal="true">Back</button>
+        </div>
+        <div style="margin-top: 10px;">
+          <label class="list-sub">Message</label>
+          <input id="interventionText" class="text-input" />
+        </div>
+        <div id="durationRow" style="margin-top: 10px;">
+          <label class="list-sub">Duration</label>
+          <select id="interventionDuration" class="text-input"></select>
+        </div>
+        <div id="techniqueRow" style="margin-top: 10px;">
+          <label class="list-sub">Breathing pattern</label>
+          <select id="interventionTechnique" class="text-input"></select>
+        </div>
+        <div id="pausableRow" class="row" style="margin-top: 10px;">
+          <div>
+            <p class="list-sub">Allow pause</p>
+          </div>
+          <label class="toggle small">
+            <input id="interventionPausable" type="checkbox" />
+            <span></span>
+          </label>
+        </div>
+        <div class="row" style="margin-top: 12px;">
+          <div></div>
+          <button id="interventionSave" class="btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="blockingInfoModal" class="modal hidden" data-modal="blockingInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="row">
+          <div>
+            <h3>Blocking style</h3>
+            <p class="list-sub">Choose how FocusBoss interrupts a blocked page.</p>
+          </div>
+          <button class="btn btn-small" data-close-modal="true">Back</button>
+        </div>
+        <div style="margin-top: 10px;">
+          <p class="list-sub"><strong>Overlay</strong> keeps you on the page but blocks interaction.</p>
+          <p class="list-sub" style="margin-top: 6px;"><strong>Redirect</strong> sends you to the intervention screen.</p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="popup/index.js"></script>
+  </body>
+</html>

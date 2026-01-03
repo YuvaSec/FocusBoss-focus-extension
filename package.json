@@ -1,0 +1,16 @@
+{
+  "name": "focusboss-focus-extension",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy.mjs",
+    "watch": "tsc -p tsconfig.json --watch",
+    "test": "node dist/shared/rules.test.js"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.5"
+  }
+}

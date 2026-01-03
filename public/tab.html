@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FocusBoss</title>
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body>
+    <div class="app full" data-theme="dark">
+      <header class="app-header">
+        <h1 class="app-title">FocusBoss</h1>
+        <span class="chip">Intervention</span>
+      </header>
+      <main class="app-main">
+        <section class="card">
+          <h2 id="interventionName">Intervention</h2>
+          <p id="interventionMessage">Preparing your focus guard...</p>
+          <p id="interventionMeta" class="list-sub" style="margin-top: 10px;"></p>
+          <div id="tempAllowSection" style="margin-top: 14px;">
+            <p class="list-sub">Let me continue for</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+              <button class="chip" data-allow-min="1">1m</button>
+              <button class="chip" data-allow-min="5">5m</button>
+              <button class="chip" data-allow-min="10">10m</button>
+              <button class="chip" data-allow-min="15">15m</button>
+            </div>
+          </div>
+          <div id="interventionActions" class="row" style="margin-top: 16px;">
+            <div></div>
+            <button id="interventionBack" class="btn btn-small btn-primary">Go back</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="tab/index.js"></script>
+  </body>
+</html>
