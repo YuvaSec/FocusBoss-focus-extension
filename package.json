@@ -12,5 +12,6 @@
     "@types/chrome": "^0.0.268",
     "@types/node": "^20.11.30",
     "typescript": "^5.4.5"
-  }
+  },
+  "dependencies": {}
 }

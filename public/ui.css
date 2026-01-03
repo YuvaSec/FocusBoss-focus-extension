@@ -1,3 +1,4 @@
+/* Fonts: local Poppins for consistent UI typography. */
 @font-face {
   font-family: "Poppins";
   src: url("fonts/poppins-400.woff2") format("woff2");
@@ -14,6 +15,8 @@
   font-display: swap;
 }
 
+
+/* Theme tokens: colors, spacing, radii, typography. */
 :root {
   color-scheme: light dark;
   --color-bg: #0e1111;
@@ -37,6 +40,7 @@
   --font-ui: "Poppins", Arial, sans-serif;
 }
 
+/* Light theme overrides (swap neutrals + accent). */
 [data-theme="light"] {
   --color-bg: #f3f4f4;
   --color-surface: #ffffff;
@@ -48,12 +52,12 @@
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* Layout box sizing */
+/* Base reset: box sizing and default element spacing. */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-/* Base layout and typography */
+/* Base layout and typography (popup sizing + default text). */
 body {
   margin: 0;
   background: var(--color-bg);
@@ -82,7 +86,7 @@ p {
   color: var(--color-muted);
 }
 
-/* App shell */
+/* App shell: header + scrollable content region. */
 .app {
   display: flex;
   flex-direction: column;
@@ -116,7 +120,7 @@ p {
   min-height: 0;
 }
 
-/* Slim, in-content scrollbar */
+/* Scrollbar styling for the main content area. */
 .app-main::-webkit-scrollbar {
   width: 6px;
 }
@@ -134,7 +138,7 @@ p {
   background: rgba(120, 120, 120, 0.6);
 }
 
-/* Modal */
+/* Modal: glassmorphism overlay + centered card. */
 .modal {
   position: fixed;
   inset: 0;
@@ -184,14 +188,17 @@ p {
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
+/* Hide modal container when not in use. */
 .modal.hidden {
   display: none;
 }
 
+/* Lock background scroll while a modal is visible. */
 body.modal-open {
   overflow: hidden;
 }
 
+/* Icon-only helper button (used for small UI actions). */
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -211,29 +218,94 @@ body.modal-open {
   border-color: rgba(156, 255, 58, 0.6);
 }
 
+.icon-btn.icon-only {
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+}
+
+/* Bottom navigation bar (full-width icon row). */
 .app-nav {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
-  padding-bottom: 2px;
+  padding: 8px 16px 10px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  justify-items: center;
+  width: 100%;
 }
 
 .nav-btn {
+  width: 100%;
+  height: 40px;
   border: 0;
   background: transparent;
-  padding: var(--space-2) var(--space-1);
   color: var(--color-muted);
-  font-size: var(--font-small);
   cursor: pointer;
-  min-height: 44px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition: color 200ms ease;
+}
+
+/* Active tab background pill behind the icon. */
+.nav-btn::before {
+  content: "";
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  /*background: rgba(156, 255, 58, 0.16);*/
+  opacity: 0;
+  transition: opacity 200ms ease;
+  z-index: 0;
 }
 
 .nav-btn.active {
   color: var(--color-accent);
 }
 
-/* Cards and rows */
+.nav-btn.active::before {
+  opacity: 1;
+}
+
+/* Active tab top indicator line (aligned to the nav border). */
+.nav-btn.active::after {
+  content: "";
+  position: absolute;
+  /*top: 47px;*/
+  bottom: -10px;
+  /*top: -9px;*/
+  width: 56px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+
+/* Outline nav icons (shared stroke styling). */
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  opacity: 0.75;
+  z-index: 1;
+}
+
+.nav-icon * {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-btn.active .nav-icon {
+  opacity: 1;
+}
+
+
+/* Cards: reusable surfaces with border + shadow. */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -244,6 +316,7 @@ body.modal-open {
   width: 100%;
 }
 
+/* Popup-specific sizing overrides. */
 .app.popup .app-main {
   justify-items: stretch;
 }
@@ -252,6 +325,7 @@ body.modal-open {
   max-width: 100%;
 }
 
+/* Rows: align labels and controls on a single line. */
 .row {
   display: flex;
   align-items: center;
@@ -263,7 +337,7 @@ body.modal-open {
   margin-top: var(--space-2);
 }
 
-/* Toggle */
+/* Toggle: custom switch control. */
 .toggle {
   position: relative;
   width: 44px;
@@ -307,7 +381,7 @@ body.modal-open {
   background: var(--color-accent);
 }
 
-/* Segmented control */
+/* Segmented control: pill buttons for tabs/filters. */
 .segmented {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -330,7 +404,7 @@ body.modal-open {
   color: var(--color-text);
 }
 
-/* Chips */
+/* Chips: pill buttons for pause presets + tags. */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -359,7 +433,7 @@ button.chip {
   cursor: not-allowed;
 }
 
-/* Inputs */
+/* Inputs: text fields + selects. */
 .text-input {
   width: 100%;
   border-radius: var(--r-control);
@@ -369,7 +443,81 @@ button.chip {
   color: var(--color-text);
 }
 
-/* Buttons */
+/* Pomodoro progress bar. */
+.timer-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(156, 255, 58, 0.25);
+  overflow: hidden;
+}
+
+.pomodoro-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.pomodoro-title {
+  min-width: 0;
+}
+
+.pomodoro-controls {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 8px;
+  justify-content: end;
+}
+
+.pomodoro-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color 200ms ease, transform 200ms ease, background 200ms ease;
+}
+
+.pomodoro-icon-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.pomodoro-icon-btn:hover {
+  border-color: rgba(156, 255, 58, 0.5);
+}
+
+.pomodoro-icon-btn:active {
+  transform: translateY(1px);
+}
+
+.pomodoro-icon-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pomodoro-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.timer-progress span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: rgba(156, 255, 58, 0.85);
+  border-radius: inherit;
+  transition: width 200ms ease;
+}
+
+/* Buttons: neutral default action button. */
 .btn {
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
@@ -385,7 +533,7 @@ button.chip {
   border-color: rgba(156, 255, 58, 0.5);
 }
 
-/* Lists */
+/* Lists: stacked list rows. */
 .list-items {
   display: grid;
   gap: 8px;
@@ -400,6 +548,7 @@ button.chip {
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
   font-size: var(--font-small);
+  overflow: visible;
 }
 
 .list-item button {
@@ -413,6 +562,243 @@ button.chip {
   color: var(--color-accent);
 }
 
+/* Stats: top domains list and progress bars. */
+.stats-row {
+  display: grid;
+  gap: 6px;
+}
+
+/* Progress bar used under each top domain. */
+.stats-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(156, 255, 58, 0.25);
+  border: 1px solid rgba(156, 255, 58, 0.4);
+}
+
+.stats-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: rgba(156, 255, 58, 0.8);
+}
+
+/* Two-column domain layout. */
+.stats-grid {
+  display: grid;
+  column-gap: 12px;
+  row-gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: visible;
+}
+
+.stats-column {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.stats-item {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.stats-label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  overflow: visible;
+}
+
+.stats-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(156, 255, 58, 0.16);
+  border: 1px solid rgba(156, 255, 58, 0.35);
+  color: var(--color-text);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.stats-domain {
+  font-size: var(--font-small);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+
+.stats-bar.fixed {
+  width: 100%;
+  max-width: 160px;
+}
+
+@media (max-width: 430px) {
+  .stats-bar.fixed {
+    max-width: 140px;
+  }
+}
+
+/* Stacked charts: focus vs distraction bars (daily/weekly/monthly). */
+.stacked-list {
+  display: grid;
+  gap: 8px;
+}
+
+.stacked-row {
+  display: grid;
+  gap: 6px;
+  font-size: var(--font-small);
+}
+
+.stacked-bars {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(156, 255, 58, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stacked-bars .focus {
+  background: rgba(156, 255, 58, 0.8);
+}
+
+.stacked-bars .blocked {
+  background: rgba(255, 90, 90, 0.8);
+}
+
+/* Weekly view: vertical stacked bars for each day. */
+.stacked-vertical {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  height: 140px;
+  overflow-x: hidden;
+}
+
+.stacked-vertical.month {
+  height: auto;
+  overflow-x: hidden;
+}
+
+.stacked-col {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 6px;
+  justify-items: center;
+  height: 100%;
+  align-content: end;
+}
+
+/* Pillar bar with stacked focus/blocked segments. */
+.stacked-pillar {
+  width: 100%;
+  max-width: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(156, 255, 58, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stacked-pillar .focus {
+  background: rgba(156, 255, 58, 0.8);
+}
+
+.stacked-pillar .blocked {
+  background: rgba(255, 90, 90, 0.8);
+}
+
+/* Month view: horizontal scroll container for dense bars. */
+.month-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 10px;
+}
+
+.month-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.month-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.4);
+  border-radius: 999px;
+}
+
+/* Month bars: long series of compact pillars. */
+.month-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+}
+
+.month-bar {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 6px;
+  justify-items: center;
+  min-width: 18px;
+}
+
+.stacked-label {
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+/* Legends: colored dot + label. */
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-small);
+  color: var(--color-muted);
+}
+
+.legend .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.legend .dot.focus {
+  background: rgba(156, 255, 58, 0.8);
+}
+
+.legend .dot.blocked {
+  background: rgba(255, 90, 90, 0.8);
+}
+
+/* Hour heatmap: 24-hour activity grid. */
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.heat-cell {
+  border-radius: 8px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Typography helpers for list headings. */
 .list-title {
   font-weight: 600;
 }
@@ -422,6 +808,7 @@ button.chip {
   color: var(--color-muted);
 }
 
+/* Button variants and sizes. */
 .btn.btn-small {
   padding: 8px 14px;
   min-width: 96px;
@@ -434,6 +821,7 @@ button.chip {
   color: var(--color-text);
 }
 
+/* Larger screens: breathe a little more. */
 @media (min-width: 900px) {
   .app-main {
     padding: 28px;
@@ -447,6 +835,7 @@ button.chip {
   }
 }
 
+/* Compact toggle variant (used in configs). */
 .toggle.small {
   width: 36px;
   height: 20px;
@@ -463,7 +852,7 @@ button.chip {
   transform: translateX(16px);
 }
 
-/* Utility */
+/* Utility helpers. */
 .hidden {
   display: none;
 }

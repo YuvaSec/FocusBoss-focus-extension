@@ -64,7 +64,11 @@ const render = async () => {
     return;
   }
 
-  tempAllowSection?.classList.remove("hidden");
+  if (state.strictSession.active) {
+    tempAllowSection?.classList.add("hidden");
+  } else {
+    tempAllowSection?.classList.remove("hidden");
+  }
 
   await setState({
     interventions: { randomization: { lastPicked: result.nextLastPicked } }

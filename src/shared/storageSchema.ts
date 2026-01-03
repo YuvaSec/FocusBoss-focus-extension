@@ -74,12 +74,13 @@ export type StorageSchema = {
     alwaysOnTop: boolean;
     running?: {
       phase: "work" | "break";
+      startedAt?: number;
       endsAt: number;
       cycleIndex: number;
       paused: boolean;
       remainingMs?: number;
       linkedTaskId?: string | null;
-    };
+    } | null;
   };
   tasks: {
     activeLimit: number;
@@ -118,6 +119,9 @@ export type StorageSchema = {
         totalMs: number;
         byDomain: Record<string, number>;
         blockedMs?: number;
+        byDomainBlocked?: Record<string, number>;
+        byHourMs?: Record<string, number>;
+        byHourBlockedMs?: Record<string, number>;
         distractionsCount?: number;
       }
     >;

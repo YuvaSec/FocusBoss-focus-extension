@@ -124,3 +124,99 @@ habituation.
 ## What’s next
 In later phases, the blocking flow will route users into this intervention
 page and show the “Let me continue” controls.
+# Schedule — Phase 10 Manual Test Checklist
+
+## Goal
+Confirm schedule entries trigger Focus Mode correctly, including overnight spans and overlapping schedules.
+
+## Test 1: Basic schedule window
+1. Create a schedule for today with start = now + 1 minute, end = now + 3 minutes.
+2. Wait for the start time.
+3. Verify Focus Mode turns ON automatically.
+4. Wait for the end time.
+5. Verify Focus Mode turns OFF automatically.
+
+Expected:
+- Focus switches ON at start.
+- Focus switches OFF at end.
+
+## Test 2: Overnight span
+1. Create a schedule for today with start = 23:00, end = 01:00.
+2. Ensure today is selected in the day chips.
+3. If current time is between 00:00–01:00 (next day), verify Focus Mode is ON.
+4. At 01:00, verify Focus Mode turns OFF automatically.
+
+Expected:
+- Focus remains ON across midnight until the end time.
+
+## Test 3: Overlapping schedules
+1. Create two schedules that overlap for the same day.
+2. Wait for the first schedule to end while the second is still active.
+3. Verify Focus Mode stays ON until the second schedule ends.
+
+Expected:
+- End of one schedule does not disable Focus if another active schedule exists.
+
+## Test 4: Restart behavior
+1. Ensure a schedule is currently active.
+2. Reload the extension (or restart the browser).
+3. Verify Focus Mode turns ON immediately on startup.
+
+Expected:
+- Focus Mode reflects the current schedule window after restart.
+
+---
+
+# Strict Session (Phase 11)
+
+## What it is
+A “Warden Mode” focus lock. Once started, Focus Mode is forced ON and cannot be turned off until the timer ends. Temporary allow (“Let me continue”) is disabled during this time.
+
+## How it works (simple)
+1. Pick a duration in the Timer tab.
+2. Click Start and confirm.
+3. Focus Mode locks ON immediately.
+4. When the timer ends, the strict session clears and normal controls return.
+
+## Behavior details
+- Focus toggle is disabled while strict mode is active.
+- Pause chips are disabled while strict mode is active.
+- Temporary allow buttons are hidden on the intervention page during strict mode.
+- On browser restart, strict mode continues until the end time.
+- When strict ends, focus returns to schedule state (if any schedule is active).
+
+## Manual test checklist
+1. Start a 1-minute strict session → Focus should lock ON.
+2. Try to toggle Focus OFF → should be disabled.
+3. Open a blocked site → “Let me continue” should be unavailable.
+4. Wait for the timer to end → controls unlock automatically.
+5. Restart the extension mid-session → strict should still be active until it expires.
+
+---
+
+# Pomodoro Timer (Phase 12)
+
+## What it is
+A focus timer that alternates between Work and Break phases. It can automatically enable Focus Mode during work sessions and optionally keep blocking active during breaks.
+
+## How it works (simple)
+1. Set Work minutes, Break minutes, and optional Cycles.
+2. Press Start to begin the Work phase.
+3. The timer automatically switches between Work and Break.
+4. When cycles are complete, the Pomodoro run ends.
+
+## Behavior details
+- Start/Pause/Stop controls manage the current run.
+- Progress bar shows completion of the current phase.
+- Auto‑block during work turns Focus Mode on when Work starts.
+- Block during break keeps Focus Mode on during breaks.
+- If no cycles are set (0), the timer runs indefinitely until stopped.
+- Completed Work phases log sessions in analytics.
+
+## Manual test checklist
+1. Start a 1‑minute Work session → countdown should tick and progress bar should fill.
+2. Pause → status should change to “paused” and time should stop decreasing.
+3. Resume → time continues from where it left off.
+4. Let Work finish → it should switch to Break automatically.
+5. Set cycles to 1 → after Break ends, the run should stop.
+6. Toggle Auto‑block → Focus Mode should turn on at Work start.

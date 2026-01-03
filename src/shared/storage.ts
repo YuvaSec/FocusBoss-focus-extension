@@ -66,6 +66,9 @@ const mergePatch = (base: unknown, patch: unknown): unknown => {
   if (patch === undefined) {
     return base;
   }
+  if (patch === null) {
+    return null;
+  }
 
   if (Array.isArray(base) || Array.isArray(patch)) {
     return Array.isArray(patch) ? patch : base;
@@ -149,6 +152,10 @@ export const ensureState = async (): Promise<StorageSchema> => {
     state.pause.isPaused &&
     typeof state.pause.pauseEndAt === "number" &&
     now >= state.pause.pauseEndAt;
+  const strictExpired =
+    state.strictSession.active &&
+    typeof state.strictSession.endsAt === "number" &&
+    now >= state.strictSession.endsAt;
   const cleanedTempAllow = Object.fromEntries(
     Object.entries(state.temporaryAllow ?? {}).filter(
       ([, value]) => typeof value?.until === "number" && value.until > now
@@ -160,10 +167,13 @@ export const ensureState = async (): Promise<StorageSchema> => {
   const nextState = pauseExpired || pauseInvalid
     ? { ...state, pause: { isPaused: false, pauseType: null, pauseEndAt: null } }
     : state;
-  const mergedState = tempAllowChanged
-    ? { ...nextState, temporaryAllow: cleanedTempAllow }
+  const strictCleared = strictExpired
+    ? { ...nextState, strictSession: { active: false, endsAt: undefined } }
     : nextState;
-  if (needsWrite || pauseExpired || pauseInvalid || tempAllowChanged) {
+  const mergedState = tempAllowChanged
+    ? { ...strictCleared, temporaryAllow: cleanedTempAllow }
+    : strictCleared;
+  if (needsWrite || pauseExpired || pauseInvalid || tempAllowChanged || strictExpired) {
     await writeState(mergedState);
   }
   return mergedState;

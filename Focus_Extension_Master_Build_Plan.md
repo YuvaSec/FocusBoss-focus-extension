@@ -327,45 +327,45 @@ Implementation requirement:
 ## 6) Feature inventory (merged, no omissions)
 
 ### 6.1 Blocking & focus state (Doc B)
-- Quick Focus (Focus Mode) ON/OFF toggle
-- “Turn off until…” options:
+- Quick Focus (Focus Mode) ON/OFF toggle ✅
+- “Turn off until…” options ✅
   - 1 hour
   - end of day
   - until manually turned on
-- Overlay mode vs redirect mode
-- Blocked List:
+- Overlay mode vs redirect mode ✅
+- Blocked List ✅
   - Website tab
   - Keyword tab
-- Allowed List (whitelist)
-- Advanced List (Beta) pattern matching + comments + `!` excludes
-- Temporary allow (“Let me continue” 1/5/10/15 minutes)
-- Blocked-site intervention experience:
-  - intervention tabs/pills
-  - message + “You have spent Xm Ys on domain today.”
-  - optional top sites list and percentages
-  - footer rate prompt
+- Allowed List (whitelist) ✅
+- Advanced List (Beta) pattern matching + comments + `!` excludes ✅
+- Temporary allow (“Let me continue” 1/5/10/15 minutes) ✅
+- Blocked-site intervention experience 🟡
+  - intervention tabs/pills ✅
+  - message + “You have spent Xm Ys on domain today.” 🟡
+  - optional top sites list and percentages ❌
+  - footer rate prompt ❌
 
 ### 6.2 Interventions system (Doc B)
-- Intervention selector screen with randomization:
+- Intervention selector screen with randomization ✅
   - Instant Block (0s)
   - Hold to Complete (duration options 3/8/15/30/45/60)
   - Slide In Out (same duration options)
   - Pixelated (3/5/8/10/12/15)
   - Breathing (techniques 4-7-8, 5-0-5, 7-1-1, box)
-- Each has:
-  - enable toggle
-  - PRO badge (optional gating)
-  - detail screen with text input + duration/technique selection
-- Random selection among enabled interventions with anti-repeat
+- Each has ✅
+  - enable toggle ✅
+  - PRO badge (optional gating) ❌
+  - detail screen with text input + duration/technique selection ✅
+- Random selection among enabled interventions with anti-repeat ✅
 
 ### 6.3 Schedule (Doc B)
-- Multiple schedule entries
-- Add/edit:
+- Multiple schedule entries 🟡
+- Add/edit 🟡
   - name
   - start time → end time (supports overnight)
   - day selection chips
-- Enforcement via alarms
-- Optional free tier limits:
+- Enforcement via alarms 🟡
+- Optional free tier limits ❌
   - max 3 days/week in free
 
 ### 6.4 Strict Session (Doc B + aligns with Warden mode)
@@ -401,27 +401,27 @@ Implementation requirement:
   - strict session start → warden enforcement
 
 ### 6.8 Analytics & insights dashboard (Doc A + Doc B)
-- Overview metrics:
+- Overview metrics ❌
   - total focus time
   - total break time
   - total tasks
   - total distractions
-- Time-series focus graph (daily)
-- Distraction vs focus toggle
-- Session history list
-- CSV export
-- “Time Machine” historical navigation
-- Web usage:
-  - today/week/month
-  - all vs blocked filter
-  - donut chart + legend
-  - chart themes saved
+- Time-series focus graph (daily) ❌
+- Distraction vs focus toggle 🟡
+- Session history list ❌
+- CSV export ❌
+- “Time Machine” historical navigation ❌
+- Web usage 🟡
+  - today/week/month ✅
+  - all vs blocked filter ✅
+  - donut chart + legend ❌
+  - chart themes saved ❌
 
 ### 6.9 UI/UX extras (Doc A + Doc B)
-- Friendly mascot-based feedback (optional; can be replaced with generic illustration for MVP)
-- Always-on-top option (if using a separate window or side panel)
-- Lightweight popup-first design + full page for deep settings
-- Settings screen:
+- Friendly mascot-based feedback (optional; can be replaced with generic illustration for MVP) ❌
+- Always-on-top option (if using a separate window or side panel) ❌
+- Lightweight popup-first design + full page for deep settings ✅ (popup-first)
+- Settings screen 🟡
   - Overlay mode toggle
   - PIN protection toggle + set PIN screen
   - Confirmation prompt toggle
@@ -436,7 +436,7 @@ Implementation requirement:
 
 > **Golden rule for Codex:** Finish *one feature* completely (UI + storage + background + tests) before starting the next.
 
-### Phase 0 — Repo + scaffold
+### Phase 0 — Repo + scaffold ✅
 **Goal:** A working MV3 TS extension that loads in Chrome.
 
 **Do:**
@@ -452,7 +452,7 @@ Implementation requirement:
 
 ---
 
-### Phase 1 — Storage + schema + migrations
+### Phase 1 — Storage + schema + migrations ✅
 **Goal:** Stable state layer.
 
 **Do:**
@@ -466,7 +466,7 @@ Implementation requirement:
 
 ---
 
-### Phase 2 — UI foundation + navigation
+### Phase 2 — UI foundation + navigation ✅
 **Goal:** Shared UI system.
 
 **Do:**
@@ -481,7 +481,7 @@ Implementation requirement:
 
 ---
 
-### Phase 3 — Focus Mode state + “turn off until…”
+### Phase 3 — Focus Mode state + “turn off until…” ✅
 **Goal:** Global focus toggle + temporary off modes.
 
 **Do:**
@@ -495,7 +495,7 @@ Implementation requirement:
 
 ---
 
-### Phase 4 — Rule engine (Blocked/Allowed/Advanced) ✅ critical
+### Phase 4 — Rule engine (Blocked/Allowed/Advanced) ✅
 **Goal:** Accurate, fast matching.
 
 **Do:**
@@ -512,7 +512,7 @@ Implementation requirement:
 
 ---
 
-### Phase 5 — Lists UI (Blocked / Allowed / Advanced)
+### Phase 5 — Lists UI (Blocked / Allowed / Advanced) ✅
 **Goal:** User can manage rules.
 
 **Do:**
@@ -532,7 +532,7 @@ Implementation requirement:
 
 ---
 
-### Phase 6 — Blocking enforcement (overlay vs redirect)
+### Phase 6 — Blocking enforcement (overlay vs redirect) ✅
 **Goal:** Blocked pages reliably show intervention.
 
 **Do:**
@@ -547,7 +547,7 @@ Implementation requirement:
 
 ---
 
-### Phase 7 — Intervention system (random + configuration)
+### Phase 7 — Intervention system (random + configuration) ✅
 **Goal:** FocusMode-like “signature UX”.
 
 **Do:**
@@ -569,7 +569,7 @@ Implementation requirement:
 
 ---
 
-### Phase 8 — Temporary allow (“Let me continue” 1/5/10/15)
+### Phase 8 — Temporary allow (“Let me continue” 1/5/10/15) ✅
 **Goal:** Controlled bypass.
 
 **Do:**
@@ -584,7 +584,7 @@ Implementation requirement:
 
 ---
 
-### Phase 9 — Usage tracking (web usage)
+### Phase 9 — Usage tracking (web usage) 🟡 (core tracking + UI in place; charts/themes partial)
 **Goal:** Domain usage totals for Today/Week/Month.
 
 **Do:**
@@ -604,7 +604,7 @@ Implementation requirement:
 
 ---
 
-### Phase 10 — Schedule engine
+### Phase 10 — Schedule engine 🟡 (UI + alarms wiring in progress)
 **Goal:** Auto enable/disable focus.
 
 **Do:**

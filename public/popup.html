@@ -86,11 +86,136 @@
         <section class="card view hidden" data-view="timer">
           <h2>Timer</h2>
           <p>Pomodoro and strict sessions.</p>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="pomodoro-header">
+              <div class="pomodoro-title">
+                <h3>Pomodoro</h3>
+                <p id="pomodoroStatus" class="list-sub">Ready.</p>
+              </div>
+              <div class="pomodoro-controls" style="gap: 8px;">
+                <button id="pomodoroStart" class="pomodoro-icon-btn" type="button" aria-label="Start">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 5l11 7-11 7z" />
+                  </svg>
+                </button>
+                <button id="pomodoroPause" class="pomodoro-icon-btn" type="button" aria-label="Pause">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+                  </svg>
+                </button>
+                <button id="pomodoroStop" class="pomodoro-icon-btn" type="button" aria-label="Stop">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 7h10v10H7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="timer-progress" style="margin-top: 12px;">
+              <span id="pomodoroProgress"></span>
+            </div>
+            <div class="pomodoro-fields" style="margin-top: 12px;">
+              <div style="flex: 1;">
+                <label class="list-sub">Work</label>
+                <input id="pomodoroWork" class="text-input" type="number" min="1" max="120" />
+              </div>
+              <div style="flex: 1;">
+                <label class="list-sub">Break</label>
+                <input id="pomodoroBreak" class="text-input" type="number" min="1" max="60" />
+              </div>
+              <div style="flex: 1;">
+                <label class="list-sub">Cycles</label>
+                <input id="pomodoroCycles" class="text-input" type="number" min="0" max="12" />
+              </div>
+            </div>
+            <div class="row" style="margin-top: 12px;">
+              <div>
+                <p class="list-sub">Auto-block during work</p>
+              </div>
+              <label class="toggle small">
+                <input id="pomodoroAutoBlock" type="checkbox" />
+                <span></span>
+              </label>
+            </div>
+            <div class="row" style="margin-top: 10px;">
+              <div>
+                <p class="list-sub">Block during break</p>
+              </div>
+              <label class="toggle small">
+                <input id="pomodoroBlockBreak" type="checkbox" />
+                <span></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
+                <h3>Strict Session</h3>
+                <p id="strictStatus" class="list-sub">No strict session running.</p>
+              </div>
+              <button id="strictStart" class="btn btn-small">Start</button>
+            </div>
+            <div style="margin-top: 12px;">
+              <p class="list-sub">Duration</p>
+              <div id="strictDurations" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                <button class="chip" data-strict-min="1">1m</button>
+                <button class="chip" data-strict-min="10">10m</button>
+                <button class="chip" data-strict-min="20">20m</button>
+                <button class="chip" data-strict-min="30">30m</button>
+                <button class="chip" data-strict-min="60">1h</button>
+                <button class="chip" data-strict-min="120">2h</button>
+                <button class="chip" data-strict-min="180">3h</button>
+                <button class="chip" data-strict-min="240">4h</button>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="card view hidden" data-view="stats">
-          <h2>Stats</h2>
-          <p>Focus and distraction insights.</p>
+          <div class="row">
+            <div>
+              <h2>Stats</h2>
+              <p class="list-sub">Your recent browsing time.</p>
+            </div>
+          </div>
+          <div class="segmented" id="statsRange" style="margin-top: 12px;">
+            <button data-range="today">Today</button>
+            <button data-range="week">Week</button>
+            <button data-range="month">Month</button>
+          </div>
+          <div class="segmented" id="statsFilter" style="margin-top: 10px;">
+            <button data-filter="all">All</button>
+            <button data-filter="blocked">Blocked</button>
+            <button disabled style="opacity: 0;">.</button>
+          </div>
+          <div id="statsTotal" class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
+                <p class="list-sub">Total time</p>
+                <h3 id="statsTotalValue">0m</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 12px; overflow: hidden;">
+            <h3>Focus vs Distraction</h3>
+            <div class="row" style="margin-top: 6px; gap: 10px;">
+              <span class="legend"><span class="dot focus"></span>Focus</span>
+              <span class="legend"><span class="dot blocked"></span>Distraction</span>
+            </div>
+            <div id="statsStacked" style="margin-top: 12px;"></div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <h3>Top domains</h3>
+            <div id="statsList" class="list-items" style="margin-top: 10px;"></div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <h3>Hour Heatmap</h3>
+            <div id="statsHeatmap" class="heatmap" style="margin-top: 12px;"></div>
+          </div>
         </section>
 
         <section class="card view hidden" data-view="settings">
@@ -122,15 +247,59 @@
               <span id="overlayLabel" class="list-sub">Overlay</span>
             </div>
           </div>
+
+          <div class="card" style="margin-top: 16px;">
+            <div class="row">
+              <div>
+                <h3>Schedules</h3>
+                <p class="list-sub">Auto-enable focus by time.</p>
+              </div>
+              <button id="scheduleAdd" class="btn btn-small">Add</button>
+            </div>
+            <div id="scheduleList" class="list-items" style="margin-top: 10px;"></div>
+          </div>
         </section>
       </main>
 
       <nav class="app-nav">
-        <button class="nav-btn active" data-target="home">Home</button>
-        <button class="nav-btn" data-target="lists">Lists</button>
-        <button class="nav-btn" data-target="timer">Timer</button>
-        <button class="nav-btn" data-target="stats">Stats</button>
-        <button class="nav-btn" data-target="settings">Settings</button>
+        <button class="nav-btn active" data-target="home" data-i="0" aria-label="Home">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m3 9 9-7 9 7" />
+            <path d="M9 22V12h6v10" />
+            <path d="M21 22H3" />
+          </svg>
+        </button>
+        <button class="nav-btn" data-target="lists" data-i="1" aria-label="Lists">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 6h13" />
+            <path d="M8 12h13" />
+            <path d="M8 18h13" />
+            <path d="M3 6h.01" />
+            <path d="M3 12h.01" />
+            <path d="M3 18h.01" />
+          </svg>
+        </button>
+        <button class="nav-btn" data-target="timer" data-i="2" aria-label="Timer">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 2h4" />
+            <path d="M12 14v-4" />
+            <circle cx="12" cy="14" r="8" />
+          </svg>
+        </button>
+        <button class="nav-btn" data-target="stats" data-i="3" aria-label="Stats">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 3v18h18" />
+            <path d="M7 16v-4" />
+            <path d="M12 16v-7" />
+            <path d="M17 16v-10" />
+          </svg>
+        </button>
+        <button class="nav-btn" data-target="settings" data-i="4" aria-label="Settings">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1 0 2.8 2 2 0 0 1-2.8 0l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8 0 2 2 0 0 1 0-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 0-2.8 2 2 0 0 1 2.8 0l.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 0 2 2 0 0 1 0 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.2a1.7 1.7 0 0 0-1.5 1z" />
+          </svg>
+        </button>
       </nav>
     </div>
 
@@ -185,6 +354,80 @@
         <div style="margin-top: 10px;">
           <p class="list-sub"><strong>Overlay</strong> keeps you on the page but blocks interaction.</p>
           <p class="list-sub" style="margin-top: 6px;"><strong>Redirect</strong> sends you to the intervention screen.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="domainStatsModal" class="modal hidden" data-modal="domainStats" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="row">
+          <div>
+            <h3 id="domainStatsTitle">Domain</h3>
+            <p class="list-sub">Usage breakdown</p>
+          </div>
+          <button class="btn btn-small" data-close-modal="true">Back</button>
+        </div>
+        <div id="domainStatsBody" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <div id="scheduleModal" class="modal hidden" data-modal="schedule" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="row">
+          <div>
+            <h3 id="scheduleTitle">Schedule</h3>
+            <p class="list-sub">Set focus hours.</p>
+          </div>
+          <button class="btn btn-small" data-close-modal="true">Back</button>
+        </div>
+        <div style="margin-top: 10px;">
+          <label class="list-sub">Name</label>
+          <input id="scheduleName" class="text-input" placeholder="Morning focus" />
+        </div>
+        <div class="row" style="margin-top: 10px; gap: 10px;">
+          <div style="flex: 1;">
+            <label class="list-sub">Start</label>
+            <input id="scheduleStart" class="text-input" type="time" />
+          </div>
+          <div style="flex: 1;">
+            <label class="list-sub">End</label>
+            <input id="scheduleEnd" class="text-input" type="time" />
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <label class="list-sub">Days</label>
+          <div id="scheduleDays" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+            <button class="chip" data-day="0">Sun</button>
+            <button class="chip" data-day="1">Mon</button>
+            <button class="chip" data-day="2">Tue</button>
+            <button class="chip" data-day="3">Wed</button>
+            <button class="chip" data-day="4">Thu</button>
+            <button class="chip" data-day="5">Fri</button>
+            <button class="chip" data-day="6">Sat</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 12px;">
+          <div></div>
+          <button id="scheduleSave" class="btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="strictModal" class="modal hidden" data-modal="strictConfirm" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="row">
+          <div>
+            <h3>Start strict session?</h3>
+            <p id="strictConfirmText" class="list-sub">You won’t be able to turn Focus off.</p>
+          </div>
+          <button class="btn btn-small" data-close-modal="true">Back</button>
+        </div>
+        <div class="row" style="margin-top: 14px;">
+          <div></div>
+          <button id="strictConfirm" class="btn btn-primary">Start</button>
         </div>
       </div>
     </div>

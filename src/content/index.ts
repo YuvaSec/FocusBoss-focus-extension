@@ -144,7 +144,7 @@ const evaluate = async () => {
   if (!lists) {
     return;
   }
-  if (isTemporarilyAllowed(location.href, state.temporaryAllow ?? {})) {
+  if (!state.strictSession?.active && isTemporarilyAllowed(location.href, state.temporaryAllow ?? {})) {
     return;
   }
   const blocked = isBlockedByRules(location.href, lists);
