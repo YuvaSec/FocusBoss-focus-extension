@@ -5,6 +5,7 @@ import { evaluateRules } from "../shared/rules.js";
 
 const PAUSE_ALARM = "pauseResume";
 const POMODORO_ALARM = "pomodoroPhase";
+const POMODORO_HEARTBEAT = "pomodoroHeartbeat";
 const STRICT_ALARM = "strictSessionEnd";
 const USAGE_UPDATE_MS = 1000;
 const SCHEDULE_PREFIX = "schedule";
@@ -249,7 +250,6 @@ const applyScheduleState = async () => {
     (entry) => entry.enabled && entry.days.length > 0
   );
   if (!hasEnabled) {
-    await setState({ focusEnabled: false });
     return;
   }
   const active = state.schedule.entries.some(
@@ -287,11 +287,15 @@ const scheduleStrictAlarm = async () => {
   }
   const now = Date.now();
   if (endsAt <= now) {
-    await setState({ strictSession: { active: false, endsAt: undefined } });
+    await setState({ strictSession: { active: false, endsAt: undefined, startedAt: undefined } });
     return;
   }
   chrome.alarms.create(STRICT_ALARM, { when: endsAt });
 };
+
+let pomodoroHandling = false;
+let lastHandledPhase: "work" | "break" | "" = "";
+let lastHandledEndsAt = 0;
 
 const schedulePomodoroAlarm = async () => {
   const state = await getState();
@@ -312,7 +316,16 @@ const schedulePomodoroAlarm = async () => {
   chrome.alarms.create(POMODORO_ALARM, { when: endsAt });
 };
 
-const logPomodoroSession = async (state: Awaited<ReturnType<typeof getState>>, startedAt: number, endedAt: number) => {
+const schedulePomodoroHeartbeat = async () => {
+  await chrome.alarms.clear(POMODORO_HEARTBEAT);
+  chrome.alarms.create(POMODORO_HEARTBEAT, { periodInMinutes: 0.5 });
+};
+
+const logPomodoroSession = async (
+  state: Awaited<ReturnType<typeof getState>>,
+  startedAt: number,
+  endedAt: number
+) => {
   const session = {
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     startedAt,
@@ -323,10 +336,32 @@ const logPomodoroSession = async (state: Awaited<ReturnType<typeof getState>>, s
     distractions: 0
   };
   const sessions = [...state.analytics.sessions, session];
+  const linkedTaskId = session.taskId ?? null;
+  let updatedTasks = state.tasks;
+  if (linkedTaskId) {
+    let changed = false;
+    const items = state.tasks.items.map((item) => {
+      if (item.id !== linkedTaskId || item.doneAt) {
+        return item;
+      }
+      changed = true;
+      return { ...item, focusSessionsCompleted: item.focusSessionsCompleted + 1 };
+    });
+    if (changed) {
+      updatedTasks = { ...state.tasks, items };
+    }
+  }
+  if (updatedTasks !== state.tasks) {
+    await setState({ analytics: { sessions }, tasks: { items: updatedTasks.items } });
+    return;
+  }
   await setState({ analytics: { sessions } });
 };
 
 const handlePomodoroPhaseEnd = async () => {
+  if (pomodoroHandling) {
+    return;
+  }
   const state = await getState();
   const running = state.pomodoro.running;
   if (!running || running.paused || typeof running.endsAt !== "number") {
@@ -335,7 +370,14 @@ const handlePomodoroPhaseEnd = async () => {
   if (Date.now() < running.endsAt) {
     return;
   }
+  if (running.phase === lastHandledPhase && running.endsAt <= lastHandledEndsAt) {
+    return;
+  }
+  pomodoroHandling = true;
+  lastHandledPhase = running.phase;
+  lastHandledEndsAt = running.endsAt;
   if (state.strictSession.active) {
+    pomodoroHandling = false;
     return;
   }
   const now = Date.now();
@@ -343,11 +385,6 @@ const handlePomodoroPhaseEnd = async () => {
     const startedAt = running.startedAt ?? now - state.pomodoro.workMin * 60 * 1000;
     await logPomodoroSession(state, startedAt, now);
     const nextCycle = running.cycleIndex + 1;
-    if (state.pomodoro.cycles > 0 && nextCycle >= state.pomodoro.cycles) {
-      await setState({ pomodoro: { running: null } });
-      await applyScheduleState();
-      return;
-    }
     const nextEnd = now + state.pomodoro.breakMin * 60 * 1000;
     await setState({
       pomodoro: {
@@ -356,12 +393,21 @@ const handlePomodoroPhaseEnd = async () => {
           startedAt: now,
           endsAt: nextEnd,
           cycleIndex: nextCycle,
-          paused: false
+          paused: false,
+          linkedTaskId: running.linkedTaskId ?? null
         }
       },
       focusEnabled: state.pomodoro.blockDuringBreak ? true : false
     });
     await schedulePomodoroAlarm();
+    pomodoroHandling = false;
+    return;
+  }
+
+  if (state.pomodoro.cycles > 0 && running.cycleIndex >= state.pomodoro.cycles) {
+    await setState({ pomodoro: { running: null } });
+    await applyScheduleState();
+    pomodoroHandling = false;
     return;
   }
 
@@ -373,12 +419,14 @@ const handlePomodoroPhaseEnd = async () => {
         startedAt: now,
         endsAt: nextEnd,
         cycleIndex: running.cycleIndex,
-        paused: false
+        paused: false,
+        linkedTaskId: running.linkedTaskId ?? null
       }
     },
     focusEnabled: state.pomodoro.autoBlockDuringWork ? true : state.focusEnabled
   });
   await schedulePomodoroAlarm();
+  pomodoroHandling = false;
 };
 
 chrome.runtime.onMessage.addListener((message: Message<"ping">) => {
@@ -386,6 +434,16 @@ chrome.runtime.onMessage.addListener((message: Message<"ping">) => {
     console.log("FocusBoss background ping", message.payload.time);
   }
 });
+
+chrome.runtime.onMessage.addListener(
+  (message: { type?: string }, sender, sendResponse: (response?: { ok: boolean }) => void) => {
+    if (message?.type !== "pomodoroTick") {
+      return;
+    }
+    void handlePomodoroPhaseEnd().then(() => sendResponse({ ok: true }));
+    return true;
+  }
+);
 
 chrome.runtime.onMessage.addListener(
   (
@@ -486,11 +544,19 @@ chrome.runtime.onMessage.addListener(
 );
 
 chrome.runtime.onInstalled.addListener(() => {
-  void ensureState().then(schedulePauseAlarm).then(scheduleStrictAlarm).then(schedulePomodoroAlarm);
+  void ensureState()
+    .then(schedulePauseAlarm)
+    .then(scheduleStrictAlarm)
+    .then(schedulePomodoroAlarm)
+    .then(schedulePomodoroHeartbeat);
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  void ensureState().then(schedulePauseAlarm).then(scheduleStrictAlarm).then(schedulePomodoroAlarm);
+  void ensureState()
+    .then(schedulePauseAlarm)
+    .then(scheduleStrictAlarm)
+    .then(schedulePomodoroAlarm)
+    .then(schedulePomodoroHeartbeat);
 });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -513,6 +579,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     if (pomodoroChanged) {
       void schedulePomodoroAlarm();
       if (!newState?.pomodoro?.running) {
+        lastHandledPhase = "";
+        lastHandledEndsAt = 0;
+        pomodoroHandling = false;
         void applyScheduleState();
       }
     }
@@ -540,11 +609,16 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === POMODORO_ALARM) {
     void handlePomodoroPhaseEnd();
   }
+  if (alarm.name === POMODORO_HEARTBEAT) {
+    void handlePomodoroPhaseEnd();
+  }
   if (alarm.name === STRICT_ALARM) {
     void getState().then((state) => {
       const endsAt = state.strictSession.endsAt;
       if (state.strictSession.active && typeof endsAt === "number" && Date.now() >= endsAt) {
-        void setState({ strictSession: { active: false, endsAt: undefined } }).then(
+        void setState({
+          strictSession: { active: false, endsAt: undefined, startedAt: undefined }
+        }).then(
           applyScheduleState
         );
       }
@@ -608,6 +682,7 @@ void ensureState()
   .then(schedulePauseAlarm)
   .then(scheduleStrictAlarm)
   .then(schedulePomodoroAlarm)
+  .then(schedulePomodoroHeartbeat)
   .then(scheduleAllEntries)
   .then(applyScheduleState);
 console.log("FocusBoss service worker running");

@@ -220,3 +220,41 @@ A focus timer that alternates between Work and Break phases. It can automaticall
 4. Let Work finish → it should switch to Break automatically.
 5. Set cycles to 1 → after Break ends, the run should stop.
 6. Toggle Auto‑block → Focus Mode should turn on at Work start.
+
+# Tasks + Pomodoro Linking (Phase 13)
+
+## What it is
+Task management tied to Pomodoro sessions. You can create up to 3 active tasks,
+link one to a Pomodoro run, and the task’s session count increments when a work
+phase completes.
+
+## What was added
+- Tasks card in the Timer view with:
+  - task title input
+  - estimate slider (15–180 minutes)
+  - active task limit = 3
+  - task list with Done/Remove actions
+- Pomodoro “Linked task” selector:
+  - choose a task before starting a session
+  - shows current link while a session is running
+- Automatic progress:
+  - when a work phase completes, `focusSessionsCompleted` increments on the linked task
+
+## How it works (simple)
+1. Add a task (title + estimate).
+2. Pick it in the Pomodoro “Linked task” dropdown.
+3. Start a Pomodoro session.
+4. When a work phase finishes, the task gains +1 session.
+
+## Behavior details
+- Only active (not done) tasks can be linked.
+- If you mark a linked task as done mid-session, the session still completes,
+  but the task is shown as done in the linker.
+- Removing a task clears the selection if it was chosen.
+
+## Manual test checklist
+1. Add three tasks → the Add button disables at the limit.
+2. Link a task, start a Pomodoro → status should show the linked task.
+3. Let the work phase end → the task’s session count increments.
+4. Mark the task as Done → it stays listed with a strikethrough.
+5. Remove the task → it disappears and selection clears.

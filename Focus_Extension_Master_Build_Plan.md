@@ -604,7 +604,7 @@ Implementation requirement:
 
 ---
 
-### Phase 10 — Schedule engine 🟡 (UI + alarms wiring in progress)
+### Phase 10 — Schedule engine ✅
 **Goal:** Auto enable/disable focus.
 
 **Do:**
@@ -619,7 +619,7 @@ Implementation requirement:
 
 ---
 
-### Phase 11 — Strict Session (Warden Mode)
+### Phase 11 — Strict Session (Warden Mode) ✅
 **Goal:** Irreversible deep focus.
 
 **Do:**
@@ -639,7 +639,7 @@ Implementation requirement:
 
 ---
 
-### Phase 12 — Pomodoro timer (Coach Mode) + session logging
+### Phase 12 — Pomodoro timer (Coach Mode) + session logging ✅
 **Goal:** Focus timer integrated with blocking.
 
 **Do:**
@@ -784,6 +784,16 @@ These are **not required** for parity, but come from Doc A as differentiation.
 ---
 
 ## 10) Codex operating instructions (how to use this doc)
+
+### Current project status (as of 2026-01-03)
+- **Completed phases:** 0–8, 10, 11, 12
+- **Partially complete:** Phase 9 (Usage tracking UI + core tracking, missing charts/themes)
+- **Next phase to implement:** **Phase 13 — Tasks + linking to sessions**
+
+**Notes for next agent:**
+- Pomodoro has UI + background alarms + session logging in place.
+- Strict Session is enforced (locks focus, disables temp allow).
+- Schedule engine is complete (overnight/overlap handling + startup evaluation).
 
 For each Phase above:
 

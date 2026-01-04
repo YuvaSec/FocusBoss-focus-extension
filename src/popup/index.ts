@@ -6,7 +6,10 @@ import {
 } from "../shared/interventions.js";
 
 // --- DOM references (grab once, reuse) ---
-const statusEl = document.getElementById("status");
+const statusPillText = document.getElementById("statusPillText");
+const statusInfoTitle = document.getElementById("statusInfoTitle");
+const statusInfoBody = document.getElementById("statusInfoBody");
+const statusElements = Array.from(document.querySelectorAll<HTMLElement>(".status"));
 const toggleEl = document.getElementById("focusToggle") as HTMLInputElement | null;
 const appRoot = document.querySelector(".app");
 const rootEl = document.documentElement;
@@ -28,6 +31,16 @@ const domainStatsTitle = document.getElementById("domainStatsTitle");
 const domainStatsBody = document.getElementById("domainStatsBody");
 const statsStacked = document.getElementById("statsStacked");
 const statsHeatmap = document.getElementById("statsHeatmap");
+const statsDonut = document.getElementById("statsDonut");
+const statsLegend = document.getElementById("statsLegend");
+const statsThemeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsTheme button")
+);
+const statsThemeControl = document.getElementById("statsTheme");
+const statsCardTabs = document.getElementById("statsCardTabs");
+const statsPanels = Array.from(
+  document.querySelectorAll<HTMLElement>(".stats-panel")
+);
 const scheduleAdd = document.getElementById("scheduleAdd");
 const scheduleList = document.getElementById("scheduleList");
 const scheduleTitle = document.getElementById("scheduleTitle");
@@ -46,6 +59,8 @@ const pomodoroBreak = document.getElementById("pomodoroBreak") as HTMLInputEleme
 const pomodoroCycles = document.getElementById("pomodoroCycles") as HTMLInputElement | null;
 const pomodoroAutoBlock = document.getElementById("pomodoroAutoBlock") as HTMLInputElement | null;
 const pomodoroBlockBreak = document.getElementById("pomodoroBlockBreak") as HTMLInputElement | null;
+const pomodoroTaskSelect = document.getElementById("pomodoroTaskSelect") as HTMLSelectElement | null;
+const pomodoroTaskHint = document.getElementById("pomodoroTaskHint");
 const strictStatus = document.getElementById("strictStatus");
 const strictStart = document.getElementById("strictStart") as HTMLButtonElement | null;
 const strictConfirm = document.getElementById("strictConfirm") as HTMLButtonElement | null;
@@ -53,6 +68,11 @@ const strictConfirmText = document.getElementById("strictConfirmText");
 const strictDurationButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-strict-min]")
 );
+const strictOverlay = document.getElementById("strictOverlay");
+const strictOverlayTime = document.getElementById("strictOverlayTime");
+const strictOverlayClose = document.getElementById("strictOverlayClose");
+const strictRing = document.getElementById("strictRing");
+const strictOverlayHint = document.getElementById("strictOverlayHint");
 const tempOffButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-temp-off]")
 );
@@ -89,6 +109,13 @@ const interventionClose = document.getElementById("interventionClose");
 const durationRow = document.getElementById("durationRow");
 const techniqueRow = document.getElementById("techniqueRow");
 const pausableRow = document.getElementById("pausableRow");
+const taskTitle = document.getElementById("taskTitle") as HTMLInputElement | null;
+const taskEstimate = document.getElementById("taskEstimate") as HTMLInputElement | null;
+const taskEstimateValue = document.getElementById("taskEstimateValue");
+const taskAdd = document.getElementById("taskAdd") as HTMLButtonElement | null;
+const taskList = document.getElementById("taskList");
+const taskEmpty = document.getElementById("taskEmpty");
+const taskSubtitle = document.getElementById("taskSubtitle");
 const PAUSE_TYPES = ["1h", "eod", "manual"] as const;
 type PauseType = (typeof PAUSE_TYPES)[number];
 
@@ -96,21 +123,58 @@ const isPauseType = (value: string | undefined | null): value is PauseType => {
   return Boolean(value) && PAUSE_TYPES.includes(value as PauseType);
 };
 
+const reportUiError = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error("FocusBoss UI error:", error);
+  statusElements.forEach((el) => {
+    el.dataset.status = "error";
+  });
+  if (statusPillText) {
+    statusPillText.textContent = "Error";
+  }
+  currentStatusDetail = message;
+  if (statusInfoTitle) {
+    statusInfoTitle.textContent = "UI error";
+  }
+  if (statusInfoBody) {
+    statusInfoBody.textContent = message;
+  }
+};
+
+window.addEventListener("error", (event) => {
+  reportUiError(event.error ?? event.message);
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  reportUiError(event.reason);
+});
+
 let currentPauseType: PauseType | null = null;
 let currentPauseUntil: number | null = null;
 let currentIsPaused = false;
 let currentFocusEnabled = false;
+let currentStatusDetail = "";
 let currentListType: "blocked" | "allowed" | "advanced" = "blocked";
 let currentEntryType: "domain" | "keyword" = "domain";
 let currentInterventionKey: InterventionKey | null = null;
 let currentStatsRange: "today" | "week" | "month" = "today";
 let currentStatsFilter: "all" | "blocked" = "all";
+let currentStatsTheme: "default" | "citrus" | "ocean" | "warm" = "default";
+let currentStatsPanel: "usage" | "domains" = "usage";
 let currentScheduleId: string | null = null;
 let currentStrictMinutes = 10;
 let currentStrictActive = false;
 let currentStrictEndsAt: number | null = null;
+let currentStrictStartedAt: number | null = null;
+let strictOverlayDismissed = false;
 let currentPomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"] | null = null;
 let pomodoroTicker: number | null = null;
+let currentTasks: Awaited<ReturnType<typeof getState>>["tasks"] | null = null;
+let selectedTaskId: string | null = null;
+let lastTasksKey = "";
+let lastTaskLinkKey = "";
+let lastPomodoroAdvanceKey = "";
+let lastPomodoroAdvanceAttemptAt = 0;
 
 // --- Rendering helpers (update UI from state) ---
 const formatUntil = (until: number) => {
@@ -131,6 +195,8 @@ const formatCountdown = (ms: number) => {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 };
 
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
 const setInputValue = (input: HTMLInputElement | null, value: number) => {
   if (!input) {
     return;
@@ -147,43 +213,77 @@ const renderFocus = (
   pauseType: PauseType | null,
   pauseEndAt: number | null,
   strictActive: boolean,
-  strictEndsAt: number | null
+  strictEndsAt: number | null,
+  pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"] | null
 ) => {
   const now = Date.now();
   const pauseActive =
     isPaused && (pauseType === "manual" || (typeof pauseEndAt === "number" && pauseEndAt > now));
   const effectiveEnabled = strictActive ? true : focusEnabled && !pauseActive;
+  const running = pomodoro?.running ?? null;
+  const timerControlsFocus = Boolean(
+    running &&
+      ((running.phase === "work" && pomodoro?.autoBlockDuringWork) ||
+        (running.phase === "break" && pomodoro?.blockDuringBreak))
+  );
 
   currentFocusEnabled = focusEnabled;
   currentIsPaused = strictActive ? false : pauseActive;
   currentPauseType = pauseType;
   currentPauseUntil = typeof pauseEndAt === "number" ? pauseEndAt : null;
 
+  const setStatus = (
+    status: "on" | "off" | "paused" | "strict" | "pomodoro",
+    short: string,
+    detail: string
+  ) => {
+    statusElements.forEach((el) => {
+      el.dataset.status = status;
+    });
+    if (statusPillText) {
+      statusPillText.textContent = short;
+    }
+    currentStatusDetail = detail;
+    if (statusInfoTitle) {
+      statusInfoTitle.textContent = short;
+    }
+    if (statusInfoBody) {
+      statusInfoBody.textContent = detail;
+    }
+  };
+
   if (toggleEl) {
     toggleEl.checked = effectiveEnabled;
-    toggleEl.disabled = strictActive || (pauseActive && focusEnabled);
+    toggleEl.disabled = strictActive || timerControlsFocus || (pauseActive && focusEnabled);
   }
-  if (statusEl) {
-    if (strictActive) {
-      statusEl.textContent =
-        typeof strictEndsAt === "number"
-          ? `Strict session active until ${formatUntil(strictEndsAt)}.`
-          : "Strict session active.";
-    } else if (pauseActive && focusEnabled) {
-      const label =
-        pauseType === "manual"
-          ? "Focus enabled, paused until you resume."
-          : `Focus enabled, paused until ${formatUntil(pauseEndAt ?? now)}.`;
-      statusEl.textContent = label;
-    } else {
-      statusEl.textContent = focusEnabled ? "Focus is on." : "Focus is off.";
-    }
+  if (strictActive) {
+    const untilLabel =
+      typeof strictEndsAt === "number" ? `Strict until ${formatUntil(strictEndsAt)}` : "Strict active";
+    setStatus("strict", "Strict", `${untilLabel} · Focus is locked until the strict timer ends.`);
+  } else if (timerControlsFocus) {
+    setStatus(
+      "pomodoro",
+      "Pomodoro",
+      "Pomodoro controls focus. Pause or stop the timer to change focus."
+    );
+  } else if (pauseActive && focusEnabled) {
+    const untilLabel =
+      pauseType === "manual"
+        ? "Paused (manual)"
+        : `Paused until ${formatUntil(pauseEndAt ?? now)}`;
+    setStatus("paused", "Paused", `${untilLabel} · Focus will resume automatically.`);
+  } else {
+    setStatus(
+      focusEnabled ? "on" : "off",
+      focusEnabled ? "Focus on" : "Focus off",
+      focusEnabled ? "Focus is on. Blocking is active." : "Focus is off. Blocking is inactive."
+    );
   }
 
   tempOffButtons.forEach((button) => {
     const selected = pauseActive && pauseType === (button.dataset.tempOff ?? null);
     button.classList.toggle("active", selected);
-    button.disabled = strictActive;
+    button.disabled = strictActive || timerControlsFocus;
   });
 };
 
@@ -210,6 +310,50 @@ const renderStrictSession = (strictSession: { active: boolean; endsAt?: number }
   }
 };
 
+const renderStrictOverlay = (
+  strictSession: Awaited<ReturnType<typeof getState>>["strictSession"]
+) => {
+  if (!strictOverlay) {
+    return;
+  }
+  if (!strictSession.active) {
+    strictOverlayDismissed = false;
+    strictOverlay.classList.add("hidden");
+    strictOverlay.setAttribute("aria-hidden", "true");
+    currentStrictStartedAt = null;
+    return;
+  }
+  if (strictOverlayDismissed) {
+    strictOverlay.classList.add("hidden");
+    strictOverlay.setAttribute("aria-hidden", "true");
+    return;
+  }
+  strictOverlay.classList.remove("hidden");
+  strictOverlay.setAttribute("aria-hidden", "false");
+  currentStrictStartedAt =
+    typeof strictSession.startedAt === "number" ? strictSession.startedAt : currentStrictStartedAt;
+
+  const now = Date.now();
+  const endsAt = strictSession.endsAt ?? now;
+  const startedAt =
+    currentStrictStartedAt ?? Math.max(0, endsAt - currentStrictMinutes * 60 * 1000);
+  const totalMs = Math.max(1, endsAt - startedAt);
+  const remainingMs = Math.max(0, endsAt - now);
+  if (strictOverlayTime) {
+    strictOverlayTime.textContent = formatCountdown(remainingMs);
+  }
+  if (strictOverlayHint) {
+    strictOverlayHint.textContent = currentStatusDetail || "Strict session in progress.";
+  }
+  if (strictRing) {
+    const progress = 1 - remainingMs / totalMs;
+    const circumference = 2 * Math.PI * 46;
+    const offset = circumference * (1 - Math.min(1, Math.max(0, progress)));
+    strictRing.setAttribute("stroke-dasharray", String(circumference));
+    strictRing.setAttribute("stroke-dashoffset", String(offset));
+  }
+};
+
 const renderPomodoro = (
   pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"],
   strictActive: boolean
@@ -217,7 +361,7 @@ const renderPomodoro = (
   currentPomodoro = pomodoro;
   setInputValue(pomodoroWork, pomodoro.workMin);
   setInputValue(pomodoroBreak, pomodoro.breakMin);
-  setInputValue(pomodoroCycles, pomodoro.cycles);
+  setInputValue(pomodoroCycles, clamp(pomodoro.cycles, 1, 12));
   if (pomodoroAutoBlock) {
     pomodoroAutoBlock.checked = pomodoro.autoBlockDuringWork;
   }
@@ -246,6 +390,9 @@ const renderPomodoro = (
     if (pomodoroProgress) {
       pomodoroProgress.style.width = "0%";
     }
+    if (currentTasks) {
+      renderTaskLinker(currentTasks, pomodoro);
+    }
     return;
   }
 
@@ -261,6 +408,202 @@ const renderPomodoro = (
     pomodoro.cycles > 0 ? ` · Cycle ${Math.min(running.cycleIndex + 1, pomodoro.cycles)}/${pomodoro.cycles}` : "";
   const statusPrefix = running.paused ? `${phaseLabel} paused` : phaseLabel;
   pomodoroStatus.textContent = `${statusPrefix} · ${formatCountdown(remaining)}${cycleLabel}`;
+  if (currentTasks) {
+    renderTaskLinker(currentTasks, pomodoro);
+  }
+};
+
+const requestPomodoroAdvance = async () => {
+  const state = await getState();
+  const running = state.pomodoro.running;
+  if (!running || running.paused || typeof running.endsAt !== "number") {
+    return;
+  }
+  const now = Date.now();
+  if (now < running.endsAt) {
+    return;
+  }
+  const advanceKey = `${running.phase}:${running.endsAt}`;
+  if (advanceKey === lastPomodoroAdvanceKey && now - lastPomodoroAdvanceAttemptAt < 1500) {
+    return;
+  }
+  lastPomodoroAdvanceKey = advanceKey;
+  lastPomodoroAdvanceAttemptAt = now;
+  chrome.runtime.sendMessage({ type: "pomodoroTick" }, async () => {
+    const nextState = await getState();
+    renderPomodoro(nextState.pomodoro, nextState.strictSession.active);
+  });
+};
+
+const getTaskLinkKey = (
+  tasks: Awaited<ReturnType<typeof getState>>["tasks"],
+  pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
+) => {
+  const activeTasks = tasks.items.filter((item) => !item.doneAt);
+  const running = pomodoro.running;
+  const activeKey = activeTasks.map((item) => `${item.id}:${item.title}`).join("|");
+  const runKey = running
+    ? `${running.phase}:${running.paused ? "p" : "r"}:${running.linkedTaskId ?? ""}`
+    : "idle";
+  return `${activeKey}::${runKey}::${selectedTaskId ?? ""}`;
+};
+
+const renderTaskLinker = (
+  tasks: Awaited<ReturnType<typeof getState>>["tasks"],
+  pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
+) => {
+  if (!pomodoroTaskSelect) {
+    return;
+  }
+  const nextKey = getTaskLinkKey(tasks, pomodoro);
+  if (nextKey === lastTaskLinkKey) {
+    return;
+  }
+  lastTaskLinkKey = nextKey;
+
+  const activeTasks = tasks.items.filter((item) => !item.doneAt);
+  const runningLinkedId = pomodoro.running?.linkedTaskId ?? null;
+  const linkedTask = runningLinkedId
+    ? tasks.items.find((item) => item.id === runningLinkedId)
+    : null;
+  const hasRunning = Boolean(pomodoro.running);
+  if (selectedTaskId && !activeTasks.some((item) => item.id === selectedTaskId)) {
+    selectedTaskId = null;
+  }
+  const fallbackId = pomodoro.lastTaskId ?? null;
+  const selectedId = hasRunning ? runningLinkedId : selectedTaskId ?? fallbackId;
+  pomodoroTaskSelect.innerHTML = "";
+
+  const emptyOption = document.createElement("option");
+  emptyOption.value = "";
+  emptyOption.textContent = "No task";
+  pomodoroTaskSelect.appendChild(emptyOption);
+
+  if (runningLinkedId && !activeTasks.some((item) => item.id === runningLinkedId)) {
+    const linkedOption = document.createElement("option");
+    linkedOption.value = runningLinkedId;
+    linkedOption.textContent = linkedTask ? `${linkedTask.title} (done)` : "Linked task";
+    pomodoroTaskSelect.appendChild(linkedOption);
+  }
+
+  activeTasks.forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.id;
+    option.textContent = item.title;
+    pomodoroTaskSelect.appendChild(option);
+  });
+
+  pomodoroTaskSelect.value = selectedId ?? "";
+  if (!hasRunning) {
+    selectedTaskId = selectedId ?? null;
+  }
+  pomodoroTaskSelect.disabled = hasRunning || activeTasks.length === 0;
+
+  if (pomodoroTaskHint) {
+    if (hasRunning) {
+      const label = linkedTask ? `Linked to ${linkedTask.title}.` : "Running without a linked task.";
+      pomodoroTaskHint.textContent = label;
+    } else if (activeTasks.length === 0) {
+      pomodoroTaskHint.textContent = "Add a task to link it to your session.";
+    } else {
+      pomodoroTaskHint.textContent = "Optional: link a task before starting.";
+    }
+  }
+};
+
+const getTasksKey = (tasks: Awaited<ReturnType<typeof getState>>["tasks"]) => {
+  const itemsKey = tasks.items
+    .map(
+      (item) =>
+        `${item.id}:${item.title}:${item.estimateMin}:${item.focusSessionsCompleted}:${item.doneAt ?? ""}`
+    )
+    .join("|");
+  return `${tasks.activeLimit}::${itemsKey}`;
+};
+
+const renderTasks = (
+  tasks: Awaited<ReturnType<typeof getState>>["tasks"],
+  pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
+) => {
+  const nextKey = getTasksKey(tasks);
+  if (nextKey === lastTasksKey) {
+    renderTaskLinker(tasks, pomodoro);
+    return;
+  }
+  lastTasksKey = nextKey;
+  currentTasks = tasks;
+  const estimateValue = Number(taskEstimate?.value || 30);
+  setInputValue(taskEstimate, clamp(estimateValue, 15, 180));
+  if (taskEstimateValue && taskEstimate) {
+    taskEstimateValue.textContent = `${taskEstimate.value}m`;
+  }
+  const activeTasks = tasks.items.filter((item) => !item.doneAt);
+  const activeCount = activeTasks.length;
+  if (taskSubtitle) {
+    taskSubtitle.textContent = `Active tasks: ${activeCount}/${tasks.activeLimit}.`;
+  }
+  const atLimit = activeCount >= tasks.activeLimit;
+  if (taskAdd) {
+    taskAdd.disabled = atLimit;
+  }
+  if (taskTitle) {
+    taskTitle.disabled = atLimit;
+  }
+  if (taskEstimate) {
+    taskEstimate.disabled = atLimit;
+  }
+
+  if (taskList) {
+    taskList.innerHTML = "";
+    tasks.items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = `list-item task-item${item.doneAt ? " task-done" : ""}`;
+      row.dataset.taskId = item.id;
+
+      const main = document.createElement("div");
+      main.className = "task-main";
+
+      const title = document.createElement("div");
+      title.className = "task-title";
+      title.textContent = item.title;
+
+      const meta = document.createElement("div");
+      meta.className = "task-meta";
+      const sessions = item.focusSessionsCompleted;
+      const doneLabel = item.doneAt ? " · Done" : "";
+      meta.textContent = `Est. ${item.estimateMin}m · Sessions ${sessions}${doneLabel}`;
+
+      main.appendChild(title);
+      main.appendChild(meta);
+
+      const actions = document.createElement("div");
+      actions.className = "task-actions";
+
+      if (!item.doneAt) {
+        const doneButton = document.createElement("button");
+        doneButton.type = "button";
+        doneButton.textContent = "Done";
+        doneButton.dataset.action = "done";
+        actions.appendChild(doneButton);
+      }
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.textContent = "Remove";
+      removeButton.dataset.action = "remove";
+      actions.appendChild(removeButton);
+
+      row.appendChild(main);
+      row.appendChild(actions);
+      taskList.appendChild(row);
+    });
+  }
+
+  if (taskEmpty) {
+    taskEmpty.classList.toggle("hidden", tasks.items.length > 0);
+  }
+
+  renderTaskLinker(tasks, pomodoro);
 };
 
 const renderTheme = (theme: "dark" | "light" | "system") => {
@@ -300,12 +643,112 @@ const getRangeKeys = (range: "today" | "week" | "month") => {
   return keys;
 };
 
+const THEME_COLORS: Record<"default" | "citrus" | "ocean" | "warm", string[]> = {
+  default: ["#9CFF3A", "#4BC6FF", "#FF9F40", "#FF5A5F", "#F7B267"],
+  citrus: ["#F9D423", "#FF4E50", "#F7B733", "#FC913A", "#E94E77"],
+  ocean: ["#00C6FF", "#0072FF", "#00F5D4", "#48BFE3", "#5390D9"],
+  warm: ["#FF6B6B", "#FFD93D", "#FF9F1C", "#F25C54", "#F7B267"]
+};
+
+const normalizeThemeId = (value: unknown): "default" | "citrus" | "ocean" | "warm" => {
+  return value === "citrus" || value === "ocean" || value === "warm" ? value : "default";
+};
+
+const renderDonut = (
+  entries: Array<{ label: string; value: number }>,
+  total: number,
+  themeId: "default" | "citrus" | "ocean" | "warm"
+) => {
+  if (!statsDonut || !statsLegend) {
+    return;
+  }
+  const donutSvg = statsDonut.querySelector(".donut-svg") as HTMLElement | null;
+  if (!donutSvg) {
+    return;
+  }
+
+  if (!entries.length || total <= 0) {
+    donutSvg.innerHTML = `
+      <svg viewBox="0 0 42 42" role="img" aria-label="No data">
+        <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
+      </svg>
+    `;
+    statsLegend.innerHTML = `<p class="list-sub">No data yet.</p>`;
+    return;
+  }
+
+  const colors = THEME_COLORS[themeId];
+  const segments = entries.map((entry) => ({
+    ...entry,
+    pct: total ? (entry.value / total) * 100 : 0
+  }));
+  const otherValue = Math.max(
+    0,
+    total - segments.reduce((acc, seg) => acc + seg.value, 0)
+  );
+  if (otherValue > 0) {
+    segments.push({ label: "Other", value: otherValue, pct: (otherValue / total) * 100 });
+  }
+
+  let offset = 0;
+  const circles = segments
+    .map((seg, idx) => {
+      const pct = Math.max(0, Math.min(100, seg.pct));
+      const dash = `${pct} ${100 - pct}`;
+      const color = colors[idx % colors.length];
+      const circle = `
+        <circle
+          cx="21"
+          cy="21"
+          r="15.9155"
+          fill="transparent"
+          stroke="${color}"
+          stroke-width="6"
+          stroke-dasharray="${dash}"
+          stroke-dashoffset="${offset}"
+        ></circle>
+      `;
+      offset -= pct;
+      return circle;
+    })
+    .join("");
+
+  donutSvg.innerHTML = `
+    <svg viewBox="0 0 42 42" role="img" aria-label="Usage breakdown">
+      <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
+      ${circles}
+    </svg>
+  `;
+
+  statsLegend.innerHTML = segments
+    .map((seg, idx) => {
+      const color = colors[idx % colors.length];
+      return `
+        <div class="legend-item">
+          <span class="legend-dot" style="background:${color}"></span>
+          <span class="legend-label">${seg.label}</span>
+          <span class="legend-value">${formatDuration(seg.value)}</span>
+        </div>
+      `;
+    })
+    .join("");
+};
+
 const renderStats = (analytics: Awaited<ReturnType<typeof getState>>["analytics"]) => {
   statsRangeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.range === currentStatsRange);
   });
   statsFilterButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.filter === currentStatsFilter);
+  });
+  statsThemeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.theme === currentStatsTheme);
+  });
+  if (statsThemeControl) {
+    statsThemeControl.classList.toggle("hidden", currentStatsPanel !== "usage");
+  }
+  statsPanels.forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.panel === currentStatsPanel);
   });
 
   const keys = getRangeKeys(currentStatsRange);
@@ -343,8 +786,14 @@ const renderStats = (analytics: Awaited<ReturnType<typeof getState>>["analytics"
   const entries = Object.entries(listSource).sort((a, b) => b[1] - a[1]).slice(0, 8);
   if (!entries.length) {
     statsList.innerHTML = `<p style="color: var(--color-muted); font-size: var(--font-small);">No data yet.</p>`;
+    renderDonut([], 0, currentStatsTheme);
     return;
   }
+  const topEntries = Object.entries(listSource)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([label, value]) => ({ label, value }));
+  renderDonut(topEntries, listTotal, currentStatsTheme);
   const left = entries.slice(0, 4);
   const right = entries.slice(4, 8);
   const renderEntry = ([host, value]: [string, number]) => {
@@ -467,9 +916,13 @@ const renderSchedules = (schedule: Awaited<ReturnType<typeof getState>>["schedul
   }
   scheduleList.innerHTML = schedule.entries
     .map((entry) => {
-      const days = entry.days
-        .map((day) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day])
-        .join(", ");
+      const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const allDaysSelected = entry.days.length === 7;
+      const dayPills = allDaysSelected
+        ? `<span class="day-pill">All</span>`
+        : entry.days
+            .map((day) => `<span class="day-pill">${dayLabels[day]}</span>`)
+            .join("");
       const start = `${Math.floor(entry.startMin / 60)
         .toString()
         .padStart(2, "0")}:${String(entry.startMin % 60).padStart(2, "0")}`;
@@ -477,23 +930,21 @@ const renderSchedules = (schedule: Awaited<ReturnType<typeof getState>>["schedul
         .toString()
         .padStart(2, "0")}:${String(entry.endMin % 60).padStart(2, "0")}`;
       return `
-        <div class="list-item">
-          <div>
-            <div class="list-title">${entry.name}</div>
-            <div class="list-sub">${days} · ${start}–${end}</div>
+        <div class="list-item schedule-item" data-edit-schedule="${entry.id}">
+          <div class="schedule-meta">
+            <div class="schedule-title">
+              <span class="list-title schedule-name">${entry.name}</span>
+              <span class="time-pill">${start}–${end}</span>
+            </div>
+            <div class="schedule-days">${dayPills}</div>
           </div>
-          <div class="row" style="gap: 8px;">
+          <div class="schedule-actions">
             <label class="toggle small">
               <input type="checkbox" data-toggle-schedule="${entry.id}" ${
                 entry.enabled ? "checked" : ""
               } />
               <span></span>
             </label>
-            <button class="icon-btn icon-only" type="button" data-edit-schedule="${entry.id}" aria-label="Edit schedule">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-                <path fill="currentColor" d="M16.862 3.487a2.25 2.25 0 013.182 3.182L8.25 18.463l-4.5 1.125 1.125-4.5 11.987-11.601zM19.5 6.75l-2.25-2.25" />
-              </svg>
-            </button>
             <button class="icon-btn icon-only" type="button" data-delete-schedule="${entry.id}" aria-label="Delete schedule">
               <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
                 <path fill="currentColor" d="M9.75 3a.75.75 0 00-.75.75V4.5H5.25a.75.75 0 000 1.5h.75l.624 12.06A2.25 2.25 0 008.87 20.25h6.26a2.25 2.25 0 002.246-2.19L18 6h.75a.75.75 0 000-1.5H15v-.75A.75.75 0 0014.25 3h-4.5zM9 8.25a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zm4.5 0a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zM10.5 4.5h3v.75h-3V4.5z" />
@@ -609,18 +1060,12 @@ const renderInterventions = (
   interventionList.innerHTML = INTERVENTION_DEFS.map((item) => {
     const enabled = interventions.enabled[item.key];
     return `
-      <div class="list-item" data-intervention="${item.key}">
-        <div>
-          <div class="list-title">${item.label}</div>
-          <div class="list-sub">${item.description}</div>
-        </div>
-        <div class="row" style="gap: 8px;">
-          <label class="toggle small">
-            <input type="checkbox" data-toggle="${item.key}" ${enabled ? "checked" : ""} />
-            <span></span>
-          </label>
-          <button class="btn btn-small" data-config="${item.key}">Configure</button>
-        </div>
+      <div class="intervention-card" data-intervention="${item.key}">
+        <div class="intervention-title">${item.label}</div>
+        <label class="toggle small intervention-toggle">
+          <input type="checkbox" data-toggle="${item.key}" ${enabled ? "checked" : ""} />
+          <span></span>
+        </label>
       </div>
     `;
   }).join("");
@@ -663,7 +1108,7 @@ const showInterventionDetail = (
     interventionTitle.textContent = def.label;
   }
   if (interventionHint) {
-    interventionHint.textContent = def.description;
+    interventionHint.textContent = def.detail;
   }
 
   const config = interventions.configs[key];
@@ -794,12 +1239,10 @@ const bindEvents = () => {
     });
   });
 
-  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-
   const readPomodoroConfig = () => {
     const work = clamp(Number(pomodoroWork?.value ?? 25), 1, 120);
     const rest = clamp(Number(pomodoroBreak?.value ?? 5), 1, 60);
-    const cycles = clamp(Number(pomodoroCycles?.value ?? 0), 0, 12);
+    const cycles = clamp(Number(pomodoroCycles?.value ?? 1), 1, 12);
     const autoBlock = Boolean(pomodoroAutoBlock?.checked);
     const blockBreak = Boolean(pomodoroBlockBreak?.checked);
     return { work, rest, cycles, autoBlock, blockBreak };
@@ -820,12 +1263,14 @@ const bindEvents = () => {
         cycles: config.cycles,
         autoBlockDuringWork: config.autoBlock,
         blockDuringBreak: config.blockBreak,
+        lastTaskId: selectedTaskId ?? currentPomodoro?.lastTaskId ?? null,
         running: {
           phase: "work",
           startedAt: now,
           endsAt,
           cycleIndex: 0,
-          paused: false
+          paused: false,
+          linkedTaskId: selectedTaskId ?? null
         }
       }
     });
@@ -880,9 +1325,85 @@ const bindEvents = () => {
   });
 
   pomodoroCycles?.addEventListener("change", async () => {
-    const value = clamp(Number(pomodoroCycles.value), 0, 12);
+    const value = clamp(Number(pomodoroCycles.value), 1, 12);
     pomodoroCycles.value = String(value);
     await setState({ pomodoro: { cycles: value } });
+  });
+
+  pomodoroTaskSelect?.addEventListener("change", async () => {
+    const value = pomodoroTaskSelect.value;
+    selectedTaskId = value ? value : null;
+    await setState({ pomodoro: { lastTaskId: selectedTaskId } });
+  });
+
+  taskEstimate?.addEventListener("input", () => {
+    if (taskEstimateValue) {
+      taskEstimateValue.textContent = `${taskEstimate.value}m`;
+    }
+  });
+
+  taskAdd?.addEventListener("click", async () => {
+    const title = taskTitle?.value.trim() ?? "";
+    if (!title) {
+      return;
+    }
+    const state = await getState();
+    const activeCount = state.tasks.items.filter((item) => !item.doneAt).length;
+    if (activeCount >= state.tasks.activeLimit) {
+      return;
+    }
+    const estimate = clamp(Number(taskEstimate?.value ?? 30), 15, 180);
+    const newTask = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      title,
+      estimateMin: estimate,
+      createdAt: Date.now(),
+      focusSessionsCompleted: 0
+    };
+    await setState({ tasks: { items: [...state.tasks.items, newTask] } });
+    if (taskTitle) {
+      taskTitle.value = "";
+    }
+  });
+
+  taskList?.addEventListener("click", async (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button");
+    const action = button?.dataset.action;
+    if (!action) {
+      return;
+    }
+    const row = button?.closest<HTMLElement>("[data-task-id]");
+    const taskId = row?.dataset.taskId;
+    if (!taskId) {
+      return;
+    }
+    const state = await getState();
+    const items = state.tasks.items;
+    if (action === "done") {
+      const updated = items.map((item) =>
+        item.id === taskId && !item.doneAt ? { ...item, doneAt: Date.now() } : item
+      );
+      const shouldClear =
+        selectedTaskId === taskId || state.pomodoro.lastTaskId === taskId;
+      if (selectedTaskId === taskId) {
+        selectedTaskId = null;
+      }
+      await setState({
+        tasks: { items: updated },
+        pomodoro: { lastTaskId: shouldClear ? null : state.pomodoro.lastTaskId ?? null }
+      });
+    } else if (action === "remove") {
+      const updated = items.filter((item) => item.id !== taskId);
+      const shouldClear =
+        selectedTaskId === taskId || state.pomodoro.lastTaskId === taskId;
+      if (selectedTaskId === taskId) {
+        selectedTaskId = null;
+      }
+      await setState({
+        tasks: { items: updated },
+        pomodoro: { lastTaskId: shouldClear ? null : state.pomodoro.lastTaskId ?? null }
+      });
+    }
   });
 
   strictDurationButtons.forEach((button) => {
@@ -915,13 +1436,20 @@ const bindEvents = () => {
     if (currentStrictActive) {
       return;
     }
-    const endsAt = Date.now() + currentStrictMinutes * 60 * 1000;
+    const startedAt = Date.now();
+    const endsAt = startedAt + currentStrictMinutes * 60 * 1000;
     await setState({
       focusEnabled: true,
       pause: { isPaused: false, pauseType: null, pauseEndAt: null },
-      strictSession: { active: true, endsAt }
+      strictSession: { active: true, endsAt, startedAt }
     });
     closeModal("strictConfirm");
+  });
+
+  strictOverlayClose?.addEventListener("click", () => {
+    strictOverlayDismissed = true;
+    strictOverlay?.classList.add("hidden");
+    strictOverlay?.setAttribute("aria-hidden", "true");
   });
 
   listTypeButtons.forEach((button) => {
@@ -994,30 +1522,33 @@ const bindEvents = () => {
 
   scheduleList?.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
-    const editButton = target.closest<HTMLButtonElement>("[data-edit-schedule]");
-    if (editButton) {
-      const id = editButton.getAttribute("data-edit-schedule");
+    const deleteButton = target.closest<HTMLButtonElement>("[data-delete-schedule]");
+    if (deleteButton) {
+      const id = deleteButton.getAttribute("data-delete-schedule");
       if (!id) {
         return;
       }
       const state = await getState();
-      const entry = state.schedule.entries.find((item) => item.id === id);
-      if (entry) {
-        openScheduleModal(entry);
-      }
+      const entries = state.schedule.entries.filter((item) => item.id !== id);
+      await setState({ schedule: { entries } });
       return;
     }
-    const deleteButton = target.closest<HTMLButtonElement>("[data-delete-schedule]");
-    if (!deleteButton) {
+    if (target.closest("label")) {
       return;
     }
-    const id = deleteButton.getAttribute("data-delete-schedule");
+    const scheduleItem = target.closest<HTMLElement>("[data-edit-schedule]");
+    if (!scheduleItem) {
+      return;
+    }
+    const id = scheduleItem.getAttribute("data-edit-schedule");
     if (!id) {
       return;
     }
     const state = await getState();
-    const entries = state.schedule.entries.filter((item) => item.id !== id);
-    await setState({ schedule: { entries } });
+    const entry = state.schedule.entries.find((item) => item.id === id);
+    if (entry) {
+      openScheduleModal(entry);
+    }
   });
 
   scheduleList?.addEventListener("change", async (event) => {
@@ -1143,6 +1674,38 @@ const bindEvents = () => {
     });
   });
 
+  statsCardTabs?.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-stats-panel]");
+    const panel = button?.dataset.statsPanel as "usage" | "domains" | undefined;
+    if (!panel) {
+      return;
+    }
+    currentStatsPanel = panel;
+    const tabButtons = statsCardTabs.querySelectorAll<HTMLButtonElement>("button");
+    tabButtons.forEach((tab) => {
+      tab.classList.toggle("active", tab.dataset.statsPanel === panel);
+    });
+    statsPanels.forEach((panelEl) => {
+      panelEl.classList.toggle("active", panelEl.dataset.panel === panel);
+    });
+    if (statsThemeControl) {
+      statsThemeControl.classList.toggle("hidden", panel !== "usage");
+    }
+  });
+
+  statsThemeButtons.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const theme = button.dataset.theme as "default" | "citrus" | "ocean" | "warm" | undefined;
+      if (!theme) {
+        return;
+      }
+      currentStatsTheme = theme;
+      await setState({ analytics: { chartThemeId: theme } });
+      const state = await getState();
+      renderStats(state.analytics);
+    });
+  });
+
   interventionList?.addEventListener("change", async (event) => {
     const target = event.target as HTMLInputElement;
     const key = target.dataset.toggle as InterventionKey | undefined;
@@ -1154,8 +1717,11 @@ const bindEvents = () => {
 
   interventionList?.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
-    const button = target.closest("button");
-    const key = button?.getAttribute("data-config") as InterventionKey | null;
+    if (target.closest("label")) {
+      return;
+    }
+    const card = target.closest<HTMLElement>("[data-intervention]");
+    const key = card?.getAttribute("data-intervention") as InterventionKey | null;
     if (!key) {
       return;
     }
@@ -1234,33 +1800,48 @@ const bindEvents = () => {
 
 // --- Bootstrap (initial load + subscriptions) ---
 const bootstrap = async () => {
-  const state = await getState();
-  renderFocus(
-    state.focusEnabled,
-    state.pause.isPaused,
-    state.pause.pauseType,
-    state.pause.pauseEndAt,
-    state.strictSession.active,
-    state.strictSession.endsAt ?? null
-  );
-  renderTheme(state.ui.theme);
-  renderOverlayMode(state.overlayMode);
-  currentStatsRange = state.analytics.chartRange;
-  currentStatsFilter = state.analytics.chartFilter;
-  renderStrictSession(state.strictSession);
-  renderPomodoro(state.pomodoro, state.strictSession.active);
-  setActiveView("home");
-  renderLists(state.lists);
-  renderInterventions(state.interventions);
-  renderStats(state.analytics);
-  renderSchedules(state.schedule);
   bindEvents();
+  const state = await getState();
+  try {
+    renderFocus(
+      state.focusEnabled,
+      state.pause.isPaused,
+      state.pause.pauseType,
+      state.pause.pauseEndAt,
+      state.strictSession.active,
+      state.strictSession.endsAt ?? null,
+      state.pomodoro
+    );
+    renderTheme(state.ui.theme);
+    renderOverlayMode(state.overlayMode);
+    currentStatsRange = state.analytics.chartRange;
+    currentStatsFilter = state.analytics.chartFilter;
+    currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
+    renderStrictSession(state.strictSession);
+    renderStrictOverlay(state.strictSession);
+    renderPomodoro(state.pomodoro, state.strictSession.active);
+    renderTasks(state.tasks, state.pomodoro);
+    setActiveView("home");
+    renderLists(state.lists);
+    renderInterventions(state.interventions);
+    renderStats(state.analytics);
+    renderSchedules(state.schedule);
+  } catch (error) {
+    reportUiError(error);
+  }
   if (pomodoroTicker) {
     window.clearInterval(pomodoroTicker);
   }
   pomodoroTicker = window.setInterval(() => {
     if (currentPomodoro) {
       renderPomodoro(currentPomodoro, currentStrictActive);
+      const running = currentPomodoro.running;
+      if (running && !running.paused && Date.now() >= running.endsAt) {
+        void requestPomodoroAdvance();
+      }
+    }
+    if (currentStrictActive) {
+      void getState().then((nextState) => renderStrictOverlay(nextState.strictSession));
     }
   }, 1000);
 
@@ -1271,16 +1852,20 @@ const bootstrap = async () => {
       nextState.pause.pauseType,
       nextState.pause.pauseEndAt,
       nextState.strictSession.active,
-      nextState.strictSession.endsAt ?? null
+      nextState.strictSession.endsAt ?? null,
+      nextState.pomodoro
     );
     renderStrictSession(nextState.strictSession);
+    renderStrictOverlay(nextState.strictSession);
     renderLists(nextState.lists);
     renderInterventions(nextState.interventions);
     renderTheme(nextState.ui.theme);
     renderOverlayMode(nextState.overlayMode);
+    currentStatsTheme = normalizeThemeId(nextState.analytics.chartThemeId);
     renderStats(nextState.analytics);
     renderSchedules(nextState.schedule);
     renderPomodoro(nextState.pomodoro, nextState.strictSession.active);
+    renderTasks(nextState.tasks, nextState.pomodoro);
   });
 
   watchSystemTheme(() => {

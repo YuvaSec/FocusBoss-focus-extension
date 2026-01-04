@@ -168,7 +168,7 @@ export const ensureState = async (): Promise<StorageSchema> => {
     ? { ...state, pause: { isPaused: false, pauseType: null, pauseEndAt: null } }
     : state;
   const strictCleared = strictExpired
-    ? { ...nextState, strictSession: { active: false, endsAt: undefined } }
+    ? { ...nextState, strictSession: { active: false, endsAt: undefined, startedAt: undefined } }
     : nextState;
   const mergedState = tempAllowChanged
     ? { ...strictCleared, temporaryAllow: cleanedTempAllow }

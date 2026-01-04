@@ -57,6 +57,7 @@ export type StorageSchema = {
   strictSession: {
     active: boolean;
     endsAt?: number;
+    startedAt?: number;
     blockedSnapshot?: {
       blockedDomains: string[];
       blockedKeywords: string[];
@@ -72,6 +73,7 @@ export type StorageSchema = {
     blockDuringBreak: boolean;
     sounds: boolean;
     alwaysOnTop: boolean;
+    lastTaskId?: string | null;
     running?: {
       phase: "work" | "break";
       startedAt?: number;
@@ -206,7 +208,8 @@ export const defaultState: StorageSchema = {
     freeTierLimitDaysPerWeek: 3
   },
   strictSession: {
-    active: false
+    active: false,
+    startedAt: undefined
   },
   pomodoro: {
     enabled: false,
@@ -216,7 +219,8 @@ export const defaultState: StorageSchema = {
     autoBlockDuringWork: true,
     blockDuringBreak: false,
     sounds: true,
-    alwaysOnTop: false
+    alwaysOnTop: false,
+    lastTaskId: null
   },
   tasks: {
     activeLimit: 3,

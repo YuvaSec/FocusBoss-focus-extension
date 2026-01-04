@@ -6,6 +6,7 @@ export type InterventionDefinition = {
   key: InterventionKey;
   label: string;
   description: string;
+  detail: string;
   durationOptions?: number[];
   usesPausable?: boolean;
   usesBreathing?: boolean;
@@ -16,30 +17,35 @@ export const INTERVENTION_DEFS: InterventionDefinition[] = [
     key: "instantBlock",
     label: "Hard Stop",
     description: "Immediate block with a short message.",
+    detail: "Blocks the page instantly with a quick reminder. Best for strict focus.",
     usesPausable: true
   },
   {
     key: "holdToComplete",
     label: "Commit Press",
     description: "Hold to confirm before entering.",
+    detail: "Press and hold to confirm you really want to enter. Adds a moment of friction.",
     durationOptions: [3, 8, 15, 30, 45, 60]
   },
   {
     key: "slideInOut",
     label: "Gate Slide",
     description: "Timed gate animation before entry.",
+    detail: "A short gate animation delays entry so you can reconsider.",
     durationOptions: [3, 8, 15, 30, 45, 60]
   },
   {
     key: "pixelated",
     label: "Blur Shield",
     description: "Obscure content for a short delay.",
+    detail: "Blurs the page briefly to break autopilot browsing.",
     durationOptions: [3, 5, 8, 10, 12, 15]
   },
   {
     key: "breathing",
     label: "Pulse Breath",
     description: "A short breathing reset before entry.",
+    detail: "A quick breathing pattern to reset attention before continuing.",
     usesBreathing: true
   }
 ];

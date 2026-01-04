@@ -203,3 +203,17 @@ This keeps the scrollbar inside the content area.
 1) Run `npm run build`.
 2) Reload the popup.
 3) Scroll should stay inside the main content, not on the outer frame.
+# Focus Toggle Doesn’t Respond
+
+**Symptom**
+- Focus toggle and “Turn off until” chips don’t react, even when Pomodoro is off.
+
+**Cause**
+- The schedule engine was forcing `focusEnabled` to `false` whenever there were **no enabled schedules**.
+- That immediately overwrote any manual toggle or pause state.
+
+**Fix**
+- `applyScheduleState()` now exits early if there are no enabled schedules, leaving manual focus control intact.
+
+**Where**
+- `src/background/index.ts` (`applyScheduleState`)
