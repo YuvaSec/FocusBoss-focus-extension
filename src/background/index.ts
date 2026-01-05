@@ -238,6 +238,38 @@ const scheduleAllEntries = async () => {
     });
 };
 
+const serializeScheduleEntries = (
+  entries: StorageSchema["schedule"]["entries"] | undefined
+): string => JSON.stringify(entries ?? []);
+
+const isScheduleActive = (state: StorageSchema): boolean => {
+  const hasEnabled = state.schedule.entries.some(
+    (entry) => entry.enabled && entry.days.length > 0
+  );
+  if (!hasEnabled) {
+    return false;
+  }
+  return state.schedule.entries.some(
+    (entry) => entry.enabled && isScheduleEntryActive(entry, new Date())
+  );
+};
+
+const resolveFocusAfterPomodoroStop = (
+  state: StorageSchema,
+  prevFocusEnabled?: boolean
+): boolean => {
+  if (state.strictSession.active) {
+    return state.focusEnabled;
+  }
+  if (isScheduleActive(state)) {
+    return true;
+  }
+  if (typeof prevFocusEnabled === "boolean") {
+    return prevFocusEnabled;
+  }
+  return state.focusEnabled;
+};
+
 const applyScheduleState = async () => {
   const state = await getState();
   if (state.strictSession.active) {
@@ -287,7 +319,17 @@ const scheduleStrictAlarm = async () => {
   }
   const now = Date.now();
   if (endsAt <= now) {
-    await setState({ strictSession: { active: false, endsAt: undefined, startedAt: undefined } });
+    const prevFocusEnabled = state.strictSession.prevFocusEnabled;
+    await setState({
+      focusEnabled:
+        typeof prevFocusEnabled === "boolean" ? prevFocusEnabled : state.focusEnabled,
+      strictSession: {
+        active: false,
+        endsAt: undefined,
+        startedAt: undefined,
+        prevFocusEnabled: undefined
+      }
+    });
     return;
   }
   chrome.alarms.create(STRICT_ALARM, { when: endsAt });
@@ -394,7 +436,8 @@ const handlePomodoroPhaseEnd = async () => {
           endsAt: nextEnd,
           cycleIndex: nextCycle,
           paused: false,
-          linkedTaskId: running.linkedTaskId ?? null
+          linkedTaskId: running.linkedTaskId ?? null,
+          prevFocusEnabled: running.prevFocusEnabled
         }
       },
       focusEnabled: state.pomodoro.blockDuringBreak ? true : false
@@ -405,8 +448,8 @@ const handlePomodoroPhaseEnd = async () => {
   }
 
   if (state.pomodoro.cycles > 0 && running.cycleIndex >= state.pomodoro.cycles) {
-    await setState({ pomodoro: { running: null } });
-    await applyScheduleState();
+    const desiredFocus = resolveFocusAfterPomodoroStop(state, running.prevFocusEnabled);
+    await setState({ pomodoro: { running: null }, focusEnabled: desiredFocus });
     pomodoroHandling = false;
     return;
   }
@@ -420,7 +463,8 @@ const handlePomodoroPhaseEnd = async () => {
         endsAt: nextEnd,
         cycleIndex: running.cycleIndex,
         paused: false,
-        linkedTaskId: running.linkedTaskId ?? null
+        linkedTaskId: running.linkedTaskId ?? null,
+        prevFocusEnabled: running.prevFocusEnabled
       }
     },
     focusEnabled: state.pomodoro.autoBlockDuringWork ? true : state.focusEnabled
@@ -567,8 +611,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     const oldState = changes.focusBossState.oldValue as StorageSchema | undefined;
     const newState = changes.focusBossState.newValue as StorageSchema | undefined;
     const scheduleChanged =
-      oldState?.schedule?.entries !== newState?.schedule?.entries ||
-      oldState?.schedule?.entries?.length !== newState?.schedule?.entries?.length;
+      serializeScheduleEntries(oldState?.schedule?.entries) !==
+      serializeScheduleEntries(newState?.schedule?.entries);
     const strictChanged = oldState?.strictSession?.active !== newState?.strictSession?.active;
     const pomodoroChanged =
       oldState?.pomodoro?.running?.endsAt !== newState?.pomodoro?.running?.endsAt ||
@@ -582,16 +626,35 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         lastHandledPhase = "";
         lastHandledEndsAt = 0;
         pomodoroHandling = false;
-        void applyScheduleState();
+        const prevFocusEnabled = oldState?.pomodoro?.running?.prevFocusEnabled;
+        const desiredFocus =
+          newState ? resolveFocusAfterPomodoroStop(newState, prevFocusEnabled) : null;
+        if (newState && typeof desiredFocus === "boolean" && desiredFocus !== newState.focusEnabled) {
+          void setState({ focusEnabled: desiredFocus });
+        }
       }
     }
     if (scheduleChanged) {
+      const hasEnabledSchedules = Boolean(
+        newState?.schedule?.entries?.some((entry) => entry.enabled && entry.days.length > 0)
+      );
+      if (
+        newState &&
+        !hasEnabledSchedules &&
+        !newState.strictSession.active &&
+        !newState.pomodoro.running &&
+        newState.focusEnabled
+      ) {
+        void setState({ focusEnabled: false });
+      }
       void scheduleAllEntries().then(applyScheduleState);
     }
     if (strictChanged) {
-      void applyScheduleState();
       if (newState?.strictSession?.active && newState.focusEnabled === false) {
         void setState({ focusEnabled: true });
+      }
+      if (!newState?.strictSession?.active) {
+        void applyScheduleState();
       }
     }
   }
@@ -616,11 +679,17 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     void getState().then((state) => {
       const endsAt = state.strictSession.endsAt;
       if (state.strictSession.active && typeof endsAt === "number" && Date.now() >= endsAt) {
+        const prevFocusEnabled = state.strictSession.prevFocusEnabled;
         void setState({
-          strictSession: { active: false, endsAt: undefined, startedAt: undefined }
-        }).then(
-          applyScheduleState
-        );
+          focusEnabled:
+            typeof prevFocusEnabled === "boolean" ? prevFocusEnabled : state.focusEnabled,
+          strictSession: {
+            active: false,
+            endsAt: undefined,
+            startedAt: undefined,
+            prevFocusEnabled: undefined
+          }
+        });
       }
     });
   }

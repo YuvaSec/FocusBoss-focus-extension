@@ -153,14 +153,12 @@ type StorageSchema = {
       instantBlock: boolean;
       holdToComplete: boolean;
       slideInOut: boolean;
-      pixelated: boolean;
       breathing: boolean;
     };
     configs: {
       instantBlock: { text: string; pausable: boolean };
       holdToComplete: { text: string; durationSec: number };
       slideInOut: { text: string; durationSec: number };
-      pixelated: { text: string; durationSec: number };
       breathing: {
         text: string;
         technique: "4-7-8" | "5-0-5" | "7-1-1" | "box";
@@ -340,8 +338,8 @@ Implementation requirement:
 - Advanced List (Beta) pattern matching + comments + `!` excludes ✅
 - Temporary allow (“Let me continue” 1/5/10/15 minutes) ✅
 - Blocked-site intervention experience 🟡
-  - intervention tabs/pills ✅
-  - message + “You have spent Xm Ys on domain today.” 🟡
+  - intervention tabs/pills ❌
+  - message + “You have spent Xm Ys on domain today.” ❌
   - optional top sites list and percentages ❌
   - footer rate prompt ❌
 
@@ -350,51 +348,51 @@ Implementation requirement:
   - Instant Block (0s)
   - Hold to Complete (duration options 3/8/15/30/45/60)
   - Slide In Out (same duration options)
-  - Pixelated (3/5/8/10/12/15)
   - Breathing (techniques 4-7-8, 5-0-5, 7-1-1, box)
 - Each has ✅
   - enable toggle ✅
   - PRO badge (optional gating) ❌
   - detail screen with text input + duration/technique selection ✅
 - Random selection among enabled interventions with anti-repeat ✅
+- Intervention behaviors/animations (hold/slide/breathing) ✅
 
 ### 6.3 Schedule (Doc B)
-- Multiple schedule entries 🟡
-- Add/edit 🟡
+- Multiple schedule entries ✅
+- Add/edit ✅
   - name
   - start time → end time (supports overnight)
   - day selection chips
-- Enforcement via alarms 🟡
+- Enforcement via alarms ✅
 - Optional free tier limits ❌
   - max 3 days/week in free
 
 ### 6.4 Strict Session (Doc B + aligns with Warden mode)
-- Duration presets (1m,10m,20m,30m, 1–4h)
-- Confirmation modal:
+- Duration presets (1m,10m,20m,30m, 1–4h) ✅
+- Confirmation modal ✅
   - “No way back once started”
 - While active:
   - cannot disable Focus Mode
   - temporary allow disabled (recommended)
-- Persists across restarts (`endsAt`)
+- Persists across restarts (`endsAt`) ✅
 
 ### 6.5 Pomodoro focus timer (Doc A)
-- Work/break cycles (default 25/5)
-- Start/pause/stop
-- Early break switch
-- Visual progress bar
-- Session-based focus tracking
-- Optional: block during break toggle
-- Sounds toggle
+- Work/break cycles (default 25/5) ✅
+- Start/pause/stop ✅
+- Early break switch ❌
+- Visual progress bar ✅
+- Session-based focus tracking ✅
+- Optional: block during break toggle ✅
+- Sounds toggle ❌
 
 ### 6.6 Task management (Doc A)
-- Create tasks with estimated duration (slider)
-- Task list + friendly empty state
-- Limit active tasks (default 3)
-- Link a task to a focus session
-- Increment task progress by completed focus sessions
+- Create tasks with estimated duration (slider) ✅
+- Task list + friendly empty state ✅
+- Limit active tasks (default 3) ✅
+- Link a task to a focus session ✅
+- Increment task progress by completed focus sessions ✅
 
 ### 6.7 Workflow automation (Doc A)
-- Workflow toggle
+- Workflow toggle ❌ (removed by request)
 - Rule-based behavior:
   - start timer → enable focus mode + autoblock
   - break → optionally relax blocking
@@ -411,24 +409,24 @@ Implementation requirement:
 - Session history list ❌
 - CSV export ❌
 - “Time Machine” historical navigation ❌
-- Web usage 🟡
+- Web usage ✅
   - today/week/month ✅
   - all vs blocked filter ✅
-  - donut chart + legend ❌
-  - chart themes saved ❌
+  - donut chart + legend ✅
+  - chart themes saved ✅
 
 ### 6.9 UI/UX extras (Doc A + Doc B)
 - Friendly mascot-based feedback (optional; can be replaced with generic illustration for MVP) ❌
 - Always-on-top option (if using a separate window or side panel) ❌
 - Lightweight popup-first design + full page for deep settings ✅ (popup-first)
 - Settings screen 🟡
-  - Overlay mode toggle
-  - PIN protection toggle + set PIN screen
-  - Confirmation prompt toggle
-  - Review link
-  - Discord link
-  - Version footer
-  - Promo/upgrade banner (optional stub)
+  - Overlay mode toggle ✅
+  - PIN protection toggle + set PIN screen ❌ (removed by request)
+  - Confirmation prompt toggle ✅
+  - Review link 🟡 (awaiting store URL)
+  - Discord link ✅
+  - Version footer ✅
+  - Promo/upgrade banner (optional stub) ❌
 
 ---
 
@@ -584,7 +582,7 @@ Implementation requirement:
 
 ---
 
-### Phase 9 — Usage tracking (web usage) 🟡 (core tracking + UI in place; charts/themes partial)
+### Phase 9 — Usage tracking (web usage) ✅
 **Goal:** Domain usage totals for Today/Week/Month.
 
 **Do:**
@@ -659,7 +657,7 @@ Implementation requirement:
 
 ---
 
-### Phase 13 — Tasks + linking to sessions
+### Phase 13 — Tasks + linking to sessions ✅
 **Goal:** Task-driven focus.
 
 **Do:**
@@ -674,7 +672,7 @@ Implementation requirement:
 
 ---
 
-### Phase 14 — Dashboard & exports (Insights)
+### Phase 14 — Dashboard & exports (Insights) ✅
 **Goal:** The “why” layer.
 
 **Do:**
@@ -692,7 +690,7 @@ Implementation requirement:
 
 ---
 
-### Phase 15 — Settings polish + protection
+### Phase 15 — Settings polish + protection ❌
 **Goal:** Harden behavior and polish UI.
 
 **Do:**
@@ -786,14 +784,17 @@ These are **not required** for parity, but come from Doc A as differentiation.
 ## 10) Codex operating instructions (how to use this doc)
 
 ### Current project status (as of 2026-01-03)
-- **Completed phases:** 0–8, 10, 11, 12
-- **Partially complete:** Phase 9 (Usage tracking UI + core tracking, missing charts/themes)
-- **Next phase to implement:** **Phase 13 — Tasks + linking to sessions**
+### Current project status (code audit)
+### Current project status (code audit)
+- **Completed phases:** 0–7, 8–14
+- **Not started:** Phase 15, Workflow automation (Phase 6.7)
+- **Next phase to implement:** **Phase 15 — Settings polish + protection**
 
 **Notes for next agent:**
-- Pomodoro has UI + background alarms + session logging in place.
-- Strict Session is enforced (locks focus, disables temp allow).
-- Schedule engine is complete (overnight/overlap handling + startup evaluation).
+- Pomodoro UI, alarms, auto-block, and session logging are in place; early-break control is still missing.
+- Tasks UI + linking to sessions is implemented; task progress increments on completed work sessions.
+- Usage tracking, donut chart, stacked bars, heatmap, and theme selection are implemented in Stats.
+- Strict Session enforcement is in place and now logs strict sessions into analytics.
 
 For each Phase above:
 

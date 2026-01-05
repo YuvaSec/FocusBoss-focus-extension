@@ -46,15 +46,16 @@
           <div class="card">
             <div class="row">
               <div>
-                <h3>Strict Session</h3>
+                <h2>Strict Mode</h2>
                 <p id="strictStatus" class="list-sub">No strict session running.</p>
               </div>
               <button id="strictStart" class="btn btn-small">Start</button>
             </div>
             <div style="margin-top: 12px;">
               <p class="list-sub">Duration</p>
-              <div id="strictDurations" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+              <div id="strictDurations" style="margin-top: 8px;">
                 <button class="chip" data-strict-min="1">1m</button>
+                <button class="chip" data-strict-min="5">5m</button>
                 <button class="chip" data-strict-min="10">10m</button>
                 <button class="chip" data-strict-min="20">20m</button>
                 <button class="chip" data-strict-min="30">30m</button>
@@ -62,12 +63,13 @@
                 <button class="chip" data-strict-min="120">2h</button>
                 <button class="chip" data-strict-min="180">3h</button>
                 <button class="chip" data-strict-min="240">4h</button>
+                <button class="chip" data-strict-min="300">5h</button>
               </div>
             </div>
           </div>
           <div class="card" style="margin-top: 12px;">
-            <h2>Interventions</h2>
-            <p class="list-sub">Pick how FocusBoss stops distractions.</p>
+            <h2>Friction Modes</h2>
+            <p class="list-sub">Pick how FocusBoss increases friction.</p>
             <div id="interventionList" class="intervention-grid" style="margin-top: 10px;"></div>
           </div>
         </section>
@@ -114,26 +116,35 @@
                 <h3>Pomodoro</h3>
                 <p id="pomodoroStatus" class="list-sub">Ready.</p>
               </div>
-              <div class="pomodoro-controls" style="gap: 8px;">
-                <button id="pomodoroStart" class="pomodoro-icon-btn" type="button" aria-label="Start">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8 5l11 7-11 7z" />
-                  </svg>
-                </button>
-                <button id="pomodoroPause" class="pomodoro-icon-btn" type="button" aria-label="Pause">
+              <div class="pomodoro-controls">
+                <button id="pomodoroPause" class="pomodoro-icon-btn pomodoro-control secondary" type="button" aria-label="Pause">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
                   </svg>
                 </button>
-                <button id="pomodoroStop" class="pomodoro-icon-btn" type="button" aria-label="Stop">
+                <button id="pomodoroStart" class="pomodoro-icon-btn pomodoro-control primary" type="button" aria-label="Start">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 5l11 7-11 7z" />
+                  </svg>
+                </button>
+                <button id="pomodoroStop" class="pomodoro-icon-btn pomodoro-control secondary" type="button" aria-label="Stop">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M7 7h10v10H7z" />
                   </svg>
                 </button>
               </div>
             </div>
-            <div class="timer-progress" style="margin-top: 12px;">
-              <span id="pomodoroProgress"></span>
+            <div class="neo-timer pomodoro-timer" style="margin-top: 12px;">
+              <div class="neo-timer-outer"></div>
+              <div class="neo-timer-inner"></div>
+              <svg class="neo-timer-svg" viewBox="0 0 240 240" aria-hidden="true">
+                <circle class="neo-timer-track" cx="120" cy="120" r="108"></circle>
+                <circle id="pomodoroRing" class="neo-timer-progress" cx="120" cy="120" r="108"></circle>
+              </svg>
+              <div class="neo-timer-time">
+                <span id="pomodoroTimerValue" class="neo-timer-value">00:00</span>
+                <span class="neo-timer-label">remaining time</span>
+              </div>
             </div>
             <div class="row" style="margin-top: 12px;">
               <div>
@@ -222,6 +233,28 @@
           </div>
 
           <div class="card" style="margin-top: 12px;">
+            <h3>Overview</h3>
+            <div class="metric-grid" style="margin-top: 10px;">
+              <div class="metric-card">
+                <p class="list-sub">Focus time</p>
+                <div id="metricFocus" class="metric-value">0m</div>
+              </div>
+              <div class="metric-card">
+                <p class="list-sub">Break time (est.)</p>
+                <div id="metricBreak" class="metric-value">0m</div>
+              </div>
+              <div class="metric-card">
+                <p class="list-sub">Tasks completed</p>
+                <div id="metricTasks" class="metric-value">0</div>
+              </div>
+              <div class="metric-card">
+                <p class="list-sub">Distraction time</p>
+                <div id="metricDistraction" class="metric-value">0m</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
             <div class="row stats-tabs-row" style="gap: 10px; align-items: center;">
               <div class="segmented two" id="statsCardTabs">
                 <button class="active" data-stats-panel="usage">Usage breakdown</button>
@@ -253,7 +286,13 @@
           </div>
 
           <div class="card" style="margin-top: 12px; overflow: hidden;">
-            <h3>Focus vs Distraction</h3>
+            <div class="row" style="justify-content: space-between; gap: 10px;">
+              <h3>Focus timeline</h3>
+              <div class="segmented two" id="statsFocusToggle">
+                <button class="active" data-focus-mode="focus">Focus</button>
+                <button data-focus-mode="distraction">Distraction</button>
+              </div>
+            </div>
             <div class="row" style="margin-top: 6px; gap: 10px;">
               <span class="legend"><span class="dot focus"></span>Focus</span>
               <span class="legend"><span class="dot blocked"></span>Distraction</span>
@@ -264,6 +303,40 @@
           <div class="card" style="margin-top: 12px;">
             <h3>Hour Heatmap</h3>
             <div id="statsHeatmap" class="heatmap" style="margin-top: 12px;"></div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
+                <h3>Session history</h3>
+                <p class="list-sub">Recent focus sessions.</p>
+              </div>
+            </div>
+            <div id="statsSessions" class="list-items" style="margin-top: 10px;"></div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
+                <h3>Time Machine</h3>
+                <p class="list-sub">Pick a day for details.</p>
+              </div>
+            </div>
+            <div id="timeMachineDays" class="chip-row" style="margin-top: 10px;"></div>
+            <div id="timeMachineDetails" style="margin-top: 12px;"></div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
+                <h3>Export</h3>
+                <p class="list-sub">Download your data as CSV.</p>
+              </div>
+            </div>
+            <div class="row" style="margin-top: 10px; gap: 8px; flex-wrap: wrap;">
+              <button id="exportSessionsCsv" class="btn btn-small">Sessions CSV</button>
+              <button id="exportUsageCsv" class="btn btn-small">Web usage CSV</button>
+            </div>
           </div>
         </section>
 
@@ -296,12 +369,44 @@
           <div class="card" style="margin-top: 12px;">
             <div class="row">
               <div>
+                <h3>Confirmation prompt</h3>
+                <p class="list-sub">Ask before turning Focus off.</p>
+              </div>
+              <label class="toggle">
+                <input id="confirmToggle" type="checkbox" />
+                <span></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
                 <h3>Schedules</h3>
                 <p class="list-sub">Auto-enable focus by time.</p>
               </div>
               <button id="scheduleAdd" class="btn btn-small">Add</button>
             </div>
             <div id="scheduleList" class="list-items" style="margin-top: 10px;"></div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
+                <h3>Links</h3>
+                <p class="list-sub">Get updates and leave feedback.</p>
+              </div>
+            </div>
+            <div class="list-items" style="margin-top: 10px;">
+              <a id="reviewLink" class="settings-link" aria-disabled="true">Review (coming soon)</a>
+              <a id="githubLink" class="settings-link" href="https://github.com/YuvaSec" target="_blank" rel="noreferrer">GitHub</a>
+              <a id="discordLink" class="settings-link" href="https://discord.gg/wY5YF99JCj" target="_blank" rel="noreferrer">Discord</a>
+            </div>
+          </div>
+
+          <div class="settings-footer">
+            <div id="versionLabel" class="list-sub">Version</div>
+            <a class="footer-link" href="https://github.com/YuvaSec" target="_blank" rel="noreferrer">Made with ❤ by YuvaSec</a>
           </div>
 
         </section>
@@ -314,12 +419,17 @@
           <div class="strict-overlay-content">
             <h2>Strict Mode</h2>
           <p id="strictOverlayHint" class="list-sub">You can't access distracting websites until the timer ends.</p>
-            <div class="strict-ring" style="margin-top: 24px;">
-              <svg viewBox="0 0 120 120" aria-hidden="true">
-                <circle cx="60" cy="60" r="46" class="strict-ring-track"></circle>
-                <circle id="strictRing" cx="60" cy="60" r="46" class="strict-ring-progress"></circle>
+            <div class="neo-timer strict-timer" style="margin-top: 24px;">
+              <div class="neo-timer-outer"></div>
+              <div class="neo-timer-inner"></div>
+              <svg class="neo-timer-svg" viewBox="0 0 240 240" aria-hidden="true">
+                <circle class="neo-timer-track" cx="120" cy="120" r="108"></circle>
+                <circle id="strictRing" class="neo-timer-progress" cx="120" cy="120" r="108"></circle>
               </svg>
-              <div id="strictOverlayTime" class="strict-ring-time">00:00</div>
+              <div class="neo-timer-time">
+                <span id="strictOverlayTime" class="neo-timer-value">00:00</span>
+                <span class="neo-timer-label">remaining time</span>
+              </div>
             </div>
           </div>
         </div>
@@ -504,6 +614,21 @@
         </div>
       </div>
     </div>
+
+    <div id="focusOffModal" class="modal hidden" data-modal="focusOffConfirm" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div>
+          <h3>Turn Focus off?</h3>
+          <p class="list-sub">Blocking will stop until you turn Focus back on.</p>
+        </div>
+        <div class="modal-actions" style="margin-top: 18px;">
+          <button id="focusOffConfirm" class="btn btn-large btn-success">Turn off</button>
+          <button id="focusOffCancel" class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="popup/index.js"></script>
   </body>
 </html>

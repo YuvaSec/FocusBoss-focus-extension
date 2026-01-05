@@ -35,13 +35,6 @@ export const INTERVENTION_DEFS: InterventionDefinition[] = [
     durationOptions: [3, 8, 15, 30, 45, 60]
   },
   {
-    key: "pixelated",
-    label: "Blur Shield",
-    description: "Obscure content for a short delay.",
-    detail: "Blurs the page briefly to break autopilot browsing.",
-    durationOptions: [3, 5, 8, 10, 12, 15]
-  },
-  {
     key: "breathing",
     label: "Pulse Breath",
     description: "A short breathing reset before entry.",

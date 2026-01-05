@@ -10,8 +10,6 @@ export type StorageSchema = {
   };
   overlayMode: boolean;
   confirmationPrompt: boolean;
-  pinProtectionEnabled: boolean;
-  pinHash?: string | null;
   lists: {
     blockedDomains: string[];
     blockedKeywords: string[];
@@ -24,14 +22,12 @@ export type StorageSchema = {
       instantBlock: boolean;
       holdToComplete: boolean;
       slideInOut: boolean;
-      pixelated: boolean;
       breathing: boolean;
     };
     configs: {
       instantBlock: { text: string; pausable: boolean };
       holdToComplete: { text: string; durationSec: number };
       slideInOut: { text: string; durationSec: number };
-      pixelated: { text: string; durationSec: number };
       breathing: {
         text: string;
         technique: "4-7-8" | "5-0-5" | "7-1-1" | "box";
@@ -58,6 +54,7 @@ export type StorageSchema = {
     active: boolean;
     endsAt?: number;
     startedAt?: number;
+    prevFocusEnabled?: boolean;
     blockedSnapshot?: {
       blockedDomains: string[];
       blockedKeywords: string[];
@@ -82,6 +79,7 @@ export type StorageSchema = {
       paused: boolean;
       remainingMs?: number;
       linkedTaskId?: string | null;
+      prevFocusEnabled?: boolean;
     } | null;
   };
   tasks: {
@@ -161,8 +159,6 @@ export const defaultState: StorageSchema = {
   },
   overlayMode: true,
   confirmationPrompt: true,
-  pinProtectionEnabled: false,
-  pinHash: null,
   lists: {
     blockedDomains: [],
     blockedKeywords: [],
@@ -175,7 +171,6 @@ export const defaultState: StorageSchema = {
       instantBlock: true,
       holdToComplete: false,
       slideInOut: false,
-      pixelated: false,
       breathing: false
     },
     configs: {
@@ -185,10 +180,6 @@ export const defaultState: StorageSchema = {
         durationSec: 8
       },
       slideInOut: {
-        text: "Are you sure you want to enter this site?",
-        durationSec: 8
-      },
-      pixelated: {
         text: "Are you sure you want to enter this site?",
         durationSec: 8
       },
@@ -209,7 +200,8 @@ export const defaultState: StorageSchema = {
   },
   strictSession: {
     active: false,
-    startedAt: undefined
+    startedAt: undefined,
+    prevFocusEnabled: undefined
   },
   pomodoro: {
     enabled: false,

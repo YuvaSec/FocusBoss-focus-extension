@@ -156,6 +156,16 @@ export const ensureState = async (): Promise<StorageSchema> => {
     state.strictSession.active &&
     typeof state.strictSession.endsAt === "number" &&
     now >= state.strictSession.endsAt;
+  const strictEndedAt =
+    strictExpired && typeof state.strictSession.endsAt === "number"
+      ? state.strictSession.endsAt
+      : null;
+  const strictStartedAt =
+    strictExpired && typeof state.strictSession.startedAt === "number"
+      ? state.strictSession.startedAt
+      : strictEndedAt
+        ? Math.max(0, strictEndedAt - 60 * 1000)
+        : null;
   const cleanedTempAllow = Object.fromEntries(
     Object.entries(state.temporaryAllow ?? {}).filter(
       ([, value]) => typeof value?.until === "number" && value.until > now
@@ -167,8 +177,37 @@ export const ensureState = async (): Promise<StorageSchema> => {
   const nextState = pauseExpired || pauseInvalid
     ? { ...state, pause: { isPaused: false, pauseType: null, pauseEndAt: null } }
     : state;
+  const prevFocusEnabled = nextState.strictSession.prevFocusEnabled;
+  const shouldRestoreFocus = typeof prevFocusEnabled === "boolean";
+  const restoredFocusEnabled = shouldRestoreFocus ? prevFocusEnabled : nextState.focusEnabled;
+  const strictSessionLogged =
+    strictExpired && strictEndedAt !== null
+      ? [
+          ...nextState.analytics.sessions,
+          {
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            startedAt: strictStartedAt ?? strictEndedAt,
+            endedAt: strictEndedAt,
+            type: "strict" as const,
+            focusEnabledDuring: true,
+            distractions: 0
+          }
+        ]
+      : null;
   const strictCleared = strictExpired
-    ? { ...nextState, strictSession: { active: false, endsAt: undefined, startedAt: undefined } }
+    ? {
+        ...nextState,
+        focusEnabled: restoredFocusEnabled,
+        analytics: strictSessionLogged
+          ? { ...nextState.analytics, sessions: strictSessionLogged }
+          : nextState.analytics,
+        strictSession: {
+          active: false,
+          endsAt: undefined,
+          startedAt: undefined,
+          prevFocusEnabled: undefined
+        }
+      }
     : nextState;
   const mergedState = tempAllowChanged
     ? { ...strictCleared, temporaryAllow: cleanedTempAllow }

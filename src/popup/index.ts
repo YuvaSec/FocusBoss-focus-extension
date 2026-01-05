@@ -4,6 +4,7 @@ import {
   INTERVENTION_DEFS,
   type InterventionKey
 } from "../shared/interventions.js";
+import type { StorageSchema } from "../shared/storageSchema.js";
 
 // --- DOM references (grab once, reuse) ---
 const statusPillText = document.getElementById("statusPillText");
@@ -19,6 +20,11 @@ const views = Array.from(document.querySelectorAll<HTMLElement>(".view"));
 const themeControl = document.getElementById("themeControl");
 const overlayToggle = document.getElementById("overlayToggle") as HTMLInputElement | null;
 const overlayLabel = document.getElementById("overlayLabel");
+const confirmToggle = document.getElementById("confirmToggle") as HTMLInputElement | null;
+const focusOffConfirm = document.getElementById("focusOffConfirm") as HTMLButtonElement | null;
+const focusOffCancel = document.getElementById("focusOffCancel") as HTMLButtonElement | null;
+const reviewLink = document.getElementById("reviewLink") as HTMLAnchorElement | null;
+const versionLabel = document.getElementById("versionLabel");
 const statsRangeButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("#statsRange button")
 );
@@ -41,6 +47,18 @@ const statsCardTabs = document.getElementById("statsCardTabs");
 const statsPanels = Array.from(
   document.querySelectorAll<HTMLElement>(".stats-panel")
 );
+const statsFocusButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsFocusToggle button")
+);
+const metricFocus = document.getElementById("metricFocus");
+const metricBreak = document.getElementById("metricBreak");
+const metricTasks = document.getElementById("metricTasks");
+const metricDistraction = document.getElementById("metricDistraction");
+const statsSessions = document.getElementById("statsSessions");
+const timeMachineDays = document.getElementById("timeMachineDays");
+const timeMachineDetails = document.getElementById("timeMachineDetails");
+const exportSessionsCsv = document.getElementById("exportSessionsCsv") as HTMLButtonElement | null;
+const exportUsageCsv = document.getElementById("exportUsageCsv") as HTMLButtonElement | null;
 const scheduleAdd = document.getElementById("scheduleAdd");
 const scheduleList = document.getElementById("scheduleList");
 const scheduleTitle = document.getElementById("scheduleTitle");
@@ -50,7 +68,8 @@ const scheduleEnd = document.getElementById("scheduleEnd") as HTMLInputElement |
 const scheduleDays = document.getElementById("scheduleDays");
 const scheduleSave = document.getElementById("scheduleSave");
 const pomodoroStatus = document.getElementById("pomodoroStatus");
-const pomodoroProgress = document.getElementById("pomodoroProgress");
+const pomodoroRing = document.getElementById("pomodoroRing") as SVGCircleElement | null;
+const pomodoroTimerValue = document.getElementById("pomodoroTimerValue");
 const pomodoroStart = document.getElementById("pomodoroStart") as HTMLButtonElement | null;
 const pomodoroPause = document.getElementById("pomodoroPause") as HTMLButtonElement | null;
 const pomodoroStop = document.getElementById("pomodoroStop") as HTMLButtonElement | null;
@@ -161,8 +180,12 @@ let currentStatsRange: "today" | "week" | "month" = "today";
 let currentStatsFilter: "all" | "blocked" = "all";
 let currentStatsTheme: "default" | "citrus" | "ocean" | "warm" = "default";
 let currentStatsPanel: "usage" | "domains" = "usage";
+let currentFocusView: "focus" | "distraction" = "focus";
+let currentTimeMachineDay = "";
+let pendingFocusOff = false;
+const REVIEW_URL = "";
 let currentScheduleId: string | null = null;
-let currentStrictMinutes = 10;
+let currentStrictMinutes = 1;
 let currentStrictActive = false;
 let currentStrictEndsAt: number | null = null;
 let currentStrictStartedAt: number | null = null;
@@ -283,7 +306,7 @@ const renderFocus = (
   tempOffButtons.forEach((button) => {
     const selected = pauseActive && pauseType === (button.dataset.tempOff ?? null);
     button.classList.toggle("active", selected);
-    button.disabled = strictActive || timerControlsFocus;
+    button.disabled = strictActive || timerControlsFocus || !focusEnabled;
   });
 };
 
@@ -346,11 +369,12 @@ const renderStrictOverlay = (
     strictOverlayHint.textContent = currentStatusDetail || "Strict session in progress.";
   }
   if (strictRing) {
+    const radius = Number(strictRing.getAttribute("r") ?? "0");
+    const circumference = 2 * Math.PI * radius;
     const progress = 1 - remainingMs / totalMs;
-    const circumference = 2 * Math.PI * 46;
     const offset = circumference * (1 - Math.min(1, Math.max(0, progress)));
-    strictRing.setAttribute("stroke-dasharray", String(circumference));
-    strictRing.setAttribute("stroke-dashoffset", String(offset));
+    strictRing.style.strokeDasharray = String(circumference);
+    strictRing.style.strokeDashoffset = String(offset);
   }
 };
 
@@ -383,13 +407,28 @@ const renderPomodoro = (
     pomodoroStop.disabled = !isRunning;
   }
 
-  if (!running || !pomodoroStatus || !pomodoroProgress) {
+  const updateRing = (remainingMs: number, totalMs: number) => {
+    if (!pomodoroRing) {
+      return;
+    }
+    const radius = Number(pomodoroRing.getAttribute("r") ?? "0");
+    const circumference = 2 * Math.PI * radius;
+    const progress = totalMs > 0 ? Math.min(1, Math.max(0, 1 - remainingMs / totalMs)) : 0;
+    pomodoroRing.style.strokeDasharray = String(circumference);
+    pomodoroRing.style.strokeDashoffset = String(
+      circumference - progress * circumference
+    );
+  };
+
+  if (!running || !pomodoroStatus) {
     if (pomodoroStatus) {
       pomodoroStatus.textContent = "Ready for your next session.";
     }
-    if (pomodoroProgress) {
-      pomodoroProgress.style.width = "0%";
+    const idleTotalMs = pomodoro.workMin * 60 * 1000;
+    if (pomodoroTimerValue) {
+      pomodoroTimerValue.textContent = formatCountdown(idleTotalMs);
     }
+    updateRing(idleTotalMs, idleTotalMs);
     if (currentTasks) {
       renderTaskLinker(currentTasks, pomodoro);
     }
@@ -402,12 +441,14 @@ const renderPomodoro = (
   const remaining = running.paused
     ? running.remainingMs ?? totalMs
     : Math.max(0, running.endsAt - Date.now());
-  const progress = totalMs > 0 ? Math.min(1, Math.max(0, 1 - remaining / totalMs)) : 0;
-  pomodoroProgress.style.width = `${Math.round(progress * 100)}%`;
+  updateRing(remaining, totalMs);
   const cycleLabel =
     pomodoro.cycles > 0 ? ` · Cycle ${Math.min(running.cycleIndex + 1, pomodoro.cycles)}/${pomodoro.cycles}` : "";
   const statusPrefix = running.paused ? `${phaseLabel} paused` : phaseLabel;
   pomodoroStatus.textContent = `${statusPrefix} · ${formatCountdown(remaining)}${cycleLabel}`;
+  if (pomodoroTimerValue) {
+    pomodoroTimerValue.textContent = formatCountdown(remaining);
+  }
   if (currentTasks) {
     renderTaskLinker(currentTasks, pomodoro);
   }
@@ -628,6 +669,25 @@ const formatDuration = (ms: number) => {
   return `${minutes}m`;
 };
 
+const formatDateLabel = (key: string): string => {
+  const [year, month, day] = key.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
+const formatTimeLabel = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+};
+
+const getDayKey = (date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+
 const getRangeKeys = (range: "today" | "week" | "month") => {
   const days = range === "today" ? 1 : range === "week" ? 7 : 30;
   const keys: string[] = [];
@@ -734,7 +794,164 @@ const renderDonut = (
     .join("");
 };
 
-const renderStats = (analytics: Awaited<ReturnType<typeof getState>>["analytics"]) => {
+const renderMetrics = (state: StorageSchema, keys: string[]) => {
+  const keySet = new Set(keys);
+  const sessionsInRange = state.analytics.sessions.filter((session) => {
+    const dateKey = getDayKey(new Date(session.startedAt));
+    return keySet.has(dateKey);
+  });
+  const focusMs = sessionsInRange.reduce(
+    (acc, session) => acc + Math.max(0, session.endedAt - session.startedAt),
+    0
+  );
+  const pomodoroSessions = sessionsInRange.filter((session) => session.type === "pomodoro").length;
+  const breakMsEst = pomodoroSessions * state.pomodoro.breakMin * 60 * 1000;
+  const tasksCompleted = state.tasks.items.filter((item) => {
+    if (!item.doneAt) {
+      return false;
+    }
+    const dateKey = getDayKey(new Date(item.doneAt));
+    return keySet.has(dateKey);
+  }).length;
+  const distractionMs = keys.reduce((acc, key) => acc + (state.analytics.byDay[key]?.blockedMs ?? 0), 0);
+
+  if (metricFocus) metricFocus.textContent = formatDuration(focusMs);
+  if (metricBreak) metricBreak.textContent = formatDuration(breakMsEst);
+  if (metricTasks) metricTasks.textContent = String(tasksCompleted);
+  if (metricDistraction) metricDistraction.textContent = formatDuration(distractionMs);
+};
+
+const renderSessions = (state: StorageSchema, keys: string[]) => {
+  if (!statsSessions) {
+    return;
+  }
+  const keySet = new Set(keys);
+  const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item.title]));
+  const sessions = [...state.analytics.sessions]
+    .filter((session) => keySet.has(getDayKey(new Date(session.startedAt))))
+    .sort((a, b) => b.startedAt - a.startedAt)
+    .slice(0, 12);
+
+  if (sessions.length === 0) {
+    statsSessions.innerHTML = `<p class="list-sub">No sessions logged yet.</p>`;
+    return;
+  }
+
+  statsSessions.innerHTML = sessions
+    .map((session) => {
+      const duration = Math.max(0, session.endedAt - session.startedAt);
+      const taskTitle = session.taskId ? taskLookup.get(session.taskId) : null;
+      const label = session.type === "strict" ? "Strict session" : "Pomodoro focus";
+      const timeLabel = `${formatTimeLabel(session.startedAt)} · ${formatDuration(duration)}`;
+      return `
+        <div class="list-item">
+          <div class="session-item">
+            <div class="session-title">${label}</div>
+            <div class="session-meta">
+              <span>${timeLabel}</span>
+              ${taskTitle ? `<span>Task: ${taskTitle}</span>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+};
+
+const renderTimeline = (state: StorageSchema, keys: string[]) => {
+  if (!statsStacked) {
+    return;
+  }
+  const rows = keys
+    .map((key) => {
+      const day = state.analytics.byDay[key];
+      const blocked = day?.blockedMs ?? 0;
+      const total = day?.totalMs ?? 0;
+      const focus = Math.max(0, total - blocked);
+      return { key, focus, blocked };
+    })
+    .reverse();
+  const maxValue = Math.max(
+    1,
+    ...rows.map((row) => (currentFocusView === "focus" ? row.focus : row.blocked))
+  );
+  statsStacked.innerHTML = rows
+    .map((row) => {
+      const value = currentFocusView === "focus" ? row.focus : row.blocked;
+      const pct = Math.round((value / maxValue) * 100);
+      return `
+        <div class="timeline-row">
+          <div class="row" style="gap: 8px;">
+            <span>${formatDateLabel(row.key)}</span>
+            <span class="list-sub">${formatDuration(value)}</span>
+          </div>
+          <div class="timeline-bar">
+            <span style="width: ${pct}%;"></span>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+};
+
+const renderTimeMachine = (state: StorageSchema) => {
+  if (!timeMachineDays || !timeMachineDetails) {
+    return;
+  }
+  const days = getRangeKeys("week").slice(0, 7);
+  if (!currentTimeMachineDay) {
+    currentTimeMachineDay = days[0] ?? getDayKey();
+  }
+  timeMachineDays.innerHTML = days
+    .map((key) => {
+      const active = key === currentTimeMachineDay ? "active" : "";
+      return `<button class="chip ${active}" data-day="${key}">${formatDateLabel(key)}</button>`;
+    })
+    .join("");
+
+  const day = state.analytics.byDay[currentTimeMachineDay];
+  const usageEntries = Object.entries(day?.byDomain ?? {})
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  const sessions = state.analytics.sessions
+    .filter((session) => getDayKey(new Date(session.startedAt)) === currentTimeMachineDay)
+    .sort((a, b) => b.startedAt - a.startedAt)
+    .slice(0, 6);
+
+  const usageHtml = usageEntries.length
+    ? usageEntries
+        .map(
+          ([host, value]) =>
+            `<div class="row" style="justify-content: space-between;"><span>${host}</span><span class="list-sub">${formatDuration(value)}</span></div>`
+        )
+        .join("")
+    : `<p class="list-sub">No web usage recorded.</p>`;
+
+  const sessionHtml = sessions.length
+    ? sessions
+        .map((session) => {
+          const duration = Math.max(0, session.endedAt - session.startedAt);
+          return `<div class="row" style="justify-content: space-between;"><span>${session.type}</span><span class="list-sub">${formatDuration(duration)}</span></div>`;
+        })
+        .join("")
+    : `<p class="list-sub">No sessions logged.</p>`;
+
+  timeMachineDetails.innerHTML = `
+    <div class="card" style="padding: 10px;">
+      <p class="list-sub">Top sites</p>
+      <div style="margin-top: 6px; display: grid; gap: 6px;">
+        ${usageHtml}
+      </div>
+      <p class="list-sub" style="margin-top: 10px;">Sessions</p>
+      <div style="margin-top: 6px; display: grid; gap: 6px;">
+        ${sessionHtml}
+      </div>
+    </div>
+  `;
+};
+
+const renderStats = (state: StorageSchema) => {
+  const analytics = state.analytics;
   statsRangeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.range === currentStatsRange);
   });
@@ -743,6 +960,9 @@ const renderStats = (analytics: Awaited<ReturnType<typeof getState>>["analytics"
   });
   statsThemeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.theme === currentStatsTheme);
+  });
+  statsFocusButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.focusMode === currentFocusView);
   });
   if (statsThemeControl) {
     statsThemeControl.classList.toggle("hidden", currentStatsPanel !== "usage");
@@ -823,52 +1043,7 @@ const renderStats = (analytics: Awaited<ReturnType<typeof getState>>["analytics"
   `;
 
   if (statsStacked) {
-    const rows = keys
-      .map((key) => {
-        const day = analytics.byDay[key];
-        if (!day) {
-          return { key, focus: 0, blocked: 0 };
-        }
-        const blocked = day.blockedMs ?? 0;
-        const total = day.totalMs ?? 0;
-        return { key, blocked, focus: Math.max(0, total - blocked) };
-      })
-      .reverse();
-
-    const todayRows = getRangeKeys("today")
-      .map((key) => {
-        const day = analytics.byDay[key];
-        if (!day) {
-          return { key, focus: 0, blocked: 0 };
-        }
-        const blocked = day.blockedMs ?? 0;
-        const total = day.totalMs ?? 0;
-        return { key, blocked, focus: Math.max(0, total - blocked) };
-      })
-      .reverse();
-    statsStacked.innerHTML = todayRows
-      .map((row) => {
-        const total = row.focus + row.blocked;
-        let focusPct = total ? Math.round((row.focus / total) * 100) : 0;
-        let blockedPct = total ? Math.round((row.blocked / total) * 100) : 0;
-        if (blockedPct > 0 && blockedPct < 4) {
-          blockedPct = 4;
-          focusPct = Math.max(0, 100 - blockedPct);
-        }
-        return `
-          <div class="stacked-row">
-            <div class="row" style="gap: 8px;">
-              <span>${row.key}</span>
-              <span class="list-sub">${formatDuration(total)}</span>
-            </div>
-            <div class="stacked-bars">
-              <div class="focus" style="width: ${focusPct}%;"></div>
-              <div class="blocked" style="width: ${blockedPct}%;"></div>
-            </div>
-          </div>
-        `;
-      })
-      .join("");
+    renderTimeline(state, keys);
   }
 
   if (statsHeatmap) {
@@ -904,6 +1079,9 @@ const renderStats = (analytics: Awaited<ReturnType<typeof getState>>["analytics"
       })
       .join("");
   }
+  renderMetrics(state, keys);
+  renderSessions(state, keys);
+  renderTimeMachine(state);
 };
 
 const renderSchedules = (schedule: Awaited<ReturnType<typeof getState>>["schedule"]) => {
@@ -997,6 +1175,34 @@ const renderOverlayMode = (overlayMode: boolean) => {
   }
 };
 
+const renderConfirmationPrompt = (enabled: boolean) => {
+  if (confirmToggle) {
+    confirmToggle.checked = enabled;
+  }
+};
+
+
+const renderLinks = () => {
+  if (reviewLink) {
+    if (!REVIEW_URL) {
+      reviewLink.removeAttribute("href");
+      reviewLink.setAttribute("aria-disabled", "true");
+      reviewLink.textContent = "Review (coming soon)";
+    } else {
+      reviewLink.href = REVIEW_URL;
+      reviewLink.target = "_blank";
+      reviewLink.rel = "noreferrer";
+      reviewLink.removeAttribute("aria-disabled");
+      reviewLink.textContent = "Review";
+    }
+  }
+  if (versionLabel) {
+    const version = chrome.runtime.getManifest().version;
+    versionLabel.textContent = `Version ${version}`;
+  }
+};
+
+
 // --- Lists rendering (build list UI from storage) ---
 const getListKey = () => {
   if (currentListType === "blocked") {
@@ -1062,9 +1268,13 @@ const renderInterventions = (
     return `
       <div class="intervention-card" data-intervention="${item.key}">
         <div class="intervention-title">${item.label}</div>
-        <label class="toggle small intervention-toggle">
-          <input type="checkbox" data-toggle="${item.key}" ${enabled ? "checked" : ""} />
-          <span></span>
+        <label class="intervention-radio">
+          <input
+            type="radio"
+            name="interventionMode"
+            data-toggle="${item.key}"
+            ${enabled ? "checked" : ""}
+          />
         </label>
       </div>
     `;
@@ -1194,6 +1404,17 @@ const bindEvents = () => {
       return;
     }
     const next = toggleEl.checked;
+    if (!next) {
+      const state = await getState();
+      if (state.confirmationPrompt) {
+        pendingFocusOff = true;
+        if (toggleEl) {
+          toggleEl.checked = true;
+        }
+        openModal("focusOffConfirm");
+        return;
+      }
+    }
     await setState({
       focusEnabled: next,
       pause: { isPaused: false, pauseType: null, pauseEndAt: null }
@@ -1203,6 +1424,11 @@ const bindEvents = () => {
   overlayToggle?.addEventListener("change", async () => {
     await setState({ overlayMode: overlayToggle.checked });
   });
+
+  confirmToggle?.addEventListener("change", async () => {
+    await setState({ confirmationPrompt: confirmToggle.checked });
+  });
+
 
   tempOffButtons.forEach((button) => {
     button.addEventListener("click", async () => {
@@ -1270,7 +1496,8 @@ const bindEvents = () => {
           endsAt,
           cycleIndex: 0,
           paused: false,
-          linkedTaskId: selectedTaskId ?? null
+          linkedTaskId: selectedTaskId ?? null,
+          prevFocusEnabled: currentFocusEnabled
         }
       }
     });
@@ -1441,7 +1668,7 @@ const bindEvents = () => {
     await setState({
       focusEnabled: true,
       pause: { isPaused: false, pauseType: null, pauseEndAt: null },
-      strictSession: { active: true, endsAt, startedAt }
+      strictSession: { active: true, endsAt, startedAt, prevFocusEnabled: currentFocusEnabled }
     });
     closeModal("strictConfirm");
   });
@@ -1607,6 +1834,7 @@ const bindEvents = () => {
     closeModal("schedule");
   });
 
+
   statsList?.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
     const domain = target.closest(".stats-domain");
@@ -1648,6 +1876,19 @@ const bindEvents = () => {
     openModal("domainStats");
   });
 
+  focusOffConfirm?.addEventListener("click", async () => {
+    pendingFocusOff = false;
+    await setState({
+      focusEnabled: false,
+      pause: { isPaused: false, pauseType: null, pauseEndAt: null }
+    });
+    closeModal("focusOffConfirm");
+  });
+
+  focusOffCancel?.addEventListener("click", () => {
+    pendingFocusOff = false;
+  });
+
   statsRangeButtons.forEach((button) => {
     button.addEventListener("click", async () => {
       const range = button.dataset.range as "today" | "week" | "month" | undefined;
@@ -1657,7 +1898,7 @@ const bindEvents = () => {
       currentStatsRange = range;
       await setState({ analytics: { chartRange: range } });
       const state = await getState();
-      renderStats(state.analytics);
+      renderStats(state);
     });
   });
 
@@ -1670,7 +1911,7 @@ const bindEvents = () => {
       currentStatsFilter = filter;
       await setState({ analytics: { chartFilter: filter } });
       const state = await getState();
-      renderStats(state.analytics);
+      renderStats(state);
     });
   });
 
@@ -1702,8 +1943,103 @@ const bindEvents = () => {
       currentStatsTheme = theme;
       await setState({ analytics: { chartThemeId: theme } });
       const state = await getState();
-      renderStats(state.analytics);
+      renderStats(state);
     });
+  });
+
+  statsFocusButtons.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const mode = button.dataset.focusMode as "focus" | "distraction" | undefined;
+      if (!mode) {
+        return;
+      }
+      currentFocusView = mode;
+      const state = await getState();
+      renderStats(state);
+    });
+  });
+
+  timeMachineDays?.addEventListener("click", async (event) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest<HTMLButtonElement>("[data-day]");
+    if (!button) {
+      return;
+    }
+    const dayKey = button.dataset.day ?? "";
+    if (!dayKey) {
+      return;
+    }
+    currentTimeMachineDay = dayKey;
+    const state = await getState();
+    renderTimeMachine(state);
+  });
+
+  const csvEscape = (value: string | number | null | undefined) => {
+    const raw = value === null || value === undefined ? "" : String(value);
+    if (raw.includes(",") || raw.includes("\"") || raw.includes("\n")) {
+      return `"${raw.replace(/\"/g, "\"\"")}"`;
+    }
+    return raw;
+  };
+
+  const downloadCsv = (filename: string, rows: Array<Array<string | number | null | undefined>>) => {
+    const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  exportSessionsCsv?.addEventListener("click", async () => {
+    const state = await getState();
+    const keys = getRangeKeys(currentStatsRange);
+    const keySet = new Set(keys);
+    const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item.title]));
+    const rows: Array<Array<string | number | null | undefined>> = [
+      ["id", "type", "startedAt", "endedAt", "durationMin", "task", "focusEnabledDuring", "distractions"]
+    ];
+    state.analytics.sessions
+      .filter((session) => keySet.has(getDayKey(new Date(session.startedAt))))
+      .forEach((session) => {
+        const durationMin = Math.round(
+          Math.max(0, session.endedAt - session.startedAt) / 60000
+        );
+        rows.push([
+          session.id,
+          session.type,
+          new Date(session.startedAt).toISOString(),
+          new Date(session.endedAt).toISOString(),
+          durationMin,
+          session.taskId ? taskLookup.get(session.taskId) ?? "" : "",
+          session.focusEnabledDuring ? "true" : "false",
+          session.distractions
+        ]);
+      });
+    downloadCsv(`focusboss-sessions-${currentStatsRange}.csv`, rows);
+  });
+
+  exportUsageCsv?.addEventListener("click", async () => {
+    const state = await getState();
+    const keys = getRangeKeys(currentStatsRange);
+    const rows: Array<Array<string | number | null | undefined>> = [
+      ["day", "domain", "totalMs", "blockedMs"]
+    ];
+    keys.forEach((key) => {
+      const day = state.analytics.byDay[key];
+      if (!day) {
+        return;
+      }
+      const blockedByDomain = day.byDomainBlocked ?? {};
+      Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
+        rows.push([key, host, value, blockedByDomain[host] ?? 0]);
+      });
+    });
+    downloadCsv(`focusboss-usage-${currentStatsRange}.csv`, rows);
   });
 
   interventionList?.addEventListener("change", async (event) => {
@@ -1712,7 +2048,10 @@ const bindEvents = () => {
     if (!key) {
       return;
     }
-    await setState({ interventions: { enabled: { [key]: target.checked } } });
+    const enabled = Object.fromEntries(
+      INTERVENTION_DEFS.map((item) => [item.key, item.key === key])
+    ) as StorageSchema["interventions"]["enabled"];
+    await setState({ interventions: { enabled } });
   });
 
   interventionList?.addEventListener("click", async (event) => {
@@ -1743,6 +2082,9 @@ const bindEvents = () => {
       const modal = target.closest(".modal");
       const modalId = modal?.getAttribute("data-modal");
       if (modalId) {
+        if (modalId === "focusOffConfirm") {
+          pendingFocusOff = false;
+        }
         closeModal(modalId);
       }
     }
@@ -1753,6 +2095,9 @@ const bindEvents = () => {
       const modal = document.querySelector(".modal:not(.hidden)");
       const modalId = modal?.getAttribute("data-modal");
       if (modalId) {
+        if (modalId === "focusOffConfirm") {
+          pendingFocusOff = false;
+        }
         closeModal(modalId);
       }
     }
@@ -1798,34 +2143,40 @@ const bindEvents = () => {
   });
 };
 
+const syncUiFromState = (state: Awaited<ReturnType<typeof getState>>) => {
+  renderFocus(
+    state.focusEnabled,
+    state.pause.isPaused,
+    state.pause.pauseType,
+    state.pause.pauseEndAt,
+    state.strictSession.active,
+    state.strictSession.endsAt ?? null,
+    state.pomodoro
+  );
+  renderTheme(state.ui.theme);
+  renderOverlayMode(state.overlayMode);
+  renderConfirmationPrompt(state.confirmationPrompt);
+  currentStatsRange = state.analytics.chartRange;
+  currentStatsFilter = state.analytics.chartFilter;
+  currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
+  renderStrictSession(state.strictSession);
+  renderStrictOverlay(state.strictSession);
+  renderPomodoro(state.pomodoro, state.strictSession.active);
+  renderTasks(state.tasks, state.pomodoro);
+  renderLists(state.lists);
+  renderInterventions(state.interventions);
+  renderStats(state);
+  renderSchedules(state.schedule);
+};
+
 // --- Bootstrap (initial load + subscriptions) ---
 const bootstrap = async () => {
   bindEvents();
   const state = await getState();
   try {
-    renderFocus(
-      state.focusEnabled,
-      state.pause.isPaused,
-      state.pause.pauseType,
-      state.pause.pauseEndAt,
-      state.strictSession.active,
-      state.strictSession.endsAt ?? null,
-      state.pomodoro
-    );
-    renderTheme(state.ui.theme);
-    renderOverlayMode(state.overlayMode);
-    currentStatsRange = state.analytics.chartRange;
-    currentStatsFilter = state.analytics.chartFilter;
-    currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
-    renderStrictSession(state.strictSession);
-    renderStrictOverlay(state.strictSession);
-    renderPomodoro(state.pomodoro, state.strictSession.active);
-    renderTasks(state.tasks, state.pomodoro);
+    syncUiFromState(state);
+    renderLinks();
     setActiveView("home");
-    renderLists(state.lists);
-    renderInterventions(state.interventions);
-    renderStats(state.analytics);
-    renderSchedules(state.schedule);
   } catch (error) {
     reportUiError(error);
   }
@@ -1846,26 +2197,7 @@ const bootstrap = async () => {
   }, 1000);
 
   subscribeState((nextState) => {
-    renderFocus(
-      nextState.focusEnabled,
-      nextState.pause.isPaused,
-      nextState.pause.pauseType,
-      nextState.pause.pauseEndAt,
-      nextState.strictSession.active,
-      nextState.strictSession.endsAt ?? null,
-      nextState.pomodoro
-    );
-    renderStrictSession(nextState.strictSession);
-    renderStrictOverlay(nextState.strictSession);
-    renderLists(nextState.lists);
-    renderInterventions(nextState.interventions);
-    renderTheme(nextState.ui.theme);
-    renderOverlayMode(nextState.overlayMode);
-    currentStatsTheme = normalizeThemeId(nextState.analytics.chartThemeId);
-    renderStats(nextState.analytics);
-    renderSchedules(nextState.schedule);
-    renderPomodoro(nextState.pomodoro, nextState.strictSession.active);
-    renderTasks(nextState.tasks, nextState.pomodoro);
+    syncUiFromState(nextState);
   });
 
   watchSystemTheme(() => {
