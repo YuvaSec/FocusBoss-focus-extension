@@ -126,11 +126,42 @@ const migrateState = (existing: unknown): StorageResult => {
     }
   }
 
+  let tasksNeedDefaults = false;
+  if (Array.isArray(migratedState.tasks?.items)) {
+    const fallbackWork = migratedState.pomodoro.workMin;
+    const fallbackBreak = migratedState.pomodoro.breakMin;
+    const fallbackCycles = migratedState.pomodoro.cycles;
+    const items = migratedState.tasks.items.map((item) => {
+      const next = { ...item };
+      if (typeof item.color !== "string") {
+        next.color = "#9cff3a";
+        tasksNeedDefaults = true;
+      }
+      if (typeof item.pomodoroWorkMin !== "number") {
+        next.pomodoroWorkMin = fallbackWork;
+        tasksNeedDefaults = true;
+      }
+      if (typeof item.pomodoroBreakMin !== "number") {
+        next.pomodoroBreakMin = fallbackBreak;
+        tasksNeedDefaults = true;
+      }
+      if (typeof item.pomodoroCycles !== "number") {
+        next.pomodoroCycles = fallbackCycles;
+        tasksNeedDefaults = true;
+      }
+      return next;
+    });
+    if (tasksNeedDefaults) {
+      migratedState = { ...migratedState, tasks: { ...migratedState.tasks, items } };
+    }
+  }
+
   const needsWrite =
     !isPlainObject(existing) ||
     schemaVersion !== SCHEMA_VERSION ||
     hasMissingKeys(defaultState, existing) ||
-    hasLegacyPause;
+    hasLegacyPause ||
+    tasksNeedDefaults;
 
   return {
     state: { ...migratedState, schemaVersion: SCHEMA_VERSION },

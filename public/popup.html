@@ -40,6 +40,27 @@
               <button class="chip" data-temp-off="manual">Manual</button>
             </div>
           </div>
+          <div class="intervention-disclosure" data-intervention-disclosure style="margin-top: 16px;">
+            <button
+              id="interventionToggle"
+              class="intervention-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="interventionPanel"
+            >
+              <span>
+                <h2>Friction Modes</h2>
+                <p class="list-sub">Pick how FocusBoss increases friction.</p>
+              </span>
+              <span id="interventionCurrent" class="intervention-current">None</span>
+              <span class="intervention-chevron" aria-hidden="true">
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"> <path d="M8 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /> </svg>
+              </span>
+            </button>
+            <div id="interventionPanel" class="intervention-panel" aria-hidden="true">
+              <div id="interventionList" class="intervention-grid"></div>
+            </div>
+          </div>
         </section>
 
         <section class="view" data-view="home">
@@ -66,11 +87,6 @@
                 <button class="chip" data-strict-min="300">5h</button>
               </div>
             </div>
-          </div>
-          <div class="card" style="margin-top: 12px;">
-            <h2>Friction Modes</h2>
-            <p class="list-sub">Pick how FocusBoss increases friction.</p>
-            <div id="interventionList" class="intervention-grid" style="margin-top: 10px;"></div>
           </div>
         </section>
 
@@ -114,7 +130,11 @@
             <div class="pomodoro-header">
               <div class="pomodoro-title">
                 <h3>Pomodoro</h3>
-                <p id="pomodoroStatus" class="list-sub">Ready.</p>
+                <div class="pomodoro-status-row">
+                  <div class="pomodoro-status-stack">
+                    <span id="pomodoroTaskPill" class="timer-pill pomodoro-task-pill">Default</span>
+                  </div>
+                </div>
               </div>
               <div class="pomodoro-controls">
                 <button id="pomodoroPause" class="pomodoro-icon-btn pomodoro-control secondary" type="button" aria-label="Pause">
@@ -143,199 +163,223 @@
               </svg>
               <div class="neo-timer-time">
                 <span id="pomodoroTimerValue" class="neo-timer-value">00:00</span>
-                <span class="neo-timer-label">remaining time</span>
+                <div class="neo-timer-meta">
+                  <span id="pomodoroPhasePill" class="timer-pill hidden">Focus</span>
+                  <span id="pomodoroCyclePill" class="timer-pill hidden">1|1</span>
+                </div>
               </div>
             </div>
-            <div class="row" style="margin-top: 12px;">
-              <div>
-                <p class="list-sub">Linked task</p>
-                <p id="pomodoroTaskHint" class="list-sub">Optional: link a task before starting.</p>
+            <div class="pomodoro-config-row" style="margin-top: 12px;">
+              <div class="pomodoro-config-col">
+                <span class="pomodoro-config-label">Focus</span>
+                <span id="pomodoroFocusValue" class="pomodoro-config-value">25m</span>
               </div>
-              <select id="pomodoroTaskSelect" class="text-input" style="max-width: 180px;"></select>
-            </div>
-            <div class="pomodoro-fields" style="margin-top: 12px;">
-              <div style="flex: 1;">
-                <label class="list-sub">Work</label>
-                <input id="pomodoroWork" class="text-input" type="number" min="1" max="120" />
+              <div class="pomodoro-config-col">
+                <span class="pomodoro-config-label">Break</span>
+                <span id="pomodoroBreakValue" class="pomodoro-config-value">5m</span>
               </div>
-              <div style="flex: 1;">
-                <label class="list-sub">Break</label>
-                <input id="pomodoroBreak" class="text-input" type="number" min="1" max="60" />
-              </div>
-              <div style="flex: 1;">
-                <label class="list-sub">Cycles</label>
-                <input id="pomodoroCycles" class="text-input" type="number" min="1" max="12" />
+              <div class="pomodoro-config-col">
+                <span class="pomodoro-config-label">Cycles</span>
+                <span id="pomodoroCycleValue" class="pomodoro-config-value">Endless</span>
               </div>
             </div>
-            <div class="row" style="margin-top: 12px;">
-              <div>
+            <div class="pomodoro-toggle-grid" style="margin-top: 12px;">
+              <div class="pomodoro-toggle">
                 <p class="list-sub">Auto-block during work</p>
+                <label class="toggle small">
+                  <input id="pomodoroAutoBlock" type="checkbox" />
+                  <span></span>
+                </label>
               </div>
-              <label class="toggle small">
-                <input id="pomodoroAutoBlock" type="checkbox" />
-                <span></span>
-              </label>
-            </div>
-            <div class="row" style="margin-top: 10px;">
-              <div>
+              <div class="pomodoro-toggle">
                 <p class="list-sub">Block during break</p>
+                <label class="toggle small">
+                  <input id="pomodoroBlockBreak" type="checkbox" />
+                  <span></span>
+                </label>
               </div>
-              <label class="toggle small">
-                <input id="pomodoroBlockBreak" type="checkbox" />
-                <span></span>
-              </label>
             </div>
           </div>
 
-          <div class="card" style="margin-top: 12px;">
-            <div class="row">
-              <div>
-                <h3>Tasks</h3>
-                <p id="taskSubtitle" class="list-sub">Up to 3 active tasks.</p>
-              </div>
+          <div class="card tasks-card" style="margin-top: 12px;">
+            <div class="row tasks-header">
+              <h3>Tasks</h3>
+              <button id="taskAdd" class="task-add" type="button" aria-label="Add task">
+                Add Task
+              </button>
             </div>
-            <div class="task-form" style="margin-top: 12px;">
-              <input
-                id="taskTitle"
-                class="text-input"
-                type="text"
-                placeholder="Add a task to focus on"
-              />
-              <div class="task-estimate" style="margin-top: 10px;">
-                <label class="list-sub">Estimate</label>
-                <div class="task-range">
-                  <input id="taskEstimate" type="range" min="15" max="180" step="5" value="30" />
-                  <span id="taskEstimateValue" class="chip">30m</span>
+            <div id="taskActiveRow" class="task-active-card">
+              <div class="task-active-header">
+                <div class="task-active-title">
+                  <span class="task-active-label">Selected task</span>
+                  <span class="task-color-dot" id="taskActiveDot" aria-hidden="true"></span>
+                  <span id="taskNameDisplay" class="task-active-name">Default</span>
+                </div>
+                <div class="task-controls">
+                  <span class="task-pill"><span class="is-active">Active</span></span>
+                  <button id="taskActiveSettings" class="task-gear hidden" type="button" aria-label="Open settings">
+                    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                      <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-              <button id="taskAdd" class="btn btn-small" type="button">Add task</button>
+              <p id="taskActiveDetail" class="task-desc">25m focus · 5m break · Endless</p>
             </div>
-            <div id="taskEmpty" class="task-empty list-sub" style="margin-top: 12px;">
-              No tasks yet. Add your first task above.
-            </div>
-            <div id="taskList" class="list-items" style="margin-top: 12px;"></div>
+            <div id="taskQuickGrid" class="task-quick-grid" style="margin-top: 12px;"></div>
+            <button id="taskShowAll" class="btn btn-large task-show-all" type="button">Show all</button>
           </div>
 
         </section>
 
         <section class="view hidden" data-view="stats">
-          <div class="card">
-            <div class="segmented" id="statsRange">
-              <button data-range="today">Today</button>
-              <button data-range="week">Week</button>
-              <button data-range="month">Month</button>
-            </div>
-            <div class="segmented" id="statsFilter" style="margin-top: 10px;">
-              <button data-filter="all">All</button>
-              <button data-filter="blocked">Blocked</button>
-              <button disabled style="opacity: 0;">.</button>
-            </div>
-          </div>
+          <div class="stats-stack">
+            <div id="statsSummaryView" class="stats-subview active">
+              <div class="stats-summary-header">
+                <div>
+                  <h2>Summary</h2>
+                  <p id="statsSummaryDate" class="list-sub">Today</p>
+                </div>
+              </div>
 
-          <div class="card" style="margin-top: 12px;">
-            <h3>Overview</h3>
-            <div class="metric-grid" style="margin-top: 10px;">
-              <div class="metric-card">
-                <p class="list-sub">Focus time</p>
-                <div id="metricFocus" class="metric-value">0m</div>
+              <div class="stats-summary-controls">
+                <div class="segmented" id="statsRange">
+                  <button data-range="today">Today</button>
+                  <button data-range="week">Week</button>
+                  <button data-range="month">Month</button>
+                </div>
+                <div class="segmented" id="statsFilter">
+                  <button data-filter="all">All</button>
+                  <button data-filter="blocked">Blocked</button>
+                  <button disabled style="opacity: 0;">.</button>
+                </div>
               </div>
-              <div class="metric-card">
-                <p class="list-sub">Break time (est.)</p>
-                <div id="metricBreak" class="metric-value">0m</div>
-              </div>
-              <div class="metric-card">
-                <p class="list-sub">Tasks completed</p>
-                <div id="metricTasks" class="metric-value">0</div>
-              </div>
-              <div class="metric-card">
-                <p class="list-sub">Distraction time</p>
-                <div id="metricDistraction" class="metric-value">0m</div>
-              </div>
-            </div>
-          </div>
 
-          <div class="card" style="margin-top: 12px;">
-            <div class="row stats-tabs-row" style="gap: 10px; align-items: center;">
-              <div class="segmented two" id="statsCardTabs">
-                <button class="active" data-stats-panel="usage">Usage breakdown</button>
-                <button data-stats-panel="domains">Top domains</button>
-              </div>
-              <div class="segmented four" id="statsTheme">
-                <button data-theme="default">Default</button>
-                <button data-theme="citrus">Citrus</button>
-                <button data-theme="ocean">Ocean</button>
-                <button data-theme="warm">Warm</button>
-              </div>
-            </div>
-            <div class="stats-panel active" data-panel="usage">
-<!--              <p class="list-sub" style="margin-top: 6px;">Top domains share.</p>-->
-              <div class="donut-wrap" style="margin-top: 12px;">
-                <div id="statsDonut" class="donut">
-                  <div class="donut-svg"></div>
-                  <div class="donut-center">
-                    <div id="statsTotalValue" class="donut-total-value">0m</div>
+              <div class="card stats-hero-card" style="margin-top: 12px;">
+                <div class="stats-hero-grid">
+                  <div class="metric-card">
+                    <p class="list-sub">Focus time</p>
+                    <div id="metricFocus" class="metric-value">0m</div>
+                  </div>
+                  <div class="metric-card">
+                    <p class="list-sub">Break time (est.)</p>
+                    <div id="metricBreak" class="metric-value">0m</div>
+                  </div>
+                  <div class="metric-card">
+                    <p class="list-sub">Tasks completed</p>
+                    <div id="metricTasks" class="metric-value">0</div>
+                  </div>
+                  <div class="metric-card">
+                    <p class="list-sub">Distraction time</p>
+                    <div id="metricDistraction" class="metric-value">0m</div>
                   </div>
                 </div>
-                <div id="statsLegend" class="legend-list"></div>
+              </div>
+
+              <div class="card stats-trend-card" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
+                <div class="row" style="justify-content: space-between; gap: 10px;">
+                  <h3>Focus Trend</h3>
+                </div>
+                <div class="stats-split stats-trend-split">
+                  <div>
+                    <p class="list-sub">Today's Focus</p>
+                    <div id="statsSummaryToday" class="metric-value">0m</div>
+                    <p id="statsSummaryTodayChange" class="list-sub">0% vs yesterday</p>
+                  </div>
+                  <div>
+                    <p class="list-sub">This Week</p>
+                    <div id="statsSummaryWeek" class="metric-value">0m</div>
+                    <p id="statsSummaryWeekChange" class="list-sub">0% vs last week</p>
+                  </div>
+                </div>
+                <div class="stats-summary-avg">
+                  <p class="list-sub">Daily Avg</p>
+                  <div id="statsSummaryAvg" class="metric-value">0m</div>
+                </div>
+                <div id="statsSummaryChart" style="min-height: 180px;"></div>
+              </div>
+
+              <div class="card" style="margin-top: 12px;">
+                <div class="row">
+                  <h3>Tasks</h3>
+                  <button id="statsShowAll" class="btn btn-small">Show All</button>
+                </div>
+                <div id="statsSummaryTasks" class="stats-task-grid" style="margin-top: 10px;"></div>
               </div>
             </div>
-            <div class="stats-panel" data-panel="domains">
-              <p class="list-sub" style="margin-top: 6px;">Most visited sites.</p>
-              <div id="statsList" class="list-items" style="margin-top: 10px;"></div>
-            </div>
-          </div>
 
-          <div class="card" style="margin-top: 12px; overflow: hidden;">
-            <div class="row" style="justify-content: space-between; gap: 10px;">
-              <h3>Focus timeline</h3>
-              <div class="segmented two" id="statsFocusToggle">
-                <button class="active" data-focus-mode="focus">Focus</button>
-                <button data-focus-mode="distraction">Distraction</button>
+            <div id="statsTrendView" class="stats-subview">
+              <div class="stats-topbar">
+                <button id="statsBack" class="icon-btn icon-only" type="button" aria-label="Back">←</button>
+                <div class="stats-range-pill">
+                  <button id="statsDatePrev" type="button" aria-label="Previous">‹</button>
+                  <span id="statsDateLabel">Today</span>
+                  <button id="statsDateNext" type="button" aria-label="Next">›</button>
+                </div>
+              </div>
+              <h2 class="stats-title">Focus Trend</h2>
+              <p id="statsDateRange" class="list-sub">Jan 1 - Jan 7</p>
+              <div class="segmented four stats-range-toggle" id="statsTrendRange">
+                <button data-range="day">D</button>
+                <button data-range="week" class="active">W</button>
+                <button data-range="month">M</button>
+                <button data-range="year">Y</button>
+              </div>
+              <div class="card" style="margin-top: 12px;">
+                <div class="stats-split">
+                  <div>
+                    <p class="list-sub">This period</p>
+                    <div id="statsTrendTotal" class="metric-value">0h 0m</div>
+                    <p id="statsTrendChange" class="list-sub">0% vs last</p>
+                  </div>
+                  <div>
+                    <p class="list-sub">Daily avg</p>
+                    <div id="statsTrendAvg" class="metric-value">0h 0m</div>
+                    <p id="statsTrendAvgChange" class="list-sub">0% vs last</p>
+                  </div>
+                </div>
+                <div id="statsTrendChart" style="min-height: 220px;"></div>
+              </div>
+              <div class="card" style="margin-top: 12px;">
+                <div class="row">
+                  <h3>Tasks</h3>
+                </div>
+                <div id="statsTrendTasks" class="list-items" style="margin-top: 10px;"></div>
               </div>
             </div>
-            <div class="row" style="margin-top: 6px; gap: 10px;">
-              <span class="legend"><span class="dot focus"></span>Focus</span>
-              <span class="legend"><span class="dot blocked"></span>Distraction</span>
-            </div>
-            <div id="statsStacked" style="margin-top: 12px;"></div>
-          </div>
 
-          <div class="card" style="margin-top: 12px;">
-            <h3>Hour Heatmap</h3>
-            <div id="statsHeatmap" class="heatmap" style="margin-top: 12px;"></div>
-          </div>
-
-          <div class="card" style="margin-top: 12px;">
-            <div class="row">
-              <div>
-                <h3>Session history</h3>
-                <p class="list-sub">Recent focus sessions.</p>
+            <div id="statsTaskView" class="stats-subview">
+              <div class="stats-topbar">
+                <button id="statsTaskBack" class="icon-btn icon-only" type="button" aria-label="Back">←</button>
+                <div class="stats-range-pill">
+                  <button id="statsTaskDatePrev" type="button" aria-label="Previous">‹</button>
+                  <span id="statsTaskDateLabel">Today</span>
+                  <button id="statsTaskDateNext" type="button" aria-label="Next">›</button>
+                </div>
               </div>
-            </div>
-            <div id="statsSessions" class="list-items" style="margin-top: 10px;"></div>
-          </div>
-
-          <div class="card" style="margin-top: 12px;">
-            <div class="row">
-              <div>
-                <h3>Time Machine</h3>
-                <p class="list-sub">Pick a day for details.</p>
+              <h2 id="statsTaskTitle" class="stats-title">Task</h2>
+              <p id="statsTaskRange" class="list-sub">Jan 1 - Jan 7</p>
+              <div class="segmented four stats-range-toggle" id="statsTaskRangeToggle">
+                <button data-range="day">D</button>
+                <button data-range="week" class="active">W</button>
+                <button data-range="month">M</button>
+                <button data-range="year">Y</button>
               </div>
-            </div>
-            <div id="timeMachineDays" class="chip-row" style="margin-top: 10px;"></div>
-            <div id="timeMachineDetails" style="margin-top: 12px;"></div>
-          </div>
-
-          <div class="card" style="margin-top: 12px;">
-            <div class="row">
-              <div>
-                <h3>Export</h3>
-                <p class="list-sub">Download your data as CSV.</p>
+              <div class="card" style="margin-top: 12px;">
+                <div class="stats-split">
+                  <div>
+                    <p class="list-sub">This period</p>
+                    <div id="statsTaskTotal" class="metric-value">0h 0m</div>
+                    <p id="statsTaskChange" class="list-sub">0% vs last</p>
+                  </div>
+                  <div>
+                    <p class="list-sub">Daily avg</p>
+                    <div id="statsTaskAvg" class="metric-value">0h 0m</div>
+                    <p id="statsTaskAvgChange" class="list-sub">0% vs last</p>
+                  </div>
+                </div>
+                <div id="statsTaskChart" style="min-height: 220px;"></div>
               </div>
-            </div>
-            <div class="row" style="margin-top: 10px; gap: 8px; flex-wrap: wrap;">
-              <button id="exportSessionsCsv" class="btn btn-small">Sessions CSV</button>
-              <button id="exportUsageCsv" class="btn btn-small">Web usage CSV</button>
             </div>
           </div>
         </section>
@@ -509,6 +553,99 @@
         </div>
         <div class="modal-actions" style="margin-top: 14px;">
           <button id="interventionSave" class="btn btn-large btn-success">Save</button>
+          <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="taskModal" class="modal hidden" data-modal="task" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <button id="taskDelete" class="task-delete-btn hidden" type="button" aria-label="Delete task">
+          <svg class="task-delete-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 6h18" />
+            <path d="M8 6V4h8v2" />
+            <path d="M6 6l1 14h10l1-14" />
+            <path d="M10 11v6" />
+            <path d="M14 11v6" />
+          </svg>
+        </button>
+        <div>
+          <h3 id="taskModalTitle">Task</h3>
+          <p class="list-sub">Define the pomodoro timing for this task.</p>
+        </div>
+        <div class="task-details" style="margin-top: 10px;">
+          <div class="task-section">
+            <div class="task-section-title">Name</div>
+            <input id="taskName" class="text-input" placeholder="e.g., Study" />
+          </div>
+          <div class="task-config-row">
+            <div class="task-config">
+              <div class="task-section-title">Focus</div>
+              <input id="taskWork" class="text-input" type="number" min="1" max="120" />
+            </div>
+            <div class="task-config">
+              <div class="task-section-title">Break</div>
+              <input id="taskBreak" class="text-input" type="number" min="1" max="60" />
+            </div>
+            <div class="task-config">
+              <div class="task-section-title">Cycles</div>
+              <input id="taskCycles" class="text-input" type="number" min="1" max="12" />
+            </div>
+          </div>
+          <div class="task-cycle-row">
+            <div class="task-color-picker">
+              <span class="list-sub">Color</span>
+              <input id="taskColor" type="color" value="#9cff3a" aria-label="Task color" />
+            </div>
+            <label class="toggle small">
+              <input id="taskEndless" type="checkbox" />
+              <span></span>
+            </label>
+            <span class="list-sub">Endless</span>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button id="taskSave" class="btn btn-large btn-success">Save</button>
+          <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="taskDeleteModal" class="modal hidden" data-modal="taskDeleteConfirm" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div>
+          <h3>Delete task?</h3>
+          <p class="list-sub">This removes the task and its pomodoro settings.</p>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button id="taskDeleteConfirm" class="btn btn-large btn-danger">Delete</button>
+          <button id="taskDeleteCancel" class="btn btn-large btn-success" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="taskPickerModal" class="modal hidden" data-modal="taskPicker" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="row" style="justify-content: space-between; align-items: center;">
+          <h3>All tasks</h3>
+          <button class="icon-btn icon-only" type="button" data-close-modal="true" aria-label="Close">X</button>
+        </div>
+        <div id="taskAllGrid" class="task-modal-grid" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <div id="taskSelectModal" class="modal hidden" data-modal="taskSelectConfirm" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div>
+          <h3>Set active task?</h3>
+          <p id="taskSelectLabel" class="list-sub">Default</p>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button id="taskSelectConfirm" class="btn btn-large btn-success">Set active</button>
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
         </div>
       </div>

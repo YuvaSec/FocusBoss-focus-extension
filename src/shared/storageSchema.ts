@@ -87,6 +87,10 @@ export type StorageSchema = {
     items: Array<{
       id: string;
       title: string;
+      color: string;
+      pomodoroWorkMin: number;
+      pomodoroBreakMin: number;
+      pomodoroCycles: number;
       estimateMin: number;
       createdAt: number;
       doneAt?: number;

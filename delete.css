@@ -1,0 +1,708 @@
+/* ====================================================================================================
+      1) Fonts: which typefaces are loaded and used across the UI
+   ====================================================================================================*/
+@font-face {font-family: "Poppins";  src: url("fonts/poppins-400.woff2") format("woff2"); font-weight: 400;  font-style: normal;  font-display: swap;}
+@font-face {font-family: "Poppins";  src: url("fonts/poppins-600.woff2") format("woff2");  font-weight: 600;  font-style: normal;  font-display: swap;}
+
+/* ====================================================================================================
+      2) Theme tokens: reusable colors, spacing, radii, and font sizes, These variables are referenced everywhere else in the file.
+   ==================================================================================================== */
+:root {
+    color-scheme: light dark;
+
+    --r-card: 16px;
+    --r-control: 12px;
+    --r-segment: 50px;
+    --r-chip: 999px;
+    --space-1: 6px;
+    --space-2: 10px;
+    --space-3: 16px;
+    --space-4: 20px;
+    --font-title: 18px;
+    --font-body: 13px;
+    --font-small: 11px;
+    --font-ui: "Poppins", Arial, sans-serif;
+
+    --black:rgba(255, 255, 255, 0.02);
+    --black-muted:rgba(255, 255, 255, 0.01);
+    --black-light:rgba(255, 255, 255, 0.08);
+    --black-light-muted:rgba(255, 255, 255, 0.12);
+}
+
+/* ========== THEME (light mode) ========== */
+@layer theme {
+    html[data-theme="light"] {
+        color-scheme: light;
+
+        --red-muted : #ffc9c2;
+        --red: #ff4430;
+        --red-dark : #a82218;
+        --green-muted: #dfffc6;
+        --green: #2ee842;
+        --green-dark: #1a8f24;
+
+        /*/////////ORIGINAL//////////*/
+        /*--fb-bg: #f5f6f7;*/
+        /*--fb-border: rgba(255, 255, 255, 0.10);*/
+
+        /*--fb-surface: #ffffff;*/
+        /*--fb-surface-2: #dde1e7;*/
+        /*!*--fb-surface-2: #eef1f2;*!*/
+
+        /*--fb-text: #1a1d1d;*/
+        /*--fb-text-muted: #5a6263;*/
+        /*--fb-text-muted-light: #a0a7a8;*/
+
+        /*--fb-accent: #ffd84d;*/
+        /*--fb-accent-muted: #e8edf3;*/
+        /*--fb-accent-stale: #a7b4c9;*/
+
+
+        /*/////...COFFEE....////*/
+        /*--fb-bg: #f6f3ef;*/
+
+        /*--fb-surface: #ffffff;*/
+        /*--fb-surface-2: #f0ece6;*/
+        /*--fb-surface-3:linear-gradient(90deg, #f0ece6, #e6e6e6);*/
+        /*--fb-surface-4: linear-gradient(135deg, #f0ece6, #e3e8e4);*/
+        /*--fb-border: rgba(30, 24, 20, 0.07);*/
+
+        /*--fb-text: #1a1714;*/
+        /*--fb-text-muted: #5a544e;*/
+        /*--fb-text-muted-light: #9a928a;*/
+
+        /*--fb-accent: #ffcf4a; !* warm yellow *!*/
+        /*--fb-accent-muted: #ffe7a6; !* warm wash *!*/
+        /*--fb-accent-stale: #b2aaa2;*/
+
+
+        /*////..OLIVE..////*/
+        --fb-bg:#f5f6f2;
+        --fb-border:rgba(27,31,20,.07);
+
+        --fb-surface:#ffffff;
+        --fb-surface-2:#edf0e6;
+
+        --fb-text:#141a10;
+        --fb-text-muted:#4f5a46;
+        --fb-text-muted-light:#95a08c;
+
+        --fb-accent:#84cc16;
+        --fb-accent-muted:#e7f7cc;
+        --fb-accent-stale:#a3b19a;
+
+
+        --fb-status-on: #7fffa0;
+        --fb-status-on-bs: inset 3px 3px 6px #54a86a, inset -3px -3px 6px #aaffd6;
+        --fb-status-off: var(--fb-bg);
+        --fb-status-off-bs:inset 3px 3px 6px #a2a09e, inset -3px -3px 6px #ffffff;
+        --fb-status-paused: #ffc77f;
+        --fb-status-paused-bs: inset 3px 3px 6px #a88354, inset -3px -3px 6px #ffffaa;
+        --fb-status-pomodoro: #ff8080;
+        --fb-status-pomodoro-bs:    inset 3px 3px 6px #a85454, inset -3px -3px 6px #ffacac;
+        --fb-status-strict: #7fbdff;
+        --fb-status-strict-bs: inset 3px 3px 6px #547da8, inset -3px -3px 6px #aafdff;
+
+
+        --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .12), -8px -8px 16px rgba(255, 255, 255, .9);
+        --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .10), -4px -4px 8px rgba(255, 255, 255, .9);
+        --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .08), inset -4px -4px 8px rgba(255, 255, 255, .9);
+        --fb-neo-lg: inset 1px 1px 1px rgba(255, 255, 255, 1), -2px -2px 2px rgba(255, 255, 255, 0.9), -4px -4px 6px rgba(255, 255, 255, 0.9), -8px -8px 16px rgba(255, 255, 255, 0.9), -12px -12px 24px rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.06), 2px 2px 2px rgba(0, 0, 0, 0.08), 4px 4px 6px rgba(0, 0, 0, 0.08), 8px 8px 16px rgba(0, 0, 0, 0.08), 12px 12px 24px rgba(0, 0, 0, 0.08);
+        --fb-neo-sm: inset 1px 1px 1px rgba(0, 0, 0, 0.04), -1px -1px 2px rgba(0, 0, 0, 0.06), -2px -2px 4px rgba(0, 0, 0, 0.06), inset -1px -1px 1px rgba(255, 255, 255, 0.6), 1px 1px 2px rgba(255, 255, 255, 0.7), 2px 2px 4px rgba(255, 255, 255, 0.7);
+        --fb-neo-inset: /* tiny inner highlights */ inset 1px 1px 1px rgba(255, 255, 255, 0.20), inset -1px -1px 1px rgba(0, 0, 0, 0.03), /* inner border ring */ inset 0 0 0 1px rgba(245, 245, 248, 1), /* soft outer highlights */ inset -1px -1px 1px 1px rgba(255, 255, 255, 0.20), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.18), -1px -1px 2px 0px rgba(255, 255, 255, 0.18), -2px -2px 4px 0px rgba(255, 255, 255, 0.16), /* soft outer shadows */ inset 1px 1px 1px 1px rgba(0, 0, 0, 0.03), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.03), 1px 1px 2px 0px rgba(0, 0, 0, 0.03), 2px 2px 4px 0px rgba(0, 0, 0, 0.03) ;
+        --fb-glass2-inset: inset 1px 1px 0 rgba(0, 0, 0, 0.05), inset -1px -1px 0 rgba(255, 255, 255, 0.65);
+
+        --shadow-card: 0 4px 16px rgba(0, 0, 0, .08);
+
+
+
+        --pomodoro-bg: var(--neo-bg);
+        --pomodoro-foreground: var(--color-text);
+        --pomodoro-muted: var(--neo-bg-alt);
+        --pomodoro-muted-foreground: var(--color-muted);
+        --pomodoro-accent: #9cff3a;
+        --pomodoro-shadow: var(--neo-shadow);
+        --pomodoro-shadow-inset: var(--neo-shadow-inset);
+        --pomodoro-shadow-sm: var(--neo-shadow-sm);
+
+    }
+}
+/* ========== THEME (Dark mode) ========== */
+@layer theme {
+    html:not([data-theme]), html[data-theme="dark"] {
+        color-scheme: dark;
+
+        /*--fb-bg: #0e1111;*/
+        /*--fb-border: rgba(255, 255, 255, .08);*/
+
+        /*--fb-surface: #161a1a;*/
+        /*--fb-surface-2: #1d2222;*/
+
+        /*--fb-text: #f2f4f4;            !* primary text *!*/
+        /*--fb-text-muted: #aeb5b6;      !* secondary text *!*/
+        /*--fb-text-muted-light: #6f7778; !* tertiary / subtle text *!*/
+
+
+        /*--fb-accent: var(--radium-green);*/
+        /*--fb-accent-muted: var(--deep-yellow);*/
+        /*--fb-accent-stale: #9baacf;*/
+
+        /*--fb-status-on: var(--green-light);*/
+        /*--fb-status-off: var(--fb-bg);*/
+        /*--fb-status-paused: #ff9f1c;*/
+        /*--fb-status-strict: #ff9f1c;*/
+        /*--fb-status-pomodoro: #ff9f1c;*/
+        /*--fb-status-error: #ff6464;*/
+
+        --red-muted : #5c3a3a;
+        --red: #ff6754;
+        --red-dark : #a82218;
+
+        --green-muted: #475c3a;
+        --green: #005c0b;
+        --green-dark: #1a8f24;
+
+        --fb-bg: #0f1214;
+        --fb-border: rgba(255,255,255,.06);
+
+        --fb-surface: #14191c;
+        --fb-surface-2: #101518;
+
+        --fb-text: #eef2f3;
+        --fb-text-muted: #aab4b7;
+        --fb-text-muted-light: #778387;
+
+        --fb-accent: #ffd84d;         /* “radium” but not neon */
+        --fb-accent-muted: #2a2f33;   /* subtle neutral wash (keeps it minimalist) */
+        --fb-accent-stale: #8a97a1;
+
+        --fb-status-on: #005029;
+        --fb-status-on-bs: inset 3px 3px 6px #00351b, inset -3px -3px 6px #006b37;
+        --fb-status-off: #0f1214;
+        --fb-status-off-bs: inset 3px 3px 6px #0a0c0d, inset -3px -3px 6px #14181b;
+        --fb-status-paused: #504100;
+        --fb-status-paused-bs: inset 3px 3px 6px #3d3200, inset -3px -3px 6px #7b6500;
+        --fb-status-pomodoro: #590000;
+        --fb-status-pomodoro-bs: inset 3px 3px 6px #3b0000, inset -3px -3px 6px #790000;
+        --fb-status-strict: #002b53;
+        --fb-status-strict-bs: inset 3px 3px 6px #001c37, inset -3px -3px 6px #003a6f;
+
+
+        --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .35), -8px -8px 16px rgba(255, 255, 255, .04);
+        --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .35), inset -4px -4px 8px rgba(255, 255, 255, .05);
+        --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .30), -4px -4px 8px rgba(255, 255, 255, .04);
+        --fb-neo-lg:inset 1px 1px 1px rgba(255, 255, 255, 0.06), -2px -2px 2px rgba(255, 255, 255, 0.08), -4px -4px 6px rgba(255, 255, 255, 0.08), -8px -8px 16px rgba(255, 255, 255, 0.08), -12px -12px 24px rgba(255, 255, 255, 0.08), inset -1px -1px 1px rgba(0, 0, 0, 0.6), 2px 2px 2px rgba(0, 0, 0, 0.7), 4px 4px 6px rgba(0, 0, 0, 0.7), 8px 8px 16px rgba(0, 0, 0, 0.7), 12px 12px 24px rgba(0, 0, 0, 0.7);
+        --fb-neo-sm:inset 1px 1px 1px rgba(255, 255, 255, 0.04), -1px -1px 2px rgba(255, 255, 255, 0.06), -2px -2px 4px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.4), 1px 1px 2px rgba(0, 0, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.5);
+        --fb-neo-inset: /* tiny inner highlights */ inset 1px 1px 1px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.40), /* inner border ring */ inset 0 0 0 1px rgba(20, 20, 24, 1), /* soft outer highlights */ inset -1px -1px 1px 1px rgba(255, 255, 255, 0.06), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.05), -1px -1px 2px 0px rgba(255, 255, 255, 0.05), -2px -2px 4px 0px rgba(255, 255, 255, 0.04), /* soft outer shadows */ inset 1px 1px 1px 1px rgba(0, 0, 0, 0.40), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.38), 1px 1px 2px 0px rgba(0, 0, 0, 0.38), 2px 2px 4px 0px rgba(0, 0, 0, 0.36) ;
+        --fb-glass1-inset:inset 1px 1px 0 rgba(0, 0, 0, 0.68), inset -1px -1px 0 rgba(255, 255, 255, 0.12);
+        --fb-glass2-inset: inset 0  1px 0 rgba(255,255,255,.07), inset 1px 0 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.55), inset -1px 0 0 rgba(0,0,0,.48);
+
+        --shadow-card: 0 4px 16px rgba(0, 0, 0, .20);
+    }
+}
+
+
+/* ====================================================================================================
+      3) Base reset + typography, Normalizes spacing and sets global text defaults.
+   ==================================================================================================== */
+*, *::before, *::after {box-sizing: border-box;}
+html,body {height: 100%;}
+
+body {margin: 0;background: var(--fb-bg);color: var(--fb-text); font-family: var(--font-ui);font-size: var(--font-body);min-width: 400px;min-height: 550px;overflow: hidden;}
+h1, h2, h3 {margin: 0;font-weight: 600;}
+p {margin: 0;color: var(--fb-muted);}
+
+
+
+
+/* ====================================================================================================
+      4) App shell layout: header + main content area Controls overall sizing and scroll behavior.
+   ==================================================================================================== */
+/*Header */
+.app {display: flex; flex-direction: column; height: 100%; min-height: 0; width: 100%; overflow: hidden; position: relative;}
+.app-header {padding: var(--space-3) var(--space-3) 10px var(--space-3); display: flex; align-items: center; justify-content: space-between; background: var(--fb-bg);}
+.app-title {font-size: var(--font-title);}
+.app-main {flex: 1; padding: var(--space-3); display: grid; gap: var(--space-3);overflow-y: auto; align-content: start; justify-items: center;width: 100%; min-height: 0; background: var(--fb-bg); }
+
+/* Popup sizing: cards stretch to full width in the popup view. */
+.app.popup .app-main {justify-items: stretch;}
+.app.popup .card {max-width: 100%;}
+
+/* Scrollbar styling for the main content area. */
+.app-main::-webkit-scrollbar {width: 0;}
+.app-main::-webkit-scrollbar-track {background: transparent;}
+.app-main::-webkit-scrollbar-thumb {background: rgba(120, 120, 120, 0.4);border-radius: 999px;}
+.app-main::-webkit-scrollbar-thumb:hover {background: rgba(120, 120, 120, 0.6);}
+
+
+
+
+/* ====================================================================================================
+   5) Navigation bar + icons, Bottom tab bar layout and active state styling.
+   ==================================================================================================== */
+.app-nav { border-top: var(--fb-border); background: var(--fb-surface-2); padding: var(--space-2); display: grid;grid-template-columns: repeat(5, 1fr); align-items: center; justify-items: center; width: 100%;}
+
+/*Button box*/
+.nav-btn { width: 100%; height: 40px; background: transparent; border: none; color: var(--fb-muted-light); cursor: pointer;display: grid; place-items: center; position: relative; transition: color 200ms ease;}
+
+/* Active tab background pill behind the icon. */
+.nav-btn::before { content: ""; position: absolute; width: 54px; height: 38px; border-radius: 12px; background: var(--fb-accent-muted);border-color:  var(--fb-border); box-shadow: var(--fb-shadow-sm); opacity: 0; transition: opacity 200ms ease; z-index: 0;}
+.nav-btn.active { color: var(--text); }
+.nav-btn.active::before { opacity: 1; }
+
+/* Active tab (indicator line) (aligned to nav border). */
+/*.nav-btn.active::after { content: ""; position: absolute; top: -10px; width: 56px; height: 3px; border-radius: 999px;background: var(--fb-accent); }*/
+
+/* Outline nav icons (shared stroke styling). */
+.nav-icon { width: 24px; height: 24px; display: block; opacity: 0.35; z-index: 1;}
+.nav-icon * { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;}
+.nav-btn.active .nav-icon { opacity: 1; }
+
+
+
+
+
+/* ====================================================================================================
+      6) Status pill styles Visual language for on/off/paused/strict/pomodoro states.
+   ==================================================================================================== */
+.status-row { display: inline-flex; align-items: center; gap: 8px; }
+.status {color: var(--fb-text);border-color: var(--fb-border);}
+.status-pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px;}
+
+/*STATUS PILL*/
+.status[data-status="off"] { background: var(--fb-status-off); box-shadow: var(--fb-shadow-inset);}
+.status[data-status="on"] { background: var(--fb-status-on); box-shadow: var(--fb-status-on-bs);}
+.status[data-status="paused"] { background: var(--fb-status-paused);box-shadow: var(--fb-status-paused-bs);}
+.status[data-status="strict"] { background: var(--fb-status-strict);box-shadow: var(--fb-status-strict-bs);}
+.status[data-status="pomodoro"] { background: var(--fb-status-pomodoro);box-shadow: var(--fb-status-pomodoro-bs);}
+.status[data-status="error"] { background: var(--fb-status-error);box-shadow: var(--fb-status-error-bs);}
+
+
+
+
+/* ====================================================================================================
+      7) Cards and layout helpers, Reusable surfaces and row alignment utilities.
+   ==================================================================================================== */
+.card {background: var(--fb-surface-2);border-radius: var(--r-card);box-shadow:var(--fb-glass2-inset);padding: var(--space-3);max-width: 720px;width: 100%;}
+
+/* Rows: align labels and controls on one line. */
+.row {display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);}
+.row + .row {margin-top: var(--space-2);}
+
+
+
+
+/* ====================================================================================================
+      8) Inputs and form controls, Text fields, selects, toggles, and segmented controls.
+   ==================================================================================================== */
+.text-input { width: 100%; border-radius: var(--r-control); border: 2px double var(--fb-border); outline: none;
+    padding: var(--space-2); background: var(--fb-surface-2); color: var(--color-text); box-shadow: var(--fb-shadow-inset);
+}
+
+/* Toggle: custom switch control. */
+.toggle { display: flex; align-items: center; position: relative; width: 64px; height: 34px;box-shadow: var(--fb-neo-inset);border-radius: var(--r-chip); cursor: pointer;}
+.toggle input {opacity: 0;width: 0;height: 0;} /* Below will Disable native box toggle */
+.toggle span { position: absolute; inset: 0;border-radius: var(--r-chip);border: 0; transition: 0.2s ease; box-shadow: var(--fb-neo-inset);} /*Below is inside the toggle */
+.toggle span::after { content: ""; position: absolute; top: 4px; left: 4px;width: 26px; height: 26px; border-radius: 50%; background: var(--fb-accent-stale); transition: 0.2s ease;} /*Below toggle accent button*/
+.toggle input:checked + span { /*background: #cde6f1;*/ background: var(--fb-accent-stale);border-color: rgba(156, 255, 58, 0.6);}
+.toggle input:checked + span::after { transform: translateX(30px);background: var(--fb-accent); }
+
+/* Compact toggle variant (used in configs). */
+.toggle.small { width: 36px; height: 20px; }
+.toggle.small span::after { width: 12px; height: 12px; top: 4px; left: 4px;}
+.toggle.small input:checked + span::after { transform: translateX(16px); }
+
+/*Segmented control: pill buttons for tabs/filters. */
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: var(--r-segment); /*border-radius: var(--r-chip);*/ border: 0; overflow: hidden; background: var(--fb-surface-2); color: var(--color-text); box-shadow: var(--fb-neo-inset);}
+.segmented.four { grid-template-columns: repeat(4, 1fr); }
+.segmented.two { grid-template-columns: repeat(2, 1fr); }
+.segmented button { border: 0; background: transparent; color: var(--fb-text-muted-light); padding: var(--space-2); cursor: pointer;}
+.segmented button.active { background: var(--fb-accent-muted); color: var(--fb-text); border-radius: var(--r-segment); /*border-radius: var(--r-chip);*/ box-shadow: var(--fb-neo-inset);}
+#entryTypeRow.segmented { grid-template-columns: repeat(2, 1fr); }
+
+
+/* Stats tabs: segmented control layout + animated panels. */
+.stats-tabs-row { flex-wrap: wrap;}
+.stats-tabs-row > * { min-width: 0;}
+.stats-tabs-row .segmented { width: 100%; }
+.segmented.four button { padding: 6px 8px; font-size: 11px;}
+.stats-panel { opacity: 0; transform: translateY(6px); max-height: 0; overflow: hidden; transition: opacity 200ms ease, transform 200ms ease, max-height 200ms ease;}
+.stats-panel.active { opacity: 1; transform: translateY(0);max-height: 480px;}
+
+
+
+
+/* ====================================================================================================
+      9) Chips, Small pill buttons for quick choices (durations, tags).
+   ==================================================================================================== */
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--r-chip); border: 0; background: var(--fb-bg); color: var(--fb-text-muted-light); font-size: 12px; cursor: pointer; /*noinspection CssUnresolvedCustomProperty*/
+    box-shadow: var(--fb-glass2-inset);}
+.chip.active {background: var(--fb-accent-stale); color: var(--fb-text); box-shadow: var(--fb-glass2-inset);}
+.chip[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* Strict mode duration chips: evenly sized grid. */
+#strictDurations { display: grid; grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)); gap: 8px;}
+#strictDurations .chip { justify-content: center; text-align: center;}
+
+
+
+
+
+/* ====================================================================================================
+      10) Buttons, Base button styling, sizes, and semantic variants.
+   ==================================================================================================== */
+.btn {color: var(--fb-text); position: relative; overflow: hidden; border: 0;
+    background: var(--fb-accent-muted); border-radius: var(--r-control); padding: 8px 12px; cursor: pointer;
+    font-size: var(--font-small); min-width: 64px;box-shadow: var(--fb-neo-sm);
+}
+.btn::after {
+    content: ""; position: absolute; top: 0; left: -150%; /* start far left */ width: 50%; height: 100%;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
+    transform: skewX(-20deg);transition: transform 0.6s ease, left 0.6s ease;pointer-events: none;
+}
+.btn:hover {box-shadow: var(--fb-neo-lg); transform: translateY(-1px); background: var(--fb-accent); transition: box-shadow 8000ms ease, transform 500ms ease, background 500ms ease; color: var(--fb-bg)}
+.btn:hover::after {left: 150%; /* sweep across */}
+.btn.btn-small { padding: 8px 14px; min-width: 96px; font-size: 12px;}
+.btn.btn-large { padding: 10px 16px; font-size: 12px; width: 100%; }
+
+/* Primary action button: lightly tinted accent color. */
+.btn.btn-primary {background: rgba(156, 255, 58, 0.2);color: var(--color-text);}
+
+/*Success Button*/
+.btn.btn-success { border-radius: var(--r-segment); color: var(--fb-text); background: var(--green-muted); box-shadow: var(--fb-neo-inset); /*box-shadow: inset 22px 22px 43px rgba(0,0,0,0.1), inset -22px -22px 43px rgba(255,255,255,.1);*/}
+.btn.btn-success:hover { color: var(--fb-bg); background: #35c459; box-shadow: var(--fb-neo-sm);}
+
+/* Danger buttons: used in modals and confirmations. */
+.btn.btn-danger { border-radius: var(--r-segment); color: var(--fb-text); background: var(--red-muted);box-shadow: var(--fb-neo-inset); /*box-shadow: inset 22px 22px 43px rgba(0,0,0,0.1), inset -22px -22px 43px rgba(255,255,255,.1);*/}
+.btn.btn-danger:hover { color: var(--fb-bg); background: red; box-shadow: var(--fb-neo-sm); }
+
+
+
+
+
+
+/* ====================================================================================================
+   12) Lists and list items
+   Used in blocked/allowed lists and schedule entries.
+   ==================================================================================================== */
+.list-items { display: grid; gap: 8px; }
+.list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: var(--r-control);
+    border: 0;
+    background: var(--fb-bg);
+    font-size: var(--font-small);
+    overflow: visible;
+    box-shadow: var(--fb-neo-inset);
+}
+.list-item button { border: 0; background: transparent; color: var(--fb-text-muted-light); cursor: pointer; }
+.list-item button:hover { color: var(--red);}
+.list-item button[data-action="done"]:hover {color: var(--green); /* or whatever you want */ }
+.list-item button[data-action="remove"]:hover { color: var(--red); }
+
+
+
+
+/* ====================================================================================================
+   13) Modal system, Overlay, modal card, and actions layout.
+   ==================================================================================================== */
+.modal { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;}
+.modal-backdrop { position: absolute; inset: 0; background: var(--fb-surface-4);backdrop-filter: blur(56px) saturate(180%);}
+.modal-card { position: relative; width: min(92vw, 420px); border-radius: 24px; padding: 18px; background: var(--fb-surface-2); border: 1px solid var(--fb-bg); box-shadow: var(--fb-neo-inset); z-index: 1; }
+.modal.hidden { display: none; }
+body.modal-open { overflow: hidden; }
+.modal-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.strict-desc { font-size: 14px; color: var(--color-muted); }
+
+
+
+
+/* ====================================================================================================
+   14) Strict session overlay, Fullscreen lock screen shown during strict mode.
+   ==================================================================================================== */
+.strict-overlay { position: absolute; inset: 0; z-index: 5000; background: var(--fb-surface-4);backdrop-filter: blur(56px) saturate(180%); display: grid; place-items: center; padding: 24px; color: var(--strict-overlay-text);}
+.strict-overlay.hidden { display: none; }
+.strict-overlay-content { text-align: left; display: grid; gap: 8px; max-width: 320px; width: 100%; }
+.strict-overlay .list-sub { color: var(--fb-text-muted); } /* Subtext */
+.strict-overlay-close { position: absolute; top: 12px; right: 12px; }
+
+
+
+
+/* ====================================================================================================
+      11) Icon buttons,Small icon-only buttons for actions like close/delete.
+   ==================================================================================================== */
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;border-radius: 999px; border: 0; background: var(--fb-bg); box-shadow: var(--fb-shadow-sm); color: var(--fb-text-muted-light); font-size: 12px; cursor: pointer;}
+.icon-btn:hover { color: var(--fb-text); box-shadow: var(--fb-neo-lg); }
+.icon-btn.icon-only { width: 28px; height: 28px; font-size: 14px; }
+
+
+
+
+
+/* ====================================================================================================
+   15) Tasks, Task list, completion states, and range slider.
+   ==================================================================================================== */
+.task-form { display: grid; gap: 10px; }
+.task-range { display: flex; align-items: center; gap: 8px; }
+.task-range input[type="range"] { flex: 1; accent-color: var(--fb-accent); }
+.task-empty {color: var(--fb-text-muted-light);}
+.task-item { gap: 10px; }
+.task-main { display: grid; gap: 4px; min-width: 0; }
+.task-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task-meta { font-size: 11px; color: var(--fb-text-muted-light);}
+.task-actions { display: inline-flex; align-items: center; gap: 8px; }
+.task-done .task-title { text-decoration: line-through; color: var(--fb-text-muted);}
+
+
+
+
+
+/* ====================================================================================================
+   18) Schedule UI, Day pills, schedule cards, and delete button behavior.
+   ==================================================================================================== */
+.schedule-days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 6px; max-width: 120px; width: 100%;}
+.schedule-item { cursor: pointer; }
+.schedule-meta { display: grid; gap: 6px; min-width: 0;}
+.schedule-title { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;}
+.schedule-actions { display: grid; align-items: center; justify-items: end; gap: 10px; }
+.schedule-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.time-pill { flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; border: 0; background: var(--fb-accent-stale);color: var(--fb-bg); font-size: 10px; white-space: nowrap; box-shadow: var(--fb-neo-sm);}
+.day-pill { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: var(--r-segment); font-size: 10px; border: 0;
+    color: var(--fb-text-muted); background: var(--fb-accent-muted); box-shadow: var(--fb-neo-sm); }
+
+/* Schedule delete button: faint by default, red glow on hover. */
+.schedule-actions .icon-btn[data-delete-schedule] {
+    border-radius: 12px; border: 1px solid rgba(120, 120, 120, 0.4); background: rgba(120, 120, 120, 0.08); color: rgba(200, 200, 200, 0.7); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease;}
+.schedule-actions .icon-btn[data-delete-schedule]:hover {
+    border-color: rgba(255, 90, 90, 0.85); color: rgba(255, 90, 90, 0.9); box-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);}
+
+/*THIS ONE WILL SET THE PROPERTIES FOR SUBTEXT UNDER HEADING.*/
+.list-sub { /*font-size: var(--font-small);*/ color: var(--fb-text-muted);}
+/*THIS IS TITLE OF SCHEDUAL*/
+.list-title { font-size: 14px; color: var(--fb-text);}
+
+
+
+
+/* ====================================================================================================
+   16) Pomodoro, Timer layout and controls.
+   ==================================================================================================== */
+.pomodoro-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.pomodoro-title { min-width: 0; }
+.pomodoro-title h3 { font-size: 1.5em; }
+.pomodoro-controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.pomodoro-control { border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; color: inherit; }
+.pomodoro-control.secondary {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--pomodoro-bg);
+    box-shadow: var(--pomodoro-shadow-sm);
+    /*color: var(--pomodoro-muted-foreground);*/
+}
+
+.pomodoro-control.secondary:hover {
+    color: var(--pomodoro-foreground);
+}
+
+.pomodoro-control.secondary:active {
+    box-shadow: var(--pomodoro-shadow-inset);
+}
+
+.pomodoro-control.primary {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--pomodoro-accent);
+    color: var(--pomodoro-foreground);
+    box-shadow: 0 4px 16px var(--pomodoro-shadow);
+}
+
+.pomodoro-control.primary:hover {
+    transform: scale(1.05);
+}
+
+.pomodoro-control.primary:active {
+    transform: scale(0.95);
+}
+
+.pomodoro-control svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.pomodoro-control.primary svg {
+    width: 24px;
+    height: 24px;
+}
+
+.pomodoro-control[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pomodoro-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+/* =========================
+   17) Neumorphic timer (reusable)
+   Shared circular timer used by Pomodoro and Strict mode.
+   ========================= */
+.neo-timer {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    margin: 0 auto;
+}
+
+.neo-timer-outer {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--neo-timer-bg, var(--neo-bg));
+    box-shadow: var(--neo-timer-shadow, var(--neo-shadow));
+}
+
+.neo-timer-inner {
+    position: absolute;
+    inset: 20px;
+    border-radius: 50%;
+    background: var(--neo-timer-bg, var(--neo-bg));
+    box-shadow: var(--neo-timer-shadow-inset, var(--neo-shadow-inset));
+}
+
+.neo-timer-svg {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+}
+
+.neo-timer-track {
+    fill: none;
+    stroke: var(--neo-timer-muted, var(--neo-bg-alt));
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+
+.neo-timer-progress {
+    fill: none;
+    stroke: var(--neo-timer-accent, var(--color-accent));
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease-out;
+    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
+}
+
+.neo-timer-time {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.neo-timer-value {
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    color: var(--neo-timer-foreground, var(--color-text));
+}
+
+.neo-timer-label {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--neo-timer-muted-foreground, var(--color-muted));
+}
+
+.pomodoro-timer {
+    --neo-timer-bg: var(--pomodoro-bg);
+    --neo-timer-foreground: var(--pomodoro-foreground);
+    --neo-timer-muted: var(--pomodoro-muted);
+    --neo-timer-muted-foreground: var(--pomodoro-muted-foreground);
+    --neo-timer-accent: var(--pomodoro-accent);
+    --neo-timer-shadow: var(--pomodoro-shadow);
+    --neo-timer-shadow-inset: var(--pomodoro-shadow-inset);
+}
+
+.strict-timer {
+    --neo-timer-bg: var(--strict-overlay-bg);
+    --neo-timer-foreground: var(--strict-overlay-text);
+    --neo-timer-muted: var(--strict-ring-track);
+    --neo-timer-muted-foreground: var(--strict-overlay-muted);
+    --neo-timer-accent: var(--strict-ring-progress);
+    --neo-timer-shadow: var(--neo-shadow);
+    --neo-timer-shadow-inset: var(--neo-shadow-inset);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
+   20) Utilities
+   Small helpers used throughout the UI.
+   ========================= */
+.hidden {
+    display: none;
+}
+
+/* =========================
+   22) Responsive adjustments
+   Larger screens: more breathing room for the layout.
+   ========================= */
+@media (min-width: 900px) {
+    .app-main {
+        padding: 28px;
+        gap: 20px;
+    }
+    .card {
+        padding: 22px 24px;
+    }
+    .app-title {
+        font-size: 20px;
+    }
+}

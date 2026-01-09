@@ -50,6 +50,46 @@ const statsPanels = Array.from(
 const statsFocusButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("#statsFocusToggle button")
 );
+const statsSummaryView = document.getElementById("statsSummaryView");
+const statsTrendView = document.getElementById("statsTrendView");
+const statsTaskView = document.getElementById("statsTaskView");
+const statsBack = document.getElementById("statsBack") as HTMLButtonElement | null;
+const statsTaskBack = document.getElementById("statsTaskBack") as HTMLButtonElement | null;
+const statsShowAll = document.getElementById("statsShowAll") as HTMLButtonElement | null;
+const statsTrendCard = document.querySelector<HTMLElement>(".stats-trend-card");
+const statsSummaryTasks = document.getElementById("statsSummaryTasks");
+const statsTrendTasks = document.getElementById("statsTrendTasks");
+const statsTaskTitle = document.getElementById("statsTaskTitle");
+const statsSummaryToday = document.getElementById("statsSummaryToday");
+const statsSummaryTodayChange = document.getElementById("statsSummaryTodayChange");
+const statsSummaryWeek = document.getElementById("statsSummaryWeek");
+const statsSummaryWeekChange = document.getElementById("statsSummaryWeekChange");
+const statsSummaryAvg = document.getElementById("statsSummaryAvg");
+const statsSummaryChart = document.getElementById("statsSummaryChart");
+const statsDateLabel = document.getElementById("statsDateLabel");
+const statsDatePrev = document.getElementById("statsDatePrev") as HTMLButtonElement | null;
+const statsDateNext = document.getElementById("statsDateNext") as HTMLButtonElement | null;
+const statsDateRange = document.getElementById("statsDateRange");
+const statsTrendRangeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsTrendRange button")
+);
+const statsTrendChart = document.getElementById("statsTrendChart");
+const statsTaskDateLabel = document.getElementById("statsTaskDateLabel");
+const statsTaskDatePrev = document.getElementById("statsTaskDatePrev") as HTMLButtonElement | null;
+const statsTaskDateNext = document.getElementById("statsTaskDateNext") as HTMLButtonElement | null;
+const statsTaskRange = document.getElementById("statsTaskRange");
+const statsTaskRangeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsTaskRangeToggle button")
+);
+const statsTaskChart = document.getElementById("statsTaskChart");
+const statsTrendTotal = document.getElementById("statsTrendTotal");
+const statsTrendChange = document.getElementById("statsTrendChange");
+const statsTrendAvg = document.getElementById("statsTrendAvg");
+const statsTrendAvgChange = document.getElementById("statsTrendAvgChange");
+const statsTaskTotal = document.getElementById("statsTaskTotal");
+const statsTaskChange = document.getElementById("statsTaskChange");
+const statsTaskAvg = document.getElementById("statsTaskAvg");
+const statsTaskAvgChange = document.getElementById("statsTaskAvgChange");
 const metricFocus = document.getElementById("metricFocus");
 const metricBreak = document.getElementById("metricBreak");
 const metricTasks = document.getElementById("metricTasks");
@@ -67,19 +107,16 @@ const scheduleStart = document.getElementById("scheduleStart") as HTMLInputEleme
 const scheduleEnd = document.getElementById("scheduleEnd") as HTMLInputElement | null;
 const scheduleDays = document.getElementById("scheduleDays");
 const scheduleSave = document.getElementById("scheduleSave");
-const pomodoroStatus = document.getElementById("pomodoroStatus");
+const pomodoroTaskPill = document.getElementById("pomodoroTaskPill");
 const pomodoroRing = document.getElementById("pomodoroRing") as SVGCircleElement | null;
 const pomodoroTimerValue = document.getElementById("pomodoroTimerValue");
+const pomodoroPhasePill = document.getElementById("pomodoroPhasePill");
+const pomodoroCyclePill = document.getElementById("pomodoroCyclePill");
 const pomodoroStart = document.getElementById("pomodoroStart") as HTMLButtonElement | null;
 const pomodoroPause = document.getElementById("pomodoroPause") as HTMLButtonElement | null;
 const pomodoroStop = document.getElementById("pomodoroStop") as HTMLButtonElement | null;
-const pomodoroWork = document.getElementById("pomodoroWork") as HTMLInputElement | null;
-const pomodoroBreak = document.getElementById("pomodoroBreak") as HTMLInputElement | null;
-const pomodoroCycles = document.getElementById("pomodoroCycles") as HTMLInputElement | null;
 const pomodoroAutoBlock = document.getElementById("pomodoroAutoBlock") as HTMLInputElement | null;
 const pomodoroBlockBreak = document.getElementById("pomodoroBlockBreak") as HTMLInputElement | null;
-const pomodoroTaskSelect = document.getElementById("pomodoroTaskSelect") as HTMLSelectElement | null;
-const pomodoroTaskHint = document.getElementById("pomodoroTaskHint");
 const strictStatus = document.getElementById("strictStatus");
 const strictStart = document.getElementById("strictStart") as HTMLButtonElement | null;
 const strictConfirm = document.getElementById("strictConfirm") as HTMLButtonElement | null;
@@ -110,6 +147,10 @@ const advancedEditor = document.getElementById("advancedEditor");
 const advancedRules = document.getElementById("advancedRules") as HTMLTextAreaElement | null;
 const advancedSave = document.getElementById("advancedSave");
 const interventionList = document.getElementById("interventionList");
+const interventionDisclosure = document.querySelector<HTMLElement>("[data-intervention-disclosure]");
+const interventionToggle = document.getElementById("interventionToggle") as HTMLButtonElement | null;
+const interventionCurrent = document.getElementById("interventionCurrent");
+const interventionPanel = document.getElementById("interventionPanel");
 const interventionModal = document.getElementById("interventionModal");
 const interventionTitle = document.getElementById("interventionTitle");
 const interventionHint = document.getElementById("interventionHint");
@@ -128,15 +169,38 @@ const interventionClose = document.getElementById("interventionClose");
 const durationRow = document.getElementById("durationRow");
 const techniqueRow = document.getElementById("techniqueRow");
 const pausableRow = document.getElementById("pausableRow");
-const taskTitle = document.getElementById("taskTitle") as HTMLInputElement | null;
-const taskEstimate = document.getElementById("taskEstimate") as HTMLInputElement | null;
-const taskEstimateValue = document.getElementById("taskEstimateValue");
+const taskActiveDetail = document.getElementById("taskActiveDetail");
+const taskActiveDot = document.getElementById("taskActiveDot");
+const taskActiveSettings = document.getElementById("taskActiveSettings") as HTMLButtonElement | null;
+const taskNameDisplay = document.getElementById("taskNameDisplay");
+const pomodoroFocusValue = document.getElementById("pomodoroFocusValue");
+const pomodoroBreakValue = document.getElementById("pomodoroBreakValue");
+const pomodoroCycleValue = document.getElementById("pomodoroCycleValue");
+const taskQuickGrid = document.getElementById("taskQuickGrid");
+const taskShowAll = document.getElementById("taskShowAll") as HTMLButtonElement | null;
+const taskAllGrid = document.getElementById("taskAllGrid");
+const taskSelectLabel = document.getElementById("taskSelectLabel");
+const taskSelectConfirm = document.getElementById("taskSelectConfirm") as HTMLButtonElement | null;
 const taskAdd = document.getElementById("taskAdd") as HTMLButtonElement | null;
-const taskList = document.getElementById("taskList");
-const taskEmpty = document.getElementById("taskEmpty");
-const taskSubtitle = document.getElementById("taskSubtitle");
+const taskModalTitle = document.getElementById("taskModalTitle");
+const taskName = document.getElementById("taskName") as HTMLInputElement | null;
+const taskWork = document.getElementById("taskWork") as HTMLInputElement | null;
+const taskBreak = document.getElementById("taskBreak") as HTMLInputElement | null;
+const taskCycles = document.getElementById("taskCycles") as HTMLInputElement | null;
+const taskEndless = document.getElementById("taskEndless") as HTMLInputElement | null;
+const taskColor = document.getElementById("taskColor") as HTMLInputElement | null;
+const taskSave = document.getElementById("taskSave");
+const taskDelete = document.getElementById("taskDelete");
+const taskDeleteConfirm = document.getElementById("taskDeleteConfirm") as HTMLButtonElement | null;
+const taskDeleteCancel = document.getElementById("taskDeleteCancel") as HTMLButtonElement | null;
 const PAUSE_TYPES = ["1h", "eod", "manual"] as const;
 type PauseType = (typeof PAUSE_TYPES)[number];
+
+const DEFAULT_POMODORO = {
+  workMin: 25,
+  breakMin: 5,
+  cycles: 0
+};
 
 const isPauseType = (value: string | undefined | null): value is PauseType => {
   return Boolean(value) && PAUSE_TYPES.includes(value as PauseType);
@@ -160,6 +224,16 @@ const reportUiError = (error: unknown) => {
   }
 };
 
+const truncateLabel = (value: string, maxChars: number) => {
+  if (value.length <= maxChars) {
+    return value;
+  }
+  if (maxChars <= 1) {
+    return "…";
+  }
+  return `${value.slice(0, maxChars - 1)}…`;
+};
+
 window.addEventListener("error", (event) => {
   reportUiError(event.error ?? event.message);
 });
@@ -180,6 +254,12 @@ let currentStatsRange: "today" | "week" | "month" = "today";
 let currentStatsFilter: "all" | "blocked" = "all";
 let currentStatsTheme: "default" | "citrus" | "ocean" | "warm" = "default";
 let currentStatsPanel: "usage" | "domains" = "usage";
+let currentStatsSubview: "summary" | "trend" | "task" = "summary";
+let currentStatsTaskId: string | null = null;
+let currentTrendRange: "day" | "week" | "month" | "year" = "week";
+let currentTrendOffset = 0;
+let currentTaskRange: "day" | "week" | "month" | "year" = "week";
+let currentTaskOffset = 0;
 let currentFocusView: "focus" | "distraction" = "focus";
 let currentTimeMachineDay = "";
 let pendingFocusOff = false;
@@ -193,9 +273,10 @@ let strictOverlayDismissed = false;
 let currentPomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"] | null = null;
 let pomodoroTicker: number | null = null;
 let currentTasks: Awaited<ReturnType<typeof getState>>["tasks"] | null = null;
-let selectedTaskId: string | null = null;
 let lastTasksKey = "";
-let lastTaskLinkKey = "";
+let currentTaskEditId: string | null = null;
+let currentTaskDeleteId: string | null = null;
+let pendingTaskSelectId: string | null | undefined = undefined;
 let lastPomodoroAdvanceKey = "";
 let lastPomodoroAdvanceAttemptAt = 0;
 
@@ -383,9 +464,6 @@ const renderPomodoro = (
   strictActive: boolean
 ) => {
   currentPomodoro = pomodoro;
-  setInputValue(pomodoroWork, pomodoro.workMin);
-  setInputValue(pomodoroBreak, pomodoro.breakMin);
-  setInputValue(pomodoroCycles, clamp(pomodoro.cycles, 1, 12));
   if (pomodoroAutoBlock) {
     pomodoroAutoBlock.checked = pomodoro.autoBlockDuringWork;
   }
@@ -420,22 +498,30 @@ const renderPomodoro = (
     );
   };
 
-  if (!running || !pomodoroStatus) {
-    if (pomodoroStatus) {
-      pomodoroStatus.textContent = "Ready for your next session.";
+  const activeTaskName = (() => {
+    if (!pomodoro.lastTaskId || !currentTasks) {
+      return "Default";
     }
+    const task = currentTasks.items.find((item) => item.id === pomodoro.lastTaskId);
+    return task?.title ?? "Default";
+  })();
+  if (pomodoroTaskPill) {
+    pomodoroTaskPill.textContent = truncateLabel(activeTaskName, 16);
+    pomodoroTaskPill.setAttribute("title", activeTaskName);
+  }
+
+  if (!running) {
     const idleTotalMs = pomodoro.workMin * 60 * 1000;
     if (pomodoroTimerValue) {
       pomodoroTimerValue.textContent = formatCountdown(idleTotalMs);
     }
     updateRing(idleTotalMs, idleTotalMs);
-    if (currentTasks) {
-      renderTaskLinker(currentTasks, pomodoro);
-    }
+    pomodoroPhasePill?.classList.add("hidden");
+    pomodoroCyclePill?.classList.add("hidden");
     return;
   }
 
-  const phaseLabel = running.phase === "work" ? "Work" : "Break";
+  const phaseLabel = running.phase === "work" ? "Focus" : "Break";
   const totalMs =
     (running.phase === "work" ? pomodoro.workMin : pomodoro.breakMin) * 60 * 1000;
   const remaining = running.paused
@@ -443,14 +529,23 @@ const renderPomodoro = (
     : Math.max(0, running.endsAt - Date.now());
   updateRing(remaining, totalMs);
   const cycleLabel =
-    pomodoro.cycles > 0 ? ` · Cycle ${Math.min(running.cycleIndex + 1, pomodoro.cycles)}/${pomodoro.cycles}` : "";
-  const statusPrefix = running.paused ? `${phaseLabel} paused` : phaseLabel;
-  pomodoroStatus.textContent = `${statusPrefix} · ${formatCountdown(remaining)}${cycleLabel}`;
+    pomodoro.cycles > 0
+      ? `${Math.min(running.cycleIndex + 1, pomodoro.cycles)}|${pomodoro.cycles}`
+      : "Endless";
   if (pomodoroTimerValue) {
     pomodoroTimerValue.textContent = formatCountdown(remaining);
   }
-  if (currentTasks) {
-    renderTaskLinker(currentTasks, pomodoro);
+  if (pomodoroPhasePill) {
+    pomodoroPhasePill.textContent = phaseLabel;
+    pomodoroPhasePill.classList.remove("hidden");
+  }
+  if (pomodoroCyclePill) {
+    if (cycleLabel) {
+      pomodoroCyclePill.textContent = cycleLabel;
+      pomodoroCyclePill.classList.remove("hidden");
+    } else {
+      pomodoroCyclePill.classList.add("hidden");
+    }
   }
 };
 
@@ -476,175 +571,162 @@ const requestPomodoroAdvance = async () => {
   });
 };
 
-const getTaskLinkKey = (
+const getTaskPickerKey = (
   tasks: Awaited<ReturnType<typeof getState>>["tasks"],
   pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
 ) => {
-  const activeTasks = tasks.items.filter((item) => !item.doneAt);
-  const running = pomodoro.running;
-  const activeKey = activeTasks.map((item) => `${item.id}:${item.title}`).join("|");
-  const runKey = running
-    ? `${running.phase}:${running.paused ? "p" : "r"}:${running.linkedTaskId ?? ""}`
-    : "idle";
-  return `${activeKey}::${runKey}::${selectedTaskId ?? ""}`;
-};
-
-const renderTaskLinker = (
-  tasks: Awaited<ReturnType<typeof getState>>["tasks"],
-  pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
-) => {
-  if (!pomodoroTaskSelect) {
-    return;
-  }
-  const nextKey = getTaskLinkKey(tasks, pomodoro);
-  if (nextKey === lastTaskLinkKey) {
-    return;
-  }
-  lastTaskLinkKey = nextKey;
-
-  const activeTasks = tasks.items.filter((item) => !item.doneAt);
-  const runningLinkedId = pomodoro.running?.linkedTaskId ?? null;
-  const linkedTask = runningLinkedId
-    ? tasks.items.find((item) => item.id === runningLinkedId)
-    : null;
-  const hasRunning = Boolean(pomodoro.running);
-  if (selectedTaskId && !activeTasks.some((item) => item.id === selectedTaskId)) {
-    selectedTaskId = null;
-  }
-  const fallbackId = pomodoro.lastTaskId ?? null;
-  const selectedId = hasRunning ? runningLinkedId : selectedTaskId ?? fallbackId;
-  pomodoroTaskSelect.innerHTML = "";
-
-  const emptyOption = document.createElement("option");
-  emptyOption.value = "";
-  emptyOption.textContent = "No task";
-  pomodoroTaskSelect.appendChild(emptyOption);
-
-  if (runningLinkedId && !activeTasks.some((item) => item.id === runningLinkedId)) {
-    const linkedOption = document.createElement("option");
-    linkedOption.value = runningLinkedId;
-    linkedOption.textContent = linkedTask ? `${linkedTask.title} (done)` : "Linked task";
-    pomodoroTaskSelect.appendChild(linkedOption);
-  }
-
-  activeTasks.forEach((item) => {
-    const option = document.createElement("option");
-    option.value = item.id;
-    option.textContent = item.title;
-    pomodoroTaskSelect.appendChild(option);
-  });
-
-  pomodoroTaskSelect.value = selectedId ?? "";
-  if (!hasRunning) {
-    selectedTaskId = selectedId ?? null;
-  }
-  pomodoroTaskSelect.disabled = hasRunning || activeTasks.length === 0;
-
-  if (pomodoroTaskHint) {
-    if (hasRunning) {
-      const label = linkedTask ? `Linked to ${linkedTask.title}.` : "Running without a linked task.";
-      pomodoroTaskHint.textContent = label;
-    } else if (activeTasks.length === 0) {
-      pomodoroTaskHint.textContent = "Add a task to link it to your session.";
-    } else {
-      pomodoroTaskHint.textContent = "Optional: link a task before starting.";
-    }
-  }
-};
-
-const getTasksKey = (tasks: Awaited<ReturnType<typeof getState>>["tasks"]) => {
   const itemsKey = tasks.items
     .map(
       (item) =>
-        `${item.id}:${item.title}:${item.estimateMin}:${item.focusSessionsCompleted}:${item.doneAt ?? ""}`
+        `${item.id}:${item.title}:${item.color}:${item.pomodoroWorkMin}:${item.pomodoroBreakMin}:${item.pomodoroCycles}`
     )
     .join("|");
-  return `${tasks.activeLimit}::${itemsKey}`;
+  return `${pomodoro.lastTaskId ?? "default"}::${itemsKey}`;
 };
 
 const renderTasks = (
   tasks: Awaited<ReturnType<typeof getState>>["tasks"],
   pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
 ) => {
-  const nextKey = getTasksKey(tasks);
+  const nextKey = getTaskPickerKey(tasks, pomodoro);
   if (nextKey === lastTasksKey) {
-    renderTaskLinker(tasks, pomodoro);
     return;
   }
   lastTasksKey = nextKey;
   currentTasks = tasks;
-  const estimateValue = Number(taskEstimate?.value || 30);
-  setInputValue(taskEstimate, clamp(estimateValue, 15, 180));
-  if (taskEstimateValue && taskEstimate) {
-    taskEstimateValue.textContent = `${taskEstimate.value}m`;
-  }
-  const activeTasks = tasks.items.filter((item) => !item.doneAt);
-  const activeCount = activeTasks.length;
-  if (taskSubtitle) {
-    taskSubtitle.textContent = `Active tasks: ${activeCount}/${tasks.activeLimit}.`;
-  }
-  const atLimit = activeCount >= tasks.activeLimit;
-  if (taskAdd) {
-    taskAdd.disabled = atLimit;
-  }
-  if (taskTitle) {
-    taskTitle.disabled = atLimit;
-  }
-  if (taskEstimate) {
-    taskEstimate.disabled = atLimit;
-  }
-
-  if (taskList) {
-    taskList.innerHTML = "";
-    tasks.items.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = `list-item task-item${item.doneAt ? " task-done" : ""}`;
-      row.dataset.taskId = item.id;
-
-      const main = document.createElement("div");
-      main.className = "task-main";
-
-      const title = document.createElement("div");
-      title.className = "task-title";
-      title.textContent = item.title;
-
-      const meta = document.createElement("div");
-      meta.className = "task-meta";
-      const sessions = item.focusSessionsCompleted;
-      const doneLabel = item.doneAt ? " · Done" : "";
-      meta.textContent = `Est. ${item.estimateMin}m · Sessions ${sessions}${doneLabel}`;
-
-      main.appendChild(title);
-      main.appendChild(meta);
-
-      const actions = document.createElement("div");
-      actions.className = "task-actions";
-
-      if (!item.doneAt) {
-        const doneButton = document.createElement("button");
-        doneButton.type = "button";
-        doneButton.textContent = "Done";
-        doneButton.dataset.action = "done";
-        actions.appendChild(doneButton);
+  const isRunning = Boolean(pomodoro.running);
+  const activeTask = pomodoro.lastTaskId
+    ? tasks.items.find((item) => item.id === pomodoro.lastTaskId) ?? null
+    : null;
+  if (pomodoro.lastTaskId && !activeTask) {
+    void setState({
+      pomodoro: isRunning
+        ? { lastTaskId: null }
+        : {
+            lastTaskId: null,
+            workMin: DEFAULT_POMODORO.workMin,
+            breakMin: DEFAULT_POMODORO.breakMin,
+            cycles: DEFAULT_POMODORO.cycles
+          }
+    });
+  } else if (
+    !isRunning &&
+    !activeTask &&
+    (pomodoro.workMin !== DEFAULT_POMODORO.workMin ||
+      pomodoro.breakMin !== DEFAULT_POMODORO.breakMin ||
+      pomodoro.cycles !== DEFAULT_POMODORO.cycles)
+  ) {
+    void setState({
+      pomodoro: {
+        workMin: DEFAULT_POMODORO.workMin,
+        breakMin: DEFAULT_POMODORO.breakMin,
+        cycles: DEFAULT_POMODORO.cycles
       }
-
-      const removeButton = document.createElement("button");
-      removeButton.type = "button";
-      removeButton.textContent = "Remove";
-      removeButton.dataset.action = "remove";
-      actions.appendChild(removeButton);
-
-      row.appendChild(main);
-      row.appendChild(actions);
-      taskList.appendChild(row);
     });
   }
 
-  if (taskEmpty) {
-    taskEmpty.classList.toggle("hidden", tasks.items.length > 0);
+  if (taskNameDisplay) {
+    taskNameDisplay.textContent = activeTask ? activeTask.title : "Default";
+    taskNameDisplay.setAttribute("title", activeTask ? activeTask.title : "Default");
+  }
+  const activeConfig = getTaskPomodoroConfig(activeTask);
+  if (taskActiveDetail) {
+    taskActiveDetail.textContent = formatTaskPomodoro(activeConfig);
+  }
+  if (taskActiveDot) {
+    taskActiveDot.style.background = activeTask?.color ?? "var(--color-accent)";
+  }
+  if (taskActiveSettings) {
+    if (activeTask) {
+      taskActiveSettings.classList.remove("hidden");
+      taskActiveSettings.setAttribute("data-task-settings", activeTask.id);
+    } else {
+      taskActiveSettings.classList.add("hidden");
+      taskActiveSettings.removeAttribute("data-task-settings");
+    }
+  }
+  if (pomodoroFocusValue) {
+    pomodoroFocusValue.textContent = `${activeConfig.workMin}m`;
+  }
+  if (pomodoroBreakValue) {
+    pomodoroBreakValue.textContent = `${activeConfig.breakMin}m`;
+  }
+  if (pomodoroCycleValue) {
+    pomodoroCycleValue.textContent =
+      activeConfig.cycles === 0 ? "Endless" : `${activeConfig.cycles}`;
   }
 
-  renderTaskLinker(tasks, pomodoro);
+  const buildCard = (item: { id: string | null; title: string; color: string; detail: string }) => {
+    const isDefault = item.id === null;
+    const gear = isDefault
+      ? ""
+      : `
+        <button class="task-gear" type="button" data-task-settings="${item.id}" aria-label="Open settings">
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      `;
+    const dataAttr = isDefault ? 'data-task-default="true"' : `data-task-id="${item.id}"`;
+    return `
+      <div class="task-quick-card" data-task-select ${dataAttr}>
+        <div class="task-quick-top">
+          <span class="task-color-dot" style="background:${item.color}"></span>
+          ${gear}
+        </div>
+        <div class="task-title" title="${item.title}">${item.title}</div>
+        <p class="task-desc">${item.detail}</p>
+      </div>
+    `;
+  };
+
+  type TaskCardItem = {
+    id: string | null;
+    title: string;
+    color: string;
+    detail: string;
+  };
+
+  const defaultItem: TaskCardItem = {
+    id: null,
+    title: "Default",
+    color: "var(--color-accent)",
+    detail: formatTaskPomodoro(DEFAULT_POMODORO)
+  };
+
+  if (taskQuickGrid) {
+    const quickItems: TaskCardItem[] = [];
+    if (activeTask) {
+      quickItems.push(defaultItem);
+    }
+    tasks.items
+      .filter((item) => item.id !== activeTask?.id)
+      .forEach((item) => {
+        quickItems.push({
+          id: item.id,
+          title: item.title,
+          color: item.color ?? "var(--color-accent)",
+          detail: formatTaskPomodoro(getTaskPomodoroConfig(item))
+        });
+      });
+    const quickCards = quickItems.slice(0, 4).map(buildCard).join("");
+    taskQuickGrid.innerHTML = quickCards
+      ? quickCards
+      : `<p class="list-sub" style="grid-column: 1 / -1;">No tasks yet.</p>`;
+  }
+
+  if (taskAllGrid) {
+    const allItems = [
+      defaultItem,
+      ...tasks.items.map((item) => ({
+        id: item.id,
+        title: item.title,
+        color: item.color ?? "var(--color-accent)",
+        detail: formatTaskPomodoro(getTaskPomodoroConfig(item))
+      }))
+    ];
+    taskAllGrid.innerHTML = allItems.map(buildCard).join("");
+  }
 };
 
 const renderTheme = (theme: "dark" | "light" | "system") => {
@@ -675,9 +757,255 @@ const formatDateLabel = (key: string): string => {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 };
 
+const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const endOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+
+const addDays = (date: Date, days: number) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const addMonths = (date: Date, months: number) => {
+  const next = new Date(date);
+  next.setMonth(next.getMonth() + months);
+  return next;
+};
+
+const addYears = (date: Date, years: number) => {
+  const next = new Date(date);
+  next.setFullYear(next.getFullYear() + years);
+  return next;
+};
+
+const getWeekStart = (date: Date) => {
+  const day = date.getDay();
+  const offset = (day + 6) % 7;
+  return startOfDay(addDays(date, -offset));
+};
+
+const getRangeWindow = (
+  range: "day" | "week" | "month" | "year",
+  offset: number
+) => {
+  const now = new Date();
+  if (range === "day") {
+    const base = addDays(now, offset);
+    return { start: startOfDay(base), end: endOfDay(base) };
+  }
+  if (range === "week") {
+    const base = addDays(now, offset * 7);
+    const start = getWeekStart(base);
+    const end = endOfDay(addDays(start, 6));
+    return { start, end };
+  }
+  if (range === "month") {
+    const base = addMonths(now, offset);
+    const start = new Date(base.getFullYear(), base.getMonth(), 1);
+    const end = endOfDay(new Date(base.getFullYear(), base.getMonth() + 1, 0));
+    return { start, end };
+  }
+  const base = addYears(now, offset);
+  const start = new Date(base.getFullYear(), 0, 1);
+  const end = endOfDay(new Date(base.getFullYear(), 11, 31));
+  return { start, end };
+};
+
+const getRangeKeysBetween = (start: Date, end: Date) => {
+  const keys: string[] = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    keys.push(getDayKey(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return keys;
+};
+
+const formatRangeLabel = (start: Date, end: Date) => {
+  const startLabel = start.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const endLabel = end.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (startLabel === endLabel) {
+    return startLabel;
+  }
+  return `${startLabel} - ${endLabel}`;
+};
 const formatTimeLabel = (timestamp: number): string => {
   const date = new Date(timestamp);
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+};
+
+const buildTaskTotals = (state: StorageSchema, keys: string[]) => {
+  const keySet = new Set(keys);
+  const totals = new Map<string, number>();
+  state.analytics.sessions.forEach((session) => {
+    if (session.type !== "pomodoro" || !session.taskId) {
+      return;
+    }
+    const key = getDayKey(new Date(session.startedAt));
+    if (!keySet.has(key)) {
+      return;
+    }
+    const duration = Math.max(0, session.endedAt - session.startedAt);
+    totals.set(session.taskId, (totals.get(session.taskId) ?? 0) + duration);
+  });
+  const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item.title]));
+  const items = Array.from(totals.entries())
+    .map(([id, totalMs]) => ({
+      id,
+      title: taskLookup.get(id) ?? "Task",
+      totalMs
+    }))
+    .sort((a, b) => b.totalMs - a.totalMs);
+  const totalAll = items.reduce((sum, item) => sum + item.totalMs, 0);
+  return { items, totalAll };
+};
+
+const buildFocusTotals = (
+  state: StorageSchema,
+  keys: string[],
+  taskId?: string | null
+) => {
+  const keySet = new Set(keys);
+  let totalMs = 0;
+  state.analytics.sessions.forEach((session) => {
+    if (session.type !== "pomodoro") {
+      return;
+    }
+    if (taskId && session.taskId !== taskId) {
+      return;
+    }
+    const key = getDayKey(new Date(session.startedAt));
+    if (!keySet.has(key)) {
+      return;
+    }
+    totalMs += Math.max(0, session.endedAt - session.startedAt);
+  });
+  const dailyAvg = keys.length ? totalMs / keys.length : 0;
+  return { totalMs, dailyAvg };
+};
+
+const buildStackedTrendBuckets = (
+  state: StorageSchema,
+  range: "day" | "week" | "month" | "year",
+  start: Date,
+  end: Date,
+  taskId?: string | null
+) => {
+  const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item]));
+  const totals = new Map<string, number>();
+  const bucketCount = range === "year" ? 12 : range === "day" ? 6 : range === "week" ? 7 : 5;
+  const bucketMaps = new Array(bucketCount).fill(0).map(() => new Map<string, number>());
+  const labels =
+    range === "year"
+      ? new Array(12).fill("").map((_, idx) =>
+          new Date(start.getFullYear(), idx, 1).toLocaleDateString(undefined, { month: "short" })
+        )
+      : range === "day"
+        ? ["0", "4", "8", "12", "16", "20"]
+        : range === "week"
+          ? new Array(7).fill("").map((_, idx) => {
+              const day = addDays(start, idx);
+              return day.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 1);
+            })
+          : new Array(5).fill("").map((_, idx) => `W${idx + 1}`);
+
+  const getBucketIndex = (date: Date) => {
+    if (range === "year") {
+      return date.getMonth();
+    }
+    if (range === "day") {
+      return Math.min(5, Math.floor(date.getHours() / 4));
+    }
+    if (range === "week") {
+      const index = Math.floor((startOfDay(date).getTime() - start.getTime()) / 86400000);
+      return Math.min(6, Math.max(0, index));
+    }
+    const day = date.getDate();
+    return Math.min(4, Math.floor((day - 1) / 7));
+  };
+
+  state.analytics.sessions.forEach((session) => {
+    if (session.type !== "pomodoro") return;
+    if (!session.taskId) return;
+    if (taskId && session.taskId !== taskId) return;
+    const date = new Date(session.startedAt);
+    if (date < start || date > end) return;
+    const index = getBucketIndex(date);
+    if (index < 0 || index >= bucketMaps.length) return;
+    const duration = Math.max(0, session.endedAt - session.startedAt);
+    const map = bucketMaps[index];
+    map.set(session.taskId, (map.get(session.taskId) ?? 0) + duration);
+    totals.set(session.taskId, (totals.get(session.taskId) ?? 0) + duration);
+  });
+
+  const orderedTaskIds = taskId
+    ? [taskId]
+    : Array.from(totals.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([id]) => id);
+
+  return labels.map((label, idx) => {
+    const bucketMap = bucketMaps[idx];
+    const segments = orderedTaskIds
+      .map((id) => {
+        const value = bucketMap.get(id) ?? 0;
+        if (value <= 0) {
+          return null;
+        }
+        const task = taskLookup.get(id);
+        return {
+          id,
+          title: task?.title ?? "Task",
+          color: task?.color ?? "var(--color-accent)",
+          value
+        };
+      })
+      .filter((segment): segment is { id: string; title: string; color: string; value: number } =>
+        Boolean(segment)
+      );
+    const total = segments.reduce((sum, seg) => sum + seg.value, 0);
+    return { label, total, segments };
+  });
+};
+
+const renderTrendChart = (
+  target: HTMLElement | null,
+  buckets: Array<{ label: string; total: number; segments: Array<{ id: string; color: string; value: number }> }>
+) => {
+  if (!target) return;
+  const max = Math.max(1, ...buckets.map((b) => b.total));
+  target.innerHTML = `
+    <div class="trend-bars">
+      ${buckets
+        .map((bucket) => {
+          const segments = bucket.segments
+            .map((segment, index) => {
+              const pct = (segment.value / max) * 100;
+              const isBottom = index === 0;
+              const isTop = index === bucket.segments.length - 1;
+              return `
+                <span
+                  class="trend-segment ${isBottom ? "is-bottom" : ""} ${isTop ? "is-top" : ""}"
+                  style="height: ${pct}%; background: ${segment.color};"
+                  title="${segment.value ? formatDuration(segment.value) : ""}"
+                ></span>
+              `;
+            })
+            .join("");
+          return `
+            <div class="trend-bar">
+              <div class="trend-bar-track">
+                ${bucket.total > 0 ? `<div class="trend-bar-stack">${segments}</div>` : `<span class="trend-bar-dot"></span>`}
+              </div>
+              <span class="trend-label">${bucket.label}</span>
+            </div>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
 };
 
 const getDayKey = (date = new Date()): string => {
@@ -858,6 +1186,48 @@ const renderSessions = (state: StorageSchema, keys: string[]) => {
     .join("");
 };
 
+const renderTaskLists = (state: StorageSchema, keys: string[]) => {
+  const { items, totalAll } = buildTaskTotals(state, keys);
+  const renderList = (target: HTMLElement | null, limit?: number, compact?: boolean) => {
+    if (!target) {
+      return;
+    }
+    const sliced = typeof limit === "number" ? items.slice(0, limit) : items;
+    if (sliced.length === 0) {
+      target.innerHTML = `<p class="list-sub">No task data yet.</p>`;
+      return;
+    }
+    target.innerHTML = sliced
+      .map((item) => {
+        const pct = totalAll ? Math.round((item.totalMs / totalAll) * 100) : 0;
+        if (compact) {
+          return `
+            <div class="stats-task-card" data-task-id="${item.id}">
+              <div class="stats-task-title">${item.title}</div>
+              <div class="stats-task-meta">
+                <span>${formatDuration(item.totalMs)}</span>
+                <span>·</span>
+                <span>${pct}%</span>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="list-item stats-task-row" data-task-id="${item.id}">
+            <div>
+              <div class="list-title">${item.title}</div>
+              <div class="list-sub">${formatDuration(item.totalMs)} · ${pct}%</div>
+            </div>
+            <div class="stats-pill">${pct}%</div>
+          </div>
+        `;
+      })
+      .join("");
+  };
+  renderList(statsSummaryTasks, 4, true);
+  renderList(statsTrendTasks);
+};
+
 const renderTimeline = (state: StorageSchema, keys: string[]) => {
   if (!statsStacked) {
     return;
@@ -964,11 +1334,31 @@ const renderStats = (state: StorageSchema) => {
   statsFocusButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.focusMode === currentFocusView);
   });
+
+  if (statsSummaryView || statsTrendView || statsTaskView) {
+    setStatsSubview(currentStatsSubview);
+  }
+  const rangeLabel =
+    currentStatsRange === "today"
+      ? "Today"
+      : currentStatsRange === "week"
+        ? "This week"
+        : "This month";
+  const summaryDate = document.getElementById("statsSummaryDate");
+  if (summaryDate) {
+    summaryDate.textContent = rangeLabel;
+  }
   if (statsThemeControl) {
     statsThemeControl.classList.toggle("hidden", currentStatsPanel !== "usage");
   }
   statsPanels.forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.panel === currentStatsPanel);
+  });
+  statsTrendRangeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.range === currentTrendRange);
+  });
+  statsTaskRangeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.range === currentTaskRange);
   });
 
   const keys = getRangeKeys(currentStatsRange);
@@ -999,48 +1389,46 @@ const renderStats = (state: StorageSchema) => {
     statsTotalValue.textContent = formatDuration(listTotal);
   }
 
-  if (!statsList) {
-    return;
-  }
-
-  const entries = Object.entries(listSource).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  if (!entries.length) {
-    statsList.innerHTML = `<p style="color: var(--color-muted); font-size: var(--font-small);">No data yet.</p>`;
-    renderDonut([], 0, currentStatsTheme);
-    return;
-  }
-  const topEntries = Object.entries(listSource)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4)
-    .map(([label, value]) => ({ label, value }));
-  renderDonut(topEntries, listTotal, currentStatsTheme);
-  const left = entries.slice(0, 4);
-  const right = entries.slice(4, 8);
-  const renderEntry = ([host, value]: [string, number]) => {
-    const percent = listTotal ? Math.round((value / listTotal) * 100) : 0;
-    const minutes = Math.max(1, Math.round(value / 60000));
-    return `
-      <div class="list-item">
-        <div class="stats-item">
-          <div class="stats-label">
-            <span class="stats-pill">${minutes}m</span>
-            <span class="stats-domain" data-host="${host}">${host}</span>
+  if (statsList) {
+    const entries = Object.entries(listSource).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    if (!entries.length) {
+      statsList.innerHTML = `<p style="color: var(--color-muted); font-size: var(--font-small);">No data yet.</p>`;
+      renderDonut([], 0, currentStatsTheme);
+    } else {
+      const topEntries = Object.entries(listSource)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([label, value]) => ({ label, value }));
+      renderDonut(topEntries, listTotal, currentStatsTheme);
+      const left = entries.slice(0, 4);
+      const right = entries.slice(4, 8);
+      const renderEntry = ([host, value]: [string, number]) => {
+        const percent = listTotal ? Math.round((value / listTotal) * 100) : 0;
+        const minutes = Math.max(1, Math.round(value / 60000));
+        return `
+          <div class="list-item">
+            <div class="stats-item">
+              <div class="stats-label">
+                <span class="stats-pill">${minutes}m</span>
+                <span class="stats-domain" data-host="${host}">${host}</span>
+              </div>
+              <div class="stats-bar fixed"><span style="width: ${percent}%;"></span></div>
+            </div>
           </div>
-          <div class="stats-bar fixed"><span style="width: ${percent}%;"></span></div>
+        `;
+      };
+      statsList.innerHTML = `
+        <div class="stats-grid">
+          <div class="stats-column">
+            ${left.map(renderEntry).join("")}
+          </div>
+          <div class="stats-column">
+            ${right.map(renderEntry).join("")}
+          </div>
         </div>
-      </div>
-    `;
-  };
-  statsList.innerHTML = `
-    <div class="stats-grid">
-      <div class="stats-column">
-        ${left.map(renderEntry).join("")}
-      </div>
-      <div class="stats-column">
-        ${right.map(renderEntry).join("")}
-      </div>
-    </div>
-  `;
+      `;
+    }
+  }
 
   if (statsStacked) {
     renderTimeline(state, keys);
@@ -1079,9 +1467,129 @@ const renderStats = (state: StorageSchema) => {
       })
       .join("");
   }
+  renderTaskLists(state, keys);
   renderMetrics(state, keys);
   renderSessions(state, keys);
   renderTimeMachine(state);
+
+  const todayWindow = getRangeWindow("day", 0);
+  const yesterdayWindow = getRangeWindow("day", -1);
+  const weekWindow = getRangeWindow("week", 0);
+  const prevWeekWindow = getRangeWindow("week", -1);
+  const todayKeys = getRangeKeysBetween(todayWindow.start, todayWindow.end);
+  const yesterdayKeys = getRangeKeysBetween(yesterdayWindow.start, yesterdayWindow.end);
+  const weekKeys = getRangeKeysBetween(weekWindow.start, weekWindow.end);
+  const prevWeekKeys = getRangeKeysBetween(prevWeekWindow.start, prevWeekWindow.end);
+  const todayTotals = buildFocusTotals(state, todayKeys);
+  const yesterdayTotals = buildFocusTotals(state, yesterdayKeys);
+  const weekTotals = buildFocusTotals(state, weekKeys);
+  const prevWeekTotals = buildFocusTotals(state, prevWeekKeys);
+  const todayChange =
+    yesterdayTotals.totalMs > 0
+      ? Math.round(((todayTotals.totalMs - yesterdayTotals.totalMs) / yesterdayTotals.totalMs) * 100)
+      : 0;
+  const weekChange =
+    prevWeekTotals.totalMs > 0
+      ? Math.round(((weekTotals.totalMs - prevWeekTotals.totalMs) / prevWeekTotals.totalMs) * 100)
+      : 0;
+  if (statsSummaryToday) {
+    statsSummaryToday.textContent = formatDuration(todayTotals.totalMs);
+  }
+  if (statsSummaryTodayChange) {
+    statsSummaryTodayChange.textContent = `${todayChange}% vs yesterday`;
+  }
+  if (statsSummaryWeek) {
+    statsSummaryWeek.textContent = formatDuration(weekTotals.totalMs);
+  }
+  if (statsSummaryWeekChange) {
+    statsSummaryWeekChange.textContent = `${weekChange}% vs last week`;
+  }
+  if (statsSummaryAvg) {
+    statsSummaryAvg.textContent = formatDuration(weekTotals.dailyAvg);
+  }
+  const weekBuckets = buildStackedTrendBuckets(state, "week", weekWindow.start, weekWindow.end);
+  renderTrendChart(statsSummaryChart, weekBuckets);
+
+  const renderTrendView = (
+    range: "day" | "week" | "month" | "year",
+    offset: number,
+    taskId: string | null,
+    chartEl: HTMLElement | null,
+    labelEl: HTMLElement | null,
+    rangeEl: HTMLElement | null,
+    titleEl?: HTMLElement | null,
+    totalEl?: HTMLElement | null,
+    changeEl?: HTMLElement | null,
+    avgEl?: HTMLElement | null,
+    avgChangeEl?: HTMLElement | null
+  ) => {
+    const { start, end } = getRangeWindow(range, offset);
+    const keys = getRangeKeysBetween(start, end);
+    const prevWindow = getRangeWindow(range, offset - 1);
+    const prevKeys = getRangeKeysBetween(prevWindow.start, prevWindow.end);
+    const currentTotals = buildFocusTotals(state, keys, taskId);
+    const prevTotals = buildFocusTotals(state, prevKeys, taskId);
+    const pctChange =
+      prevTotals.totalMs > 0
+        ? Math.round(((currentTotals.totalMs - prevTotals.totalMs) / prevTotals.totalMs) * 100)
+        : 0;
+    const avgChange =
+      prevTotals.dailyAvg > 0
+        ? Math.round(((currentTotals.dailyAvg - prevTotals.dailyAvg) / prevTotals.dailyAvg) * 100)
+        : 0;
+    if (labelEl) {
+      labelEl.textContent =
+        range === "day" && offset === 0 ? "Today" : formatRangeLabel(start, end);
+    }
+    if (rangeEl) {
+      rangeEl.textContent = formatRangeLabel(start, end);
+    }
+    if (titleEl && taskId) {
+      const task = state.tasks.items.find((item) => item.id === taskId);
+      titleEl.textContent = task?.title ?? "Task";
+    }
+    const buckets = buildStackedTrendBuckets(state, range, start, end, taskId);
+    renderTrendChart(chartEl, buckets);
+    if (totalEl) {
+      totalEl.textContent = formatDuration(currentTotals.totalMs);
+    }
+    if (changeEl) {
+      changeEl.textContent = `${pctChange}% vs last`;
+    }
+    if (avgEl) {
+      avgEl.textContent = formatDuration(currentTotals.dailyAvg);
+    }
+    if (avgChangeEl) {
+      avgChangeEl.textContent = `${avgChange}% vs last`;
+    }
+  };
+
+  renderTrendView(
+    currentTrendRange,
+    currentTrendOffset,
+    null,
+    statsTrendChart,
+    statsDateLabel,
+    statsDateRange,
+    null,
+    statsTrendTotal,
+    statsTrendChange,
+    statsTrendAvg,
+    statsTrendAvgChange
+  );
+  renderTrendView(
+    currentTaskRange,
+    currentTaskOffset,
+    currentStatsTaskId,
+    statsTaskChart,
+    statsTaskDateLabel,
+    statsTaskRange,
+    statsTaskTitle,
+    statsTaskTotal,
+    statsTaskChange,
+    statsTaskAvg,
+    statsTaskAvgChange
+  );
 };
 
 const renderSchedules = (schedule: Awaited<ReturnType<typeof getState>>["schedule"]) => {
@@ -1263,19 +1771,34 @@ const renderInterventions = (
     return;
   }
 
+  const active = INTERVENTION_DEFS.find((item) => interventions.enabled[item.key]);
+  if (interventionCurrent) {
+    interventionCurrent.textContent = active ? active.label : "None";
+  }
+
   interventionList.innerHTML = INTERVENTION_DEFS.map((item) => {
     const enabled = interventions.enabled[item.key];
     return `
       <div class="intervention-card" data-intervention="${item.key}">
         <div class="intervention-title">${item.label}</div>
-        <label class="intervention-radio">
-          <input
-            type="radio"
-            name="interventionMode"
-            data-toggle="${item.key}"
-            ${enabled ? "checked" : ""}
-          />
-        </label>
+        <p class="intervention-desc">${item.detail}</p>
+        <div class="intervention-controls">
+          <label class="intervention-pill">
+            <input
+              type="radio"
+              name="interventionMode"
+              data-toggle="${item.key}"
+              ${enabled ? "checked" : ""}
+            />
+            <span class="${enabled ? "is-active" : "is-inactive"}">${enabled ? "Active" : "Inactive"}</span>
+          </label>
+          <button class="intervention-gear" type="button" data-intervention-settings="${item.key}" aria-label="Open settings">
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+               <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /> 
+<!--              <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="currentColor" />-->
+            </svg>
+          </button>
+        </div>
       </div>
     `;
   }).join("");
@@ -1360,6 +1883,137 @@ const hideInterventionDetail = () => {
   closeModal("intervention");
 };
 
+const setInterventionDisclosure = (open: boolean) => {
+  if (!interventionDisclosure || !interventionToggle) {
+    return;
+  }
+  interventionDisclosure.classList.toggle("is-open", open);
+  interventionToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  if (interventionPanel) {
+    interventionPanel.setAttribute("aria-hidden", open ? "false" : "true");
+  }
+};
+
+const getTaskPomodoroConfig = (task: StorageSchema["tasks"]["items"][number] | null) => {
+  if (!task) {
+    return { ...DEFAULT_POMODORO };
+  }
+  return {
+    workMin:
+      typeof task.pomodoroWorkMin === "number"
+        ? task.pomodoroWorkMin
+        : DEFAULT_POMODORO.workMin,
+    breakMin:
+      typeof task.pomodoroBreakMin === "number"
+        ? task.pomodoroBreakMin
+        : DEFAULT_POMODORO.breakMin,
+    cycles:
+      typeof task.pomodoroCycles === "number"
+        ? task.pomodoroCycles
+        : DEFAULT_POMODORO.cycles
+  };
+};
+
+const formatTaskPomodoro = (config: { workMin: number; breakMin: number; cycles: number }) => {
+  const cycleLabel = config.cycles === 0 ? "Endless" : `${config.cycles} cycles`;
+  return `${config.workMin}m focus · ${config.breakMin}m break · ${cycleLabel}`;
+};
+
+
+const deleteTaskById = async (taskId: string) => {
+  const state = await getState();
+  const items = state.tasks.items.filter((item) => item.id !== taskId);
+  const isActive = state.pomodoro.lastTaskId === taskId;
+  const pomodoroUpdate = isActive
+    ? state.pomodoro.running
+      ? { lastTaskId: null }
+      : {
+          lastTaskId: null,
+          workMin: DEFAULT_POMODORO.workMin,
+          breakMin: DEFAULT_POMODORO.breakMin,
+          cycles: DEFAULT_POMODORO.cycles
+        }
+    : { lastTaskId: state.pomodoro.lastTaskId ?? null };
+  await setState({
+    tasks: { items },
+    pomodoro: pomodoroUpdate
+  });
+};
+
+const syncTaskCyclesInput = () => {
+  if (!taskCycles || !taskEndless) {
+    return;
+  }
+  const endlessOn = taskEndless.checked;
+  taskCycles.disabled = endlessOn;
+};
+
+const openTaskModal = (task: StorageSchema["tasks"]["items"][number] | null) => {
+  currentTaskEditId = task?.id ?? null;
+  if (taskModalTitle) {
+    taskModalTitle.textContent = task ? "Edit task" : "New task";
+  }
+  if (taskName) {
+    taskName.value = task?.title ?? "";
+  }
+  const config = getTaskPomodoroConfig(task);
+  if (taskWork) {
+    taskWork.value = String(config.workMin);
+  }
+  if (taskBreak) {
+    taskBreak.value = String(config.breakMin);
+  }
+  if (taskEndless) {
+    taskEndless.checked = config.cycles === 0;
+  }
+  if (taskCycles) {
+    taskCycles.value = String(config.cycles === 0 ? 1 : config.cycles);
+  }
+  if (taskColor) {
+    taskColor.value = task?.color ?? "#9cff3a";
+  }
+  syncTaskCyclesInput();
+  if (taskDelete) {
+    taskDelete.classList.toggle("hidden", !task);
+  }
+  openModal("task");
+};
+
+const openTaskSelectPrompt = (taskId: string | null) => {
+  const title = taskId
+    ? currentTasks?.items.find((item) => item.id === taskId)?.title ?? "Task"
+    : "Default";
+  pendingTaskSelectId = taskId;
+  if (taskSelectLabel) {
+    taskSelectLabel.textContent = `Set "${title}" as active?`;
+  }
+  openModal("taskSelectConfirm");
+};
+
+const setActiveTask = async (taskId: string | null) => {
+  const state = await getState();
+  const task = taskId
+    ? state.tasks.items.find((item) => item.id === taskId) ?? null
+    : null;
+  const config = getTaskPomodoroConfig(task);
+  if (state.pomodoro.running) {
+    await setState({
+      pomodoro: {
+        lastTaskId: task ? task.id : null
+      }
+    });
+  } else {
+    await setState({
+      pomodoro: {
+        lastTaskId: task ? task.id : null,
+        workMin: config.workMin,
+        breakMin: config.breakMin,
+        cycles: config.cycles
+      }
+    });
+  }
+};
+
 // --- Navigation (show one view at a time) ---
 const setActiveView = (viewId: string) => {
   views.forEach((view) => {
@@ -1373,6 +2027,27 @@ const setActiveView = (viewId: string) => {
   const active = navButtons.find((button) => button.dataset.target === viewId);
   const index = active?.dataset.i ?? "0";
   navBar?.style.setProperty("--i", index);
+
+  if (viewId === "stats") {
+    setStatsSubview(currentStatsSubview);
+  }
+};
+
+const setStatsSubview = (view: "summary" | "trend" | "task") => {
+  currentStatsSubview = view;
+  statsSummaryView?.classList.toggle("active", view === "summary");
+  statsTrendView?.classList.toggle("active", view === "trend");
+  statsTaskView?.classList.toggle("active", view === "task");
+};
+
+const openTaskStats = async (taskId: string) => {
+  const state = await getState();
+  const task = state.tasks.items.find((item) => item.id === taskId);
+  currentStatsTaskId = taskId;
+  if (statsTaskTitle) {
+    statsTaskTitle.textContent = task?.title ?? "Task";
+  }
+  setStatsSubview("task");
 };
 
 // --- Theme utilities (sync with OS setting) ---
@@ -1465,38 +2140,33 @@ const bindEvents = () => {
     });
   });
 
-  const readPomodoroConfig = () => {
-    const work = clamp(Number(pomodoroWork?.value ?? 25), 1, 120);
-    const rest = clamp(Number(pomodoroBreak?.value ?? 5), 1, 60);
-    const cycles = clamp(Number(pomodoroCycles?.value ?? 1), 1, 12);
-    const autoBlock = Boolean(pomodoroAutoBlock?.checked);
-    const blockBreak = Boolean(pomodoroBlockBreak?.checked);
-    return { work, rest, cycles, autoBlock, blockBreak };
-  };
-
   pomodoroStart?.addEventListener("click", async () => {
     if (currentStrictActive) {
       return;
     }
-    const config = readPomodoroConfig();
+    const state = await getState();
+    const activeTask = state.pomodoro.lastTaskId
+      ? state.tasks.items.find((item) => item.id === state.pomodoro.lastTaskId) ?? null
+      : null;
+    const config = getTaskPomodoroConfig(activeTask);
     const now = Date.now();
-    const endsAt = now + config.work * 60 * 1000;
+    const endsAt = now + config.workMin * 60 * 1000;
     await setState({
-      focusEnabled: config.autoBlock ? true : currentFocusEnabled,
+      focusEnabled: state.pomodoro.autoBlockDuringWork ? true : currentFocusEnabled,
       pomodoro: {
-        workMin: config.work,
-        breakMin: config.rest,
+        workMin: config.workMin,
+        breakMin: config.breakMin,
         cycles: config.cycles,
-        autoBlockDuringWork: config.autoBlock,
-        blockDuringBreak: config.blockBreak,
-        lastTaskId: selectedTaskId ?? currentPomodoro?.lastTaskId ?? null,
+        autoBlockDuringWork: state.pomodoro.autoBlockDuringWork,
+        blockDuringBreak: state.pomodoro.blockDuringBreak,
+        lastTaskId: activeTask?.id ?? null,
         running: {
           phase: "work",
           startedAt: now,
           endsAt,
           cycleIndex: 0,
           paused: false,
-          linkedTaskId: selectedTaskId ?? null,
+          linkedTaskId: activeTask?.id ?? null,
           prevFocusEnabled: currentFocusEnabled
         }
       }
@@ -1539,98 +2209,151 @@ const bindEvents = () => {
     await setState({ pomodoro: { blockDuringBreak: pomodoroBlockBreak.checked } });
   });
 
-  pomodoroWork?.addEventListener("change", async () => {
-    const value = clamp(Number(pomodoroWork.value), 1, 120);
-    pomodoroWork.value = String(value);
-    await setState({ pomodoro: { workMin: value } });
+  taskAdd?.addEventListener("click", () => {
+    openTaskModal(null);
   });
 
-  pomodoroBreak?.addEventListener("change", async () => {
-    const value = clamp(Number(pomodoroBreak.value), 1, 60);
-    pomodoroBreak.value = String(value);
-    await setState({ pomodoro: { breakMin: value } });
+  taskShowAll?.addEventListener("click", () => {
+    openModal("taskPicker");
   });
 
-  pomodoroCycles?.addEventListener("change", async () => {
-    const value = clamp(Number(pomodoroCycles.value), 1, 12);
-    pomodoroCycles.value = String(value);
-    await setState({ pomodoro: { cycles: value } });
-  });
-
-  pomodoroTaskSelect?.addEventListener("change", async () => {
-    const value = pomodoroTaskSelect.value;
-    selectedTaskId = value ? value : null;
-    await setState({ pomodoro: { lastTaskId: selectedTaskId } });
-  });
-
-  taskEstimate?.addEventListener("input", () => {
-    if (taskEstimateValue) {
-      taskEstimateValue.textContent = `${taskEstimate.value}m`;
-    }
-  });
-
-  taskAdd?.addEventListener("click", async () => {
-    const title = taskTitle?.value.trim() ?? "";
-    if (!title) {
+  taskActiveSettings?.addEventListener("click", () => {
+    const taskId = taskActiveSettings.getAttribute("data-task-settings");
+    if (!taskId || !currentTasks) {
       return;
     }
+    const task = currentTasks.items.find((item) => item.id === taskId) ?? null;
+    if (!task) {
+      return;
+    }
+    openTaskModal(task);
+  });
+
+  taskEndless?.addEventListener("change", () => {
+    syncTaskCyclesInput();
+    if (taskCycles && taskEndless && !taskEndless.checked && !taskCycles.value) {
+      taskCycles.value = "1";
+    }
+  });
+
+  taskSave?.addEventListener("click", async () => {
+    const name = taskName?.value.trim() ?? "";
+    if (!name) {
+      return;
+    }
+    const work = clamp(Number(taskWork?.value ?? DEFAULT_POMODORO.workMin), 1, 120);
+    const rest = clamp(Number(taskBreak?.value ?? DEFAULT_POMODORO.breakMin), 1, 60);
+    const cycles = taskEndless?.checked
+      ? 0
+      : clamp(Number(taskCycles?.value ?? 1), 1, 12);
+    const color = taskColor?.value ?? "#9cff3a";
     const state = await getState();
-    const activeCount = state.tasks.items.filter((item) => !item.doneAt).length;
-    if (activeCount >= state.tasks.activeLimit) {
-      return;
+    const items = [...state.tasks.items];
+    if (currentTaskEditId) {
+      const index = items.findIndex((item) => item.id === currentTaskEditId);
+      if (index >= 0) {
+        items[index] = {
+          ...items[index],
+          title: name,
+          color,
+          pomodoroWorkMin: work,
+          pomodoroBreakMin: rest,
+          pomodoroCycles: cycles,
+          estimateMin: items[index].estimateMin ?? work
+        };
+      }
+    } else {
+      const newTask = {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        title: name,
+        color,
+        pomodoroWorkMin: work,
+        pomodoroBreakMin: rest,
+        pomodoroCycles: cycles,
+        estimateMin: work,
+        createdAt: Date.now(),
+        focusSessionsCompleted: 0
+      };
+      items.push(newTask);
     }
-    const estimate = clamp(Number(taskEstimate?.value ?? 30), 15, 180);
-    const newTask = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      title,
-      estimateMin: estimate,
-      createdAt: Date.now(),
-      focusSessionsCompleted: 0
-    };
-    await setState({ tasks: { items: [...state.tasks.items, newTask] } });
-    if (taskTitle) {
-      taskTitle.value = "";
-    }
+    const isActive = state.pomodoro.lastTaskId === currentTaskEditId;
+    const pomodoroUpdate =
+      isActive && !state.pomodoro.running
+        ? { workMin: work, breakMin: rest, cycles, lastTaskId: currentTaskEditId }
+        : { lastTaskId: state.pomodoro.lastTaskId ?? null };
+    await setState({ tasks: { items }, pomodoro: pomodoroUpdate });
+    closeModal("task");
   });
 
-  taskList?.addEventListener("click", async (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button");
-    const action = button?.dataset.action;
-    if (!action) {
+  taskDelete?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (!currentTaskEditId) {
       return;
     }
-    const row = button?.closest<HTMLElement>("[data-task-id]");
-    const taskId = row?.dataset.taskId;
-    if (!taskId) {
+    currentTaskDeleteId = currentTaskEditId;
+    openModal("taskDeleteConfirm");
+  });
+
+  taskDeleteConfirm?.addEventListener("click", async () => {
+    if (!currentTaskDeleteId) {
       return;
     }
-    const state = await getState();
-    const items = state.tasks.items;
-    if (action === "done") {
-      const updated = items.map((item) =>
-        item.id === taskId && !item.doneAt ? { ...item, doneAt: Date.now() } : item
-      );
-      const shouldClear =
-        selectedTaskId === taskId || state.pomodoro.lastTaskId === taskId;
-      if (selectedTaskId === taskId) {
-        selectedTaskId = null;
+    await deleteTaskById(currentTaskDeleteId);
+    currentTaskDeleteId = null;
+    closeModal("taskDeleteConfirm");
+    closeModal("task");
+  });
+
+  taskDeleteCancel?.addEventListener("click", () => {
+    currentTaskDeleteId = null;
+    closeModal("taskDeleteConfirm");
+  });
+
+  const handleTaskSelectClick = (event: MouseEvent, closePicker?: boolean) => {
+    const target = event.target as HTMLElement;
+    const settingsButton = target.closest<HTMLElement>("[data-task-settings]");
+    if (settingsButton) {
+      const taskId = settingsButton.getAttribute("data-task-settings");
+      if (!taskId || !currentTasks) {
+        return;
       }
-      await setState({
-        tasks: { items: updated },
-        pomodoro: { lastTaskId: shouldClear ? null : state.pomodoro.lastTaskId ?? null }
-      });
-    } else if (action === "remove") {
-      const updated = items.filter((item) => item.id !== taskId);
-      const shouldClear =
-        selectedTaskId === taskId || state.pomodoro.lastTaskId === taskId;
-      if (selectedTaskId === taskId) {
-        selectedTaskId = null;
+      const task = currentTasks.items.find((item) => item.id === taskId) ?? null;
+      if (!task) {
+        return;
       }
-      await setState({
-        tasks: { items: updated },
-        pomodoro: { lastTaskId: shouldClear ? null : state.pomodoro.lastTaskId ?? null }
-      });
+      openTaskModal(task);
+      return;
     }
+    const card = target.closest<HTMLElement>("[data-task-select]");
+    if (!card) {
+      return;
+    }
+    const isDefault = card.hasAttribute("data-task-default");
+    const taskId = isDefault ? null : card.getAttribute("data-task-id");
+    if (!isDefault && !taskId) {
+      return;
+    }
+    if (closePicker) {
+      closeModal("taskPicker");
+    }
+    openTaskSelectPrompt(taskId);
+  };
+
+  taskQuickGrid?.addEventListener("click", (event) => {
+    handleTaskSelectClick(event);
+  });
+
+  taskAllGrid?.addEventListener("click", (event) => {
+    handleTaskSelectClick(event, true);
+  });
+
+  taskSelectConfirm?.addEventListener("click", async () => {
+    if (pendingTaskSelectId === undefined) {
+      return;
+    }
+    await setActiveTask(pendingTaskSelectId ?? null);
+    pendingTaskSelectId = undefined;
+    closeModal("taskSelectConfirm");
   });
 
   strictDurationButtons.forEach((button) => {
@@ -1959,6 +2682,100 @@ const bindEvents = () => {
     });
   });
 
+  statsShowAll?.addEventListener("click", () => {
+    setStatsSubview("trend");
+  });
+
+  statsTrendCard?.addEventListener("click", () => {
+    setStatsSubview("trend");
+  });
+
+  statsTrendCard?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    setStatsSubview("trend");
+  });
+
+  statsBack?.addEventListener("click", () => {
+    setStatsSubview("summary");
+  });
+
+  statsTaskBack?.addEventListener("click", () => {
+    setStatsSubview("trend");
+  });
+
+  statsTrendRangeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const range = button.dataset.range as "day" | "week" | "month" | "year" | undefined;
+      if (!range) {
+        return;
+      }
+      currentTrendRange = range;
+      currentTrendOffset = 0;
+      statsTrendRangeButtons.forEach((btn) => {
+        btn.classList.toggle("active", btn === button);
+      });
+      void getState().then((nextState) => renderStats(nextState));
+    });
+  });
+
+  statsTaskRangeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const range = button.dataset.range as "day" | "week" | "month" | "year" | undefined;
+      if (!range) {
+        return;
+      }
+      currentTaskRange = range;
+      currentTaskOffset = 0;
+      statsTaskRangeButtons.forEach((btn) => {
+        btn.classList.toggle("active", btn === button);
+      });
+      void getState().then((nextState) => renderStats(nextState));
+    });
+  });
+
+  statsDatePrev?.addEventListener("click", () => {
+    currentTrendOffset -= 1;
+    void getState().then((nextState) => renderStats(nextState));
+  });
+
+  statsDateNext?.addEventListener("click", () => {
+    currentTrendOffset += 1;
+    void getState().then((nextState) => renderStats(nextState));
+  });
+
+  statsTaskDatePrev?.addEventListener("click", () => {
+    currentTaskOffset -= 1;
+    void getState().then((nextState) => renderStats(nextState));
+  });
+
+  statsTaskDateNext?.addEventListener("click", () => {
+    currentTaskOffset += 1;
+    void getState().then((nextState) => renderStats(nextState));
+  });
+
+  statsSummaryTasks?.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    const row = target.closest<HTMLElement>(".stats-task-row");
+    const taskId = row?.getAttribute("data-task-id");
+    if (!taskId) {
+      return;
+    }
+    void openTaskStats(taskId);
+  });
+
+  statsTrendTasks?.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    const row = target.closest<HTMLElement>(".stats-task-row");
+    const taskId = row?.getAttribute("data-task-id");
+    if (!taskId) {
+      return;
+    }
+    void openTaskStats(taskId);
+  });
+
   timeMachineDays?.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
     const button = target.closest<HTMLButtonElement>("[data-day]");
@@ -2042,20 +2859,40 @@ const bindEvents = () => {
     downloadCsv(`focusboss-usage-${currentStatsRange}.csv`, rows);
   });
 
+  interventionToggle?.addEventListener("click", () => {
+    const isOpen = interventionDisclosure?.classList.contains("is-open");
+    setInterventionDisclosure(!isOpen);
+  });
+
+  const setActiveIntervention = async (key: InterventionKey) => {
+    const enabled = Object.fromEntries(
+      INTERVENTION_DEFS.map((item) => [item.key, item.key === key])
+    ) as StorageSchema["interventions"]["enabled"];
+    await setState({ interventions: { enabled } });
+    setInterventionDisclosure(false);
+  };
+
   interventionList?.addEventListener("change", async (event) => {
     const target = event.target as HTMLInputElement;
     const key = target.dataset.toggle as InterventionKey | undefined;
     if (!key) {
       return;
     }
-    const enabled = Object.fromEntries(
-      INTERVENTION_DEFS.map((item) => [item.key, item.key === key])
-    ) as StorageSchema["interventions"]["enabled"];
-    await setState({ interventions: { enabled } });
+    await setActiveIntervention(key);
   });
 
   interventionList?.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
+    const settingsButton = target.closest<HTMLElement>("[data-intervention-settings]");
+    if (settingsButton) {
+      const key = settingsButton.getAttribute("data-intervention-settings") as InterventionKey | null;
+      if (!key) {
+        return;
+      }
+      const state = await getState();
+      showInterventionDetail(key, state.interventions);
+      return;
+    }
     if (target.closest("label")) {
       return;
     }
@@ -2064,8 +2901,7 @@ const bindEvents = () => {
     if (!key) {
       return;
     }
-    const state = await getState();
-    showInterventionDetail(key, state.interventions);
+    await setActiveIntervention(key);
   });
 
   interventionClose?.addEventListener("click", () => hideInterventionDetail());
@@ -2161,8 +2997,8 @@ const syncUiFromState = (state: Awaited<ReturnType<typeof getState>>) => {
   currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
   renderStrictSession(state.strictSession);
   renderStrictOverlay(state.strictSession);
-  renderPomodoro(state.pomodoro, state.strictSession.active);
   renderTasks(state.tasks, state.pomodoro);
+  renderPomodoro(state.pomodoro, state.strictSession.active);
   renderLists(state.lists);
   renderInterventions(state.interventions);
   renderStats(state);
