@@ -25,11 +25,17 @@ const focusOffConfirm = document.getElementById("focusOffConfirm") as HTMLButton
 const focusOffCancel = document.getElementById("focusOffCancel") as HTMLButtonElement | null;
 const reviewLink = document.getElementById("reviewLink") as HTMLAnchorElement | null;
 const versionLabel = document.getElementById("versionLabel");
-const statsRangeButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("#statsRange button")
+const statsPomodoroRangeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsPomodoroRange button")
 );
-const statsFilterButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("#statsFilter button")
+const statsUsageSummaryRangeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsUsageSummaryRange button")
+);
+const statsUsageFilterButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsUsageFilter button")
+);
+const statsUsageRangeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsUsageRange button")
 );
 const statsTotalValue = document.getElementById("statsTotalValue");
 const statsList = document.getElementById("statsList");
@@ -51,21 +57,58 @@ const statsFocusButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("#statsFocusToggle button")
 );
 const statsSummaryView = document.getElementById("statsSummaryView");
+const statsSegmentToggle = document.getElementById("statsSegmentToggle");
+const statsSegmentButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsSegmentToggle button")
+);
+const statsPomodoroSegment = document.getElementById("statsPomodoroSegment");
+const statsUsageSegment = document.getElementById("statsUsageSegment");
 const statsTrendView = document.getElementById("statsTrendView");
-const statsTaskView = document.getElementById("statsTaskView");
+const statsUsageTrendView = document.getElementById("statsUsageTrendView");
+const statsTagView = document.getElementById("statsTagView");
 const statsBack = document.getElementById("statsBack") as HTMLButtonElement | null;
-const statsTaskBack = document.getElementById("statsTaskBack") as HTMLButtonElement | null;
+const statsUsageBack = document.getElementById("statsUsageBack") as HTMLButtonElement | null;
+const statsTagBack = document.getElementById("statsTagBack") as HTMLButtonElement | null;
 const statsShowAll = document.getElementById("statsShowAll") as HTMLButtonElement | null;
 const statsTrendCard = document.querySelector<HTMLElement>(".stats-trend-card");
-const statsSummaryTasks = document.getElementById("statsSummaryTasks");
-const statsTrendTasks = document.getElementById("statsTrendTasks");
-const statsTaskTitle = document.getElementById("statsTaskTitle");
+const statsUsageTrendCard = document.getElementById("statsUsageTrendCard");
+const statsSummaryTags = document.getElementById("statsSummaryTags");
+const statsUsageToday = document.getElementById("statsUsageToday");
+const statsUsageTodayChange = document.getElementById("statsUsageTodayChange");
+const statsUsageWeek = document.getElementById("statsUsageWeek");
+const statsUsageWeekChange = document.getElementById("statsUsageWeekChange");
+const statsUsageAvg = document.getElementById("statsUsageAvg");
+const statsUsageChart = document.getElementById("statsUsageChart");
+const statsUsageRing = document.getElementById("statsUsageRing");
+const statsUsageLegend = document.getElementById("statsUsageLegend");
+const statsUsageHeatmap = document.getElementById("statsUsageHeatmap");
+const statsUsageDate = document.getElementById("statsUsageDate");
+const usageTotal = document.getElementById("usageTotal");
+const usageBlocked = document.getElementById("usageBlocked");
+const usageAllowed = document.getElementById("usageAllowed");
+const usageOther = document.getElementById("usageOther");
+const statsTrendTags = document.getElementById("statsTrendTags");
+const statsTagTitle = document.getElementById("statsTagTitle");
 const statsSummaryToday = document.getElementById("statsSummaryToday");
 const statsSummaryTodayChange = document.getElementById("statsSummaryTodayChange");
 const statsSummaryWeek = document.getElementById("statsSummaryWeek");
 const statsSummaryWeekChange = document.getElementById("statsSummaryWeekChange");
 const statsSummaryAvg = document.getElementById("statsSummaryAvg");
 const statsSummaryChart = document.getElementById("statsSummaryChart");
+const statsUsageTrendTotal = document.getElementById("statsUsageTrendTotal");
+const statsUsageTrendChange = document.getElementById("statsUsageTrendChange");
+const statsUsageTrendAvg = document.getElementById("statsUsageTrendAvg");
+const statsUsageTrendAvgChange = document.getElementById("statsUsageTrendAvgChange");
+const statsUsageTrendChart = document.getElementById("statsUsageTrendChart");
+const statsUsageTrendRangeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsUsageTrendRange button")
+);
+const statsUsageTrendFilterButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsUsageTrendFilter button")
+);
+const statsUsageDateLabel = document.getElementById("statsUsageDateLabel");
+const statsUsageDatePrev = document.getElementById("statsUsageDatePrev") as HTMLButtonElement | null;
+const statsUsageDateNext = document.getElementById("statsUsageDateNext") as HTMLButtonElement | null;
 const statsDateLabel = document.getElementById("statsDateLabel");
 const statsDatePrev = document.getElementById("statsDatePrev") as HTMLButtonElement | null;
 const statsDateNext = document.getElementById("statsDateNext") as HTMLButtonElement | null;
@@ -74,31 +117,32 @@ const statsTrendRangeButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("#statsTrendRange button")
 );
 const statsTrendChart = document.getElementById("statsTrendChart");
-const statsTaskDateLabel = document.getElementById("statsTaskDateLabel");
-const statsTaskDatePrev = document.getElementById("statsTaskDatePrev") as HTMLButtonElement | null;
-const statsTaskDateNext = document.getElementById("statsTaskDateNext") as HTMLButtonElement | null;
-const statsTaskRange = document.getElementById("statsTaskRange");
-const statsTaskRangeButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("#statsTaskRangeToggle button")
+const statsTagDateLabel = document.getElementById("statsTagDateLabel");
+const statsTagDatePrev = document.getElementById("statsTagDatePrev") as HTMLButtonElement | null;
+const statsTagDateNext = document.getElementById("statsTagDateNext") as HTMLButtonElement | null;
+const statsTagRange = document.getElementById("statsTagRange");
+const statsTagRangeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#statsTagRangeToggle button")
 );
-const statsTaskChart = document.getElementById("statsTaskChart");
+const statsTagChart = document.getElementById("statsTagChart");
 const statsTrendTotal = document.getElementById("statsTrendTotal");
 const statsTrendChange = document.getElementById("statsTrendChange");
 const statsTrendAvg = document.getElementById("statsTrendAvg");
 const statsTrendAvgChange = document.getElementById("statsTrendAvgChange");
-const statsTaskTotal = document.getElementById("statsTaskTotal");
-const statsTaskChange = document.getElementById("statsTaskChange");
-const statsTaskAvg = document.getElementById("statsTaskAvg");
-const statsTaskAvgChange = document.getElementById("statsTaskAvgChange");
+const statsTagTotal = document.getElementById("statsTagTotal");
+const statsTagChange = document.getElementById("statsTagChange");
+const statsTagAvg = document.getElementById("statsTagAvg");
+const statsTagAvgChange = document.getElementById("statsTagAvgChange");
 const metricFocus = document.getElementById("metricFocus");
 const metricBreak = document.getElementById("metricBreak");
-const metricTasks = document.getElementById("metricTasks");
+const metricTags = document.getElementById("metricTags");
 const metricDistraction = document.getElementById("metricDistraction");
 const statsSessions = document.getElementById("statsSessions");
 const timeMachineDays = document.getElementById("timeMachineDays");
 const timeMachineDetails = document.getElementById("timeMachineDetails");
 const exportSessionsCsv = document.getElementById("exportSessionsCsv") as HTMLButtonElement | null;
 const exportUsageCsv = document.getElementById("exportUsageCsv") as HTMLButtonElement | null;
+const exportBlockedCsv = document.getElementById("exportBlockedCsv") as HTMLButtonElement | null;
 const scheduleAdd = document.getElementById("scheduleAdd");
 const scheduleList = document.getElementById("scheduleList");
 const scheduleTitle = document.getElementById("scheduleTitle");
@@ -107,7 +151,7 @@ const scheduleStart = document.getElementById("scheduleStart") as HTMLInputEleme
 const scheduleEnd = document.getElementById("scheduleEnd") as HTMLInputElement | null;
 const scheduleDays = document.getElementById("scheduleDays");
 const scheduleSave = document.getElementById("scheduleSave");
-const pomodoroTaskPill = document.getElementById("pomodoroTaskPill");
+const pomodoroTagPill = document.getElementById("pomodoroTagPill");
 const pomodoroRing = document.getElementById("pomodoroRing") as SVGCircleElement | null;
 const pomodoroTimerValue = document.getElementById("pomodoroTimerValue");
 const pomodoroPhasePill = document.getElementById("pomodoroPhasePill");
@@ -169,30 +213,30 @@ const interventionClose = document.getElementById("interventionClose");
 const durationRow = document.getElementById("durationRow");
 const techniqueRow = document.getElementById("techniqueRow");
 const pausableRow = document.getElementById("pausableRow");
-const taskActiveDetail = document.getElementById("taskActiveDetail");
-const taskActiveDot = document.getElementById("taskActiveDot");
-const taskActiveSettings = document.getElementById("taskActiveSettings") as HTMLButtonElement | null;
-const taskNameDisplay = document.getElementById("taskNameDisplay");
+const tagActiveDetail = document.getElementById("tagActiveDetail");
+const tagActiveDot = document.getElementById("tagActiveDot");
+const tagActiveSettings = document.getElementById("tagActiveSettings") as HTMLButtonElement | null;
+const tagNameDisplay = document.getElementById("tagNameDisplay");
 const pomodoroFocusValue = document.getElementById("pomodoroFocusValue");
 const pomodoroBreakValue = document.getElementById("pomodoroBreakValue");
 const pomodoroCycleValue = document.getElementById("pomodoroCycleValue");
-const taskQuickGrid = document.getElementById("taskQuickGrid");
-const taskShowAll = document.getElementById("taskShowAll") as HTMLButtonElement | null;
-const taskAllGrid = document.getElementById("taskAllGrid");
-const taskSelectLabel = document.getElementById("taskSelectLabel");
-const taskSelectConfirm = document.getElementById("taskSelectConfirm") as HTMLButtonElement | null;
-const taskAdd = document.getElementById("taskAdd") as HTMLButtonElement | null;
-const taskModalTitle = document.getElementById("taskModalTitle");
-const taskName = document.getElementById("taskName") as HTMLInputElement | null;
-const taskWork = document.getElementById("taskWork") as HTMLInputElement | null;
-const taskBreak = document.getElementById("taskBreak") as HTMLInputElement | null;
-const taskCycles = document.getElementById("taskCycles") as HTMLInputElement | null;
-const taskEndless = document.getElementById("taskEndless") as HTMLInputElement | null;
-const taskColor = document.getElementById("taskColor") as HTMLInputElement | null;
-const taskSave = document.getElementById("taskSave");
-const taskDelete = document.getElementById("taskDelete");
-const taskDeleteConfirm = document.getElementById("taskDeleteConfirm") as HTMLButtonElement | null;
-const taskDeleteCancel = document.getElementById("taskDeleteCancel") as HTMLButtonElement | null;
+const tagQuickGrid = document.getElementById("tagQuickGrid");
+const tagShowAll = document.getElementById("tagShowAll") as HTMLButtonElement | null;
+const tagAllGrid = document.getElementById("tagAllGrid");
+const tagSelectLabel = document.getElementById("tagSelectLabel");
+const tagSelectConfirm = document.getElementById("tagSelectConfirm") as HTMLButtonElement | null;
+const tagAdd = document.getElementById("tagAdd") as HTMLButtonElement | null;
+const tagModalTitle = document.getElementById("tagModalTitle");
+const tagName = document.getElementById("tagName") as HTMLInputElement | null;
+const tagWork = document.getElementById("tagWork") as HTMLInputElement | null;
+const tagBreak = document.getElementById("tagBreak") as HTMLInputElement | null;
+const tagCycles = document.getElementById("tagCycles") as HTMLInputElement | null;
+const tagEndless = document.getElementById("tagEndless") as HTMLInputElement | null;
+const tagColor = document.getElementById("tagColor") as HTMLInputElement | null;
+const tagSave = document.getElementById("tagSave");
+const tagDelete = document.getElementById("tagDelete");
+const tagDeleteConfirm = document.getElementById("tagDeleteConfirm") as HTMLButtonElement | null;
+const tagDeleteCancel = document.getElementById("tagDeleteCancel") as HTMLButtonElement | null;
 const PAUSE_TYPES = ["1h", "eod", "manual"] as const;
 type PauseType = (typeof PAUSE_TYPES)[number];
 
@@ -250,16 +294,22 @@ let currentStatusDetail = "";
 let currentListType: "blocked" | "allowed" | "advanced" = "blocked";
 let currentEntryType: "domain" | "keyword" = "domain";
 let currentInterventionKey: InterventionKey | null = null;
-let currentStatsRange: "today" | "week" | "month" = "today";
-let currentStatsFilter: "all" | "blocked" = "all";
+let currentPomodoroSummaryRange: "today" | "week" | "month" = "today";
+let currentUsageSummaryRange: "today" | "week" | "month" = "today";
+let currentStatsFilter: "all" | "blocked" | "allowed" = "all";
 let currentStatsTheme: "default" | "citrus" | "ocean" | "warm" = "default";
 let currentStatsPanel: "usage" | "domains" = "usage";
-let currentStatsSubview: "summary" | "trend" | "task" = "summary";
-let currentStatsTaskId: string | null = null;
+let currentStatsSubview: "summary" | "trend" | "usage-trend" | "tag" = "summary";
+let currentStatsSegment: "pomodoro" | "usage" = "pomodoro";
+let currentUsageRange: "today" | "week" | "month" = "week";
+let currentStatsTagId: string | null = null;
 let currentTrendRange: "day" | "week" | "month" | "year" = "week";
 let currentTrendOffset = 0;
-let currentTaskRange: "day" | "week" | "month" | "year" = "week";
-let currentTaskOffset = 0;
+let currentUsageTrendRange: "day" | "week" | "month" | "year" = "week";
+let currentUsageTrendOffset = 0;
+let currentUsageTrendFilter: "all" | "allowed" | "blocked" = "all";
+let currentTagRange: "day" | "week" | "month" | "year" = "week";
+let currentTagOffset = 0;
 let currentFocusView: "focus" | "distraction" = "focus";
 let currentTimeMachineDay = "";
 let pendingFocusOff = false;
@@ -272,11 +322,11 @@ let currentStrictStartedAt: number | null = null;
 let strictOverlayDismissed = false;
 let currentPomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"] | null = null;
 let pomodoroTicker: number | null = null;
-let currentTasks: Awaited<ReturnType<typeof getState>>["tasks"] | null = null;
-let lastTasksKey = "";
-let currentTaskEditId: string | null = null;
-let currentTaskDeleteId: string | null = null;
-let pendingTaskSelectId: string | null | undefined = undefined;
+let currentTags: Awaited<ReturnType<typeof getState>>["tags"] | null = null;
+let lastTagsKey = "";
+let currentTagEditId: string | null = null;
+let currentTagDeleteId: string | null = null;
+let pendingTagSelectId: string | null | undefined = undefined;
 let lastPomodoroAdvanceKey = "";
 let lastPomodoroAdvanceAttemptAt = 0;
 
@@ -498,16 +548,16 @@ const renderPomodoro = (
     );
   };
 
-  const activeTaskName = (() => {
-    if (!pomodoro.lastTaskId || !currentTasks) {
+  const activeTagName = (() => {
+    if (!pomodoro.lastTagId || !currentTags) {
       return "Default";
     }
-    const task = currentTasks.items.find((item) => item.id === pomodoro.lastTaskId);
-    return task?.title ?? "Default";
+    const tag = currentTags.items.find((item) => item.id === pomodoro.lastTagId);
+    return tag?.title ?? "Default";
   })();
-  if (pomodoroTaskPill) {
-    pomodoroTaskPill.textContent = truncateLabel(activeTaskName, 16);
-    pomodoroTaskPill.setAttribute("title", activeTaskName);
+  if (pomodoroTagPill) {
+    pomodoroTagPill.textContent = truncateLabel(activeTagName, 16);
+    pomodoroTagPill.setAttribute("title", activeTagName);
   }
 
   if (!running) {
@@ -571,39 +621,39 @@ const requestPomodoroAdvance = async () => {
   });
 };
 
-const getTaskPickerKey = (
-  tasks: Awaited<ReturnType<typeof getState>>["tasks"],
+const getTagPickerKey = (
+  tags: Awaited<ReturnType<typeof getState>>["tags"],
   pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
 ) => {
-  const itemsKey = tasks.items
+  const itemsKey = tags.items
     .map(
       (item) =>
         `${item.id}:${item.title}:${item.color}:${item.pomodoroWorkMin}:${item.pomodoroBreakMin}:${item.pomodoroCycles}`
     )
     .join("|");
-  return `${pomodoro.lastTaskId ?? "default"}::${itemsKey}`;
+  return `${pomodoro.lastTagId ?? "default"}::${itemsKey}`;
 };
 
-const renderTasks = (
-  tasks: Awaited<ReturnType<typeof getState>>["tasks"],
+const renderTags = (
+  tags: Awaited<ReturnType<typeof getState>>["tags"],
   pomodoro: Awaited<ReturnType<typeof getState>>["pomodoro"]
 ) => {
-  const nextKey = getTaskPickerKey(tasks, pomodoro);
-  if (nextKey === lastTasksKey) {
+  const nextKey = getTagPickerKey(tags, pomodoro);
+  if (nextKey === lastTagsKey) {
     return;
   }
-  lastTasksKey = nextKey;
-  currentTasks = tasks;
+  lastTagsKey = nextKey;
+  currentTags = tags;
   const isRunning = Boolean(pomodoro.running);
-  const activeTask = pomodoro.lastTaskId
-    ? tasks.items.find((item) => item.id === pomodoro.lastTaskId) ?? null
+  const activeTag = pomodoro.lastTagId
+    ? tags.items.find((item) => item.id === pomodoro.lastTagId) ?? null
     : null;
-  if (pomodoro.lastTaskId && !activeTask) {
+  if (pomodoro.lastTagId && !activeTag) {
     void setState({
       pomodoro: isRunning
-        ? { lastTaskId: null }
+        ? { lastTagId: null }
         : {
-            lastTaskId: null,
+            lastTagId: null,
             workMin: DEFAULT_POMODORO.workMin,
             breakMin: DEFAULT_POMODORO.breakMin,
             cycles: DEFAULT_POMODORO.cycles
@@ -611,7 +661,7 @@ const renderTasks = (
     });
   } else if (
     !isRunning &&
-    !activeTask &&
+    !activeTag &&
     (pomodoro.workMin !== DEFAULT_POMODORO.workMin ||
       pomodoro.breakMin !== DEFAULT_POMODORO.breakMin ||
       pomodoro.cycles !== DEFAULT_POMODORO.cycles)
@@ -625,24 +675,24 @@ const renderTasks = (
     });
   }
 
-  if (taskNameDisplay) {
-    taskNameDisplay.textContent = activeTask ? activeTask.title : "Default";
-    taskNameDisplay.setAttribute("title", activeTask ? activeTask.title : "Default");
+  if (tagNameDisplay) {
+    tagNameDisplay.textContent = activeTag ? activeTag.title : "Default";
+    tagNameDisplay.setAttribute("title", activeTag ? activeTag.title : "Default");
   }
-  const activeConfig = getTaskPomodoroConfig(activeTask);
-  if (taskActiveDetail) {
-    taskActiveDetail.textContent = formatTaskPomodoro(activeConfig);
+  const activeConfig = getTagPomodoroConfig(activeTag);
+  if (tagActiveDetail) {
+    tagActiveDetail.textContent = formatTagPomodoro(activeConfig);
   }
-  if (taskActiveDot) {
-    taskActiveDot.style.background = activeTask?.color ?? "var(--color-accent)";
+  if (tagActiveDot) {
+    tagActiveDot.style.background = activeTag?.color ?? "var(--color-accent)";
   }
-  if (taskActiveSettings) {
-    if (activeTask) {
-      taskActiveSettings.classList.remove("hidden");
-      taskActiveSettings.setAttribute("data-task-settings", activeTask.id);
+  if (tagActiveSettings) {
+    if (activeTag) {
+      tagActiveSettings.classList.remove("hidden");
+      tagActiveSettings.setAttribute("data-tag-settings", activeTag.id);
     } else {
-      taskActiveSettings.classList.add("hidden");
-      taskActiveSettings.removeAttribute("data-task-settings");
+      tagActiveSettings.classList.add("hidden");
+      tagActiveSettings.removeAttribute("data-tag-settings");
     }
   }
   if (pomodoroFocusValue) {
@@ -661,71 +711,71 @@ const renderTasks = (
     const gear = isDefault
       ? ""
       : `
-        <button class="task-gear" type="button" data-task-settings="${item.id}" aria-label="Open settings">
+        <button class="tag-gear" type="button" data-tag-settings="${item.id}" aria-label="Open settings">
           <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
             <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
       `;
-    const dataAttr = isDefault ? 'data-task-default="true"' : `data-task-id="${item.id}"`;
+    const dataAttr = isDefault ? 'data-tag-default="true"' : `data-tag-id="${item.id}"`;
     return `
-      <div class="task-quick-card" data-task-select ${dataAttr}>
-        <div class="task-quick-top">
-          <span class="task-color-dot" style="background:${item.color}"></span>
+      <div class="tag-quick-card" data-tag-select ${dataAttr}>
+        <div class="tag-quick-top">
+          <span class="tag-color-dot" style="background:${item.color}"></span>
           ${gear}
         </div>
-        <div class="task-title" title="${item.title}">${item.title}</div>
-        <p class="task-desc">${item.detail}</p>
+        <div class="tag-title" title="${item.title}">${item.title}</div>
+        <p class="tag-desc">${item.detail}</p>
       </div>
     `;
   };
 
-  type TaskCardItem = {
+  type TagCardItem = {
     id: string | null;
     title: string;
     color: string;
     detail: string;
   };
 
-  const defaultItem: TaskCardItem = {
+  const defaultItem: TagCardItem = {
     id: null,
     title: "Default",
     color: "var(--color-accent)",
-    detail: formatTaskPomodoro(DEFAULT_POMODORO)
+    detail: formatTagPomodoro(DEFAULT_POMODORO)
   };
 
-  if (taskQuickGrid) {
-    const quickItems: TaskCardItem[] = [];
-    if (activeTask) {
+  if (tagQuickGrid) {
+    const quickItems: TagCardItem[] = [];
+    if (activeTag) {
       quickItems.push(defaultItem);
     }
-    tasks.items
-      .filter((item) => item.id !== activeTask?.id)
+    tags.items
+      .filter((item) => item.id !== activeTag?.id)
       .forEach((item) => {
         quickItems.push({
           id: item.id,
           title: item.title,
           color: item.color ?? "var(--color-accent)",
-          detail: formatTaskPomodoro(getTaskPomodoroConfig(item))
+          detail: formatTagPomodoro(getTagPomodoroConfig(item))
         });
       });
     const quickCards = quickItems.slice(0, 4).map(buildCard).join("");
-    taskQuickGrid.innerHTML = quickCards
+    tagQuickGrid.innerHTML = quickCards
       ? quickCards
-      : `<p class="list-sub" style="grid-column: 1 / -1;">No tasks yet.</p>`;
+      : `<p class="list-sub" style="grid-column: 1 / -1;">No tags yet.</p>`;
   }
 
-  if (taskAllGrid) {
+  if (tagAllGrid) {
     const allItems = [
       defaultItem,
-      ...tasks.items.map((item) => ({
+      ...tags.items.map((item) => ({
         id: item.id,
         title: item.title,
         color: item.color ?? "var(--color-accent)",
-        detail: formatTaskPomodoro(getTaskPomodoroConfig(item))
+        detail: formatTagPomodoro(getTagPomodoroConfig(item))
       }))
     ];
-    taskAllGrid.innerHTML = allItems.map(buildCard).join("");
+    tagAllGrid.innerHTML = allItems.map(buildCard).join("");
   }
 };
 
@@ -836,11 +886,11 @@ const formatTimeLabel = (timestamp: number): string => {
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 };
 
-const buildTaskTotals = (state: StorageSchema, keys: string[]) => {
+const buildTagTotals = (state: StorageSchema, keys: string[]) => {
   const keySet = new Set(keys);
   const totals = new Map<string, number>();
   state.analytics.sessions.forEach((session) => {
-    if (session.type !== "pomodoro" || !session.taskId) {
+    if (session.type !== "pomodoro" || !session.tagId) {
       return;
     }
     const key = getDayKey(new Date(session.startedAt));
@@ -848,13 +898,13 @@ const buildTaskTotals = (state: StorageSchema, keys: string[]) => {
       return;
     }
     const duration = Math.max(0, session.endedAt - session.startedAt);
-    totals.set(session.taskId, (totals.get(session.taskId) ?? 0) + duration);
+    totals.set(session.tagId, (totals.get(session.tagId) ?? 0) + duration);
   });
-  const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item.title]));
+  const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
   const items = Array.from(totals.entries())
     .map(([id, totalMs]) => ({
       id,
-      title: taskLookup.get(id) ?? "Task",
+      title: tagLookup.get(id) ?? "Tag",
       totalMs
     }))
     .sort((a, b) => b.totalMs - a.totalMs);
@@ -862,10 +912,141 @@ const buildTaskTotals = (state: StorageSchema, keys: string[]) => {
   return { items, totalAll };
 };
 
+const buildUsageTotals = (state: StorageSchema, keys: string[]) => {
+  const allowedSet = new Set(state.lists.allowedDomains.map((host) => host.toLowerCase()));
+  let totalMs = 0;
+  let blockedMs = 0;
+  let allowedMs = 0;
+  keys.forEach((key) => {
+    const day = state.analytics.byDay[key];
+    if (!day) {
+      return;
+    }
+    totalMs += day.totalMs ?? 0;
+    blockedMs += day.blockedMs ?? 0;
+    Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
+      if (allowedSet.has(host.toLowerCase())) {
+        allowedMs += value;
+      }
+    });
+  });
+  const otherMs = Math.max(0, totalMs - allowedMs - blockedMs);
+  return { totalMs, blockedMs, allowedMs, otherMs };
+};
+
+const buildUsageTrendBuckets = (
+  state: StorageSchema,
+  range: "day" | "week" | "month" | "year",
+  start: Date,
+  end: Date,
+  filter: "all" | "allowed" | "blocked"
+) => {
+  const allowedSet = new Set(state.lists.allowedDomains.map((host) => host.toLowerCase()));
+  const bucketCount = range === "year" ? 12 : range === "day" ? 6 : range === "week" ? 7 : 5;
+  const buckets = new Array(bucketCount).fill(0).map(() => ({
+    allowedMs: 0,
+    blockedMs: 0,
+    otherMs: 0
+  }));
+  const labels =
+    range === "year"
+      ? new Array(12).fill("").map((_, idx) =>
+          new Date(start.getFullYear(), idx, 1).toLocaleDateString(undefined, { month: "short" })
+        )
+      : range === "day"
+        ? ["0", "4", "8", "12", "16", "20"]
+        : range === "week"
+          ? new Array(7).fill("").map((_, idx) => {
+              const day = addDays(start, idx);
+              return day.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 1);
+            })
+          : new Array(5).fill("").map((_, idx) => `W${idx + 1}`);
+
+  const getBucketIndex = (date: Date) => {
+    if (range === "year") {
+      return date.getMonth();
+    }
+    if (range === "day") {
+      return Math.min(5, Math.floor(date.getHours() / 4));
+    }
+    if (range === "week") {
+      const index = Math.floor((startOfDay(date).getTime() - start.getTime()) / 86400000);
+      return Math.min(6, Math.max(0, index));
+    }
+    const day = date.getDate();
+    return Math.min(4, Math.floor((day - 1) / 7));
+  };
+
+  const dayBuckets = new Map<string, { totalMs: number; blockedMs: number; allowedMs: number }>();
+  if (range === "day") {
+    const dayKey = getDayKey(start);
+    const day = state.analytics.byDay[dayKey];
+    if (day) {
+      const totalMs = day.totalMs ?? 0;
+      const blockedMs = day.blockedMs ?? 0;
+      const allowedMs = Object.entries(day.byDomain ?? {}).reduce((sum, [host, value]) => {
+        return allowedSet.has(host.toLowerCase()) ? sum + value : sum;
+      }, 0);
+      dayBuckets.set(dayKey, { totalMs, blockedMs, allowedMs });
+      const hourTotals = day.byHourMs ?? {};
+      const hourBlocked = day.byHourBlockedMs ?? {};
+      Object.entries(hourTotals).forEach(([hour, value]) => {
+        const date = new Date(start);
+        date.setHours(Number(hour), 0, 0, 0);
+        const index = getBucketIndex(date);
+        const blocked = hourBlocked[hour] ?? 0;
+        const allowedRatio = totalMs > 0 ? allowedMs / totalMs : 0;
+        const allowed = value * allowedRatio;
+        const other = Math.max(0, value - blocked - allowed);
+        buckets[index].allowedMs += allowed;
+        buckets[index].blockedMs += blocked;
+        buckets[index].otherMs += other;
+      });
+    }
+  } else {
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      const dayKey = getDayKey(cursor);
+      const day = state.analytics.byDay[dayKey];
+      if (day) {
+        const totalMs = day.totalMs ?? 0;
+        const blockedMs = day.blockedMs ?? 0;
+        const allowedMs = Object.entries(day.byDomain ?? {}).reduce((sum, [host, value]) => {
+          return allowedSet.has(host.toLowerCase()) ? sum + value : sum;
+        }, 0);
+        const index = getBucketIndex(cursor);
+        const otherMs = Math.max(0, totalMs - allowedMs - blockedMs);
+        buckets[index].allowedMs += allowedMs;
+        buckets[index].blockedMs += blockedMs;
+        buckets[index].otherMs += otherMs;
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  }
+
+  return buckets.map((bucket, idx) => {
+    const segments =
+      filter === "allowed"
+        ? [{ id: "allowed", color: "var(--usage-allowed)", value: bucket.allowedMs }]
+        : filter === "blocked"
+          ? [{ id: "blocked", color: "var(--usage-blocked)", value: bucket.blockedMs }]
+          : [
+              { id: "allowed", color: "var(--usage-allowed)", value: bucket.allowedMs },
+              { id: "other", color: "var(--usage-other)", value: bucket.otherMs },
+              { id: "blocked", color: "var(--usage-blocked)", value: bucket.blockedMs }
+            ];
+    return {
+      label: labels[idx],
+      total: bucket.allowedMs + bucket.otherMs + bucket.blockedMs,
+      segments: segments.filter((segment) => segment.value > 0)
+    };
+  });
+};
+
 const buildFocusTotals = (
   state: StorageSchema,
   keys: string[],
-  taskId?: string | null
+  tagId?: string | null
 ) => {
   const keySet = new Set(keys);
   let totalMs = 0;
@@ -873,7 +1054,7 @@ const buildFocusTotals = (
     if (session.type !== "pomodoro") {
       return;
     }
-    if (taskId && session.taskId !== taskId) {
+    if (tagId && session.tagId !== tagId) {
       return;
     }
     const key = getDayKey(new Date(session.startedAt));
@@ -891,9 +1072,9 @@ const buildStackedTrendBuckets = (
   range: "day" | "week" | "month" | "year",
   start: Date,
   end: Date,
-  taskId?: string | null
+  tagId?: string | null
 ) => {
-  const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item]));
+  const tagLookup = new Map(state.tags.items.map((item) => [item.id, item]));
   const totals = new Map<string, number>();
   const bucketCount = range === "year" ? 12 : range === "day" ? 6 : range === "week" ? 7 : 5;
   const bucketMaps = new Array(bucketCount).fill(0).map(() => new Map<string, number>());
@@ -928,37 +1109,37 @@ const buildStackedTrendBuckets = (
 
   state.analytics.sessions.forEach((session) => {
     if (session.type !== "pomodoro") return;
-    if (!session.taskId) return;
-    if (taskId && session.taskId !== taskId) return;
+    if (!session.tagId) return;
+    if (tagId && session.tagId !== tagId) return;
     const date = new Date(session.startedAt);
     if (date < start || date > end) return;
     const index = getBucketIndex(date);
     if (index < 0 || index >= bucketMaps.length) return;
     const duration = Math.max(0, session.endedAt - session.startedAt);
     const map = bucketMaps[index];
-    map.set(session.taskId, (map.get(session.taskId) ?? 0) + duration);
-    totals.set(session.taskId, (totals.get(session.taskId) ?? 0) + duration);
+    map.set(session.tagId, (map.get(session.tagId) ?? 0) + duration);
+    totals.set(session.tagId, (totals.get(session.tagId) ?? 0) + duration);
   });
 
-  const orderedTaskIds = taskId
-    ? [taskId]
+  const orderedTagIds = tagId
+    ? [tagId]
     : Array.from(totals.entries())
         .sort((a, b) => b[1] - a[1])
         .map(([id]) => id);
 
   return labels.map((label, idx) => {
     const bucketMap = bucketMaps[idx];
-    const segments = orderedTaskIds
+    const segments = orderedTagIds
       .map((id) => {
         const value = bucketMap.get(id) ?? 0;
         if (value <= 0) {
           return null;
         }
-        const task = taskLookup.get(id);
+        const tag = tagLookup.get(id);
         return {
           id,
-          title: task?.title ?? "Task",
-          color: task?.color ?? "var(--color-accent)",
+          title: tag?.title ?? "Tag",
+          color: tag?.color ?? "var(--color-accent)",
           value
         };
       })
@@ -1122,6 +1303,83 @@ const renderDonut = (
     .join("");
 };
 
+const renderRingChart = (
+  target: HTMLElement | null,
+  legend: HTMLElement | null,
+  entries: Array<{ label: string; value: number }>,
+  total: number,
+  themeId: "default" | "citrus" | "ocean" | "warm"
+) => {
+  if (!target || !legend) {
+    return;
+  }
+  if (!entries.length || total <= 0) {
+    target.innerHTML = `
+      <svg viewBox="0 0 42 42" role="img" aria-label="No data">
+        <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
+      </svg>
+    `;
+    legend.innerHTML = `<p class="list-sub">No data yet.</p>`;
+    return;
+  }
+
+  const colors = THEME_COLORS[themeId];
+  const segments = entries.map((entry) => ({
+    ...entry,
+    pct: total ? (entry.value / total) * 100 : 0
+  }));
+  const otherValue = Math.max(
+    0,
+    total - segments.reduce((acc, seg) => acc + seg.value, 0)
+  );
+  if (otherValue > 0) {
+    segments.push({ label: "Other", value: otherValue, pct: (otherValue / total) * 100 });
+  }
+
+  let offset = 0;
+  const circles = segments
+    .map((seg, idx) => {
+      const pct = Math.max(0, Math.min(100, seg.pct));
+      const dash = `${pct} ${100 - pct}`;
+      const color = colors[idx % colors.length];
+      const circle = `
+        <circle
+          cx="21"
+          cy="21"
+          r="15.9155"
+          fill="transparent"
+          stroke="${color}"
+          stroke-width="6"
+          stroke-dasharray="${dash}"
+          stroke-dashoffset="${offset}"
+        ></circle>
+      `;
+      offset -= pct;
+      return circle;
+    })
+    .join("");
+
+  target.innerHTML = `
+    <svg viewBox="0 0 42 42" role="img" aria-label="Usage breakdown">
+      <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
+      ${circles}
+    </svg>
+  `;
+
+  legend.innerHTML = segments
+    .map((seg, idx) => {
+      const color = colors[idx % colors.length];
+      return `
+        <div class="legend-item">
+          <span class="legend-dot" style="background:${color}"></span>
+          <span class="legend-label">${seg.label}</span>
+          <span class="legend-value">${formatDuration(seg.value)}</span>
+        </div>
+      `;
+    })
+    .join("");
+};
+
 const renderMetrics = (state: StorageSchema, keys: string[]) => {
   const keySet = new Set(keys);
   const sessionsInRange = state.analytics.sessions.filter((session) => {
@@ -1134,7 +1392,7 @@ const renderMetrics = (state: StorageSchema, keys: string[]) => {
   );
   const pomodoroSessions = sessionsInRange.filter((session) => session.type === "pomodoro").length;
   const breakMsEst = pomodoroSessions * state.pomodoro.breakMin * 60 * 1000;
-  const tasksCompleted = state.tasks.items.filter((item) => {
+  const tagsCompleted = state.tags.items.filter((item) => {
     if (!item.doneAt) {
       return false;
     }
@@ -1145,7 +1403,7 @@ const renderMetrics = (state: StorageSchema, keys: string[]) => {
 
   if (metricFocus) metricFocus.textContent = formatDuration(focusMs);
   if (metricBreak) metricBreak.textContent = formatDuration(breakMsEst);
-  if (metricTasks) metricTasks.textContent = String(tasksCompleted);
+  if (metricTags) metricTags.textContent = String(tagsCompleted);
   if (metricDistraction) metricDistraction.textContent = formatDuration(distractionMs);
 };
 
@@ -1154,7 +1412,7 @@ const renderSessions = (state: StorageSchema, keys: string[]) => {
     return;
   }
   const keySet = new Set(keys);
-  const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item.title]));
+  const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
   const sessions = [...state.analytics.sessions]
     .filter((session) => keySet.has(getDayKey(new Date(session.startedAt))))
     .sort((a, b) => b.startedAt - a.startedAt)
@@ -1168,7 +1426,7 @@ const renderSessions = (state: StorageSchema, keys: string[]) => {
   statsSessions.innerHTML = sessions
     .map((session) => {
       const duration = Math.max(0, session.endedAt - session.startedAt);
-      const taskTitle = session.taskId ? taskLookup.get(session.taskId) : null;
+      const tagTitle = session.tagId ? tagLookup.get(session.tagId) : null;
       const label = session.type === "strict" ? "Strict session" : "Pomodoro focus";
       const timeLabel = `${formatTimeLabel(session.startedAt)} · ${formatDuration(duration)}`;
       return `
@@ -1177,7 +1435,7 @@ const renderSessions = (state: StorageSchema, keys: string[]) => {
             <div class="session-title">${label}</div>
             <div class="session-meta">
               <span>${timeLabel}</span>
-              ${taskTitle ? `<span>Task: ${taskTitle}</span>` : ""}
+              ${tagTitle ? `<span>Tag: ${tagTitle}</span>` : ""}
             </div>
           </div>
         </div>
@@ -1186,46 +1444,50 @@ const renderSessions = (state: StorageSchema, keys: string[]) => {
     .join("");
 };
 
-const renderTaskLists = (state: StorageSchema, keys: string[]) => {
-  const { items, totalAll } = buildTaskTotals(state, keys);
-  const renderList = (target: HTMLElement | null, limit?: number, compact?: boolean) => {
+const renderTagLists = (
+  state: StorageSchema,
+  summaryKeys: string[],
+  trendKeys: string[]
+) => {
+  const renderGrid = (
+    target: HTMLElement | null,
+    items: Array<{ id: string; title: string; totalMs: number }>,
+    totalAll: number,
+    limit?: number
+  ) => {
     if (!target) {
       return;
     }
     const sliced = typeof limit === "number" ? items.slice(0, limit) : items;
     if (sliced.length === 0) {
-      target.innerHTML = `<p class="list-sub">No task data yet.</p>`;
+      target.innerHTML = `<p class="list-sub">No tag data yet.</p>`;
       return;
     }
     target.innerHTML = sliced
       .map((item) => {
         const pct = totalAll ? Math.round((item.totalMs / totalAll) * 100) : 0;
-        if (compact) {
-          return `
-            <div class="stats-task-card" data-task-id="${item.id}">
-              <div class="stats-task-title">${item.title}</div>
-              <div class="stats-task-meta">
-                <span>${formatDuration(item.totalMs)}</span>
-                <span>·</span>
-                <span>${pct}%</span>
-              </div>
-            </div>
-          `;
-        }
+        const color =
+          state.tags.items.find((tag) => tag.id === item.id)?.color ?? "var(--color-accent)";
         return `
-          <div class="list-item stats-task-row" data-task-id="${item.id}">
-            <div>
-              <div class="list-title">${item.title}</div>
-              <div class="list-sub">${formatDuration(item.totalMs)} · ${pct}%</div>
+          <div class="stats-tag-card" data-tag-id="${item.id}">
+            <div class="stats-tag-title">
+              <span class="stats-tag-dot" style="background:${color};"></span>
+              ${item.title}
             </div>
-            <div class="stats-pill">${pct}%</div>
+            <div class="stats-tag-meta">
+              <span>${formatDuration(item.totalMs)}</span>
+              <span>·</span>
+              <span>${pct}%</span>
+            </div>
           </div>
         `;
       })
       .join("");
   };
-  renderList(statsSummaryTasks, 4, true);
-  renderList(statsTrendTasks);
+  const summaryTotals = buildTagTotals(state, summaryKeys);
+  const trendTotals = buildTagTotals(state, trendKeys);
+  renderGrid(statsSummaryTags, summaryTotals.items, summaryTotals.totalAll, 4);
+  renderGrid(statsTrendTags, trendTotals.items, trendTotals.totalAll);
 };
 
 const renderTimeline = (state: StorageSchema, keys: string[]) => {
@@ -1322,11 +1584,17 @@ const renderTimeMachine = (state: StorageSchema) => {
 
 const renderStats = (state: StorageSchema) => {
   const analytics = state.analytics;
-  statsRangeButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.range === currentStatsRange);
+  statsPomodoroRangeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.range === currentPomodoroSummaryRange);
   });
-  statsFilterButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.filter === currentStatsFilter);
+  statsUsageSummaryRangeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.range === currentUsageSummaryRange);
+  });
+  statsUsageFilterButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.usageFilter === currentStatsFilter);
+  });
+  statsUsageRangeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.usageRange === currentUsageRange);
   });
   statsThemeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.theme === currentStatsTheme);
@@ -1335,18 +1603,28 @@ const renderStats = (state: StorageSchema) => {
     button.classList.toggle("active", button.dataset.focusMode === currentFocusView);
   });
 
-  if (statsSummaryView || statsTrendView || statsTaskView) {
+  if (statsSummaryView || statsTrendView || statsUsageTrendView || statsTagView) {
     setStatsSubview(currentStatsSubview);
   }
-  const rangeLabel =
-    currentStatsRange === "today"
+  setStatsSegment(currentStatsSegment);
+  const pomodoroRangeLabel =
+    currentPomodoroSummaryRange === "today"
       ? "Today"
-      : currentStatsRange === "week"
+      : currentPomodoroSummaryRange === "week"
         ? "This week"
         : "This month";
   const summaryDate = document.getElementById("statsSummaryDate");
   if (summaryDate) {
-    summaryDate.textContent = rangeLabel;
+    summaryDate.textContent = pomodoroRangeLabel;
+  }
+  const usageRangeLabel =
+    currentUsageSummaryRange === "today"
+      ? "Today"
+      : currentUsageSummaryRange === "week"
+        ? "This week"
+        : "This month";
+  if (statsUsageDate) {
+    statsUsageDate.textContent = usageRangeLabel;
   }
   if (statsThemeControl) {
     statsThemeControl.classList.toggle("hidden", currentStatsPanel !== "usage");
@@ -1357,17 +1635,24 @@ const renderStats = (state: StorageSchema) => {
   statsTrendRangeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.range === currentTrendRange);
   });
-  statsTaskRangeButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.range === currentTaskRange);
+  statsUsageTrendRangeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.usageTrendRange === currentUsageTrendRange);
+  });
+  statsUsageTrendFilterButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.usageTrendFilter === currentUsageTrendFilter);
+  });
+  statsTagRangeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.range === currentTagRange);
   });
 
-  const keys = getRangeKeys(currentStatsRange);
+  const pomodoroKeys = getRangeKeys(currentPomodoroSummaryRange);
+  const usageSummaryKeys = getRangeKeys(currentUsageSummaryRange);
   let totalMs = 0;
   let blockedMs = 0;
   const byDomain: Record<string, number> = {};
   const byDomainBlocked: Record<string, number> = {};
 
-  keys.forEach((key) => {
+  usageSummaryKeys.forEach((key) => {
     const day = analytics.byDay[key];
     if (!day) {
       return;
@@ -1382,7 +1667,12 @@ const renderStats = (state: StorageSchema) => {
     });
   });
 
-  const listSource = currentStatsFilter === "blocked" ? byDomainBlocked : byDomain;
+  const listSource =
+    currentStatsFilter === "blocked"
+      ? byDomainBlocked
+      : currentStatsFilter === "allowed"
+        ? byDomain
+        : byDomain;
   const listTotal = currentStatsFilter === "blocked" ? blockedMs : totalMs;
 
   if (statsTotalValue) {
@@ -1431,13 +1721,14 @@ const renderStats = (state: StorageSchema) => {
   }
 
   if (statsStacked) {
-    renderTimeline(state, keys);
+    renderTimeline(state, usageSummaryKeys);
   }
 
-  if (statsHeatmap) {
+  if (statsUsageHeatmap) {
     const hourTotals = new Array(24).fill(0);
     const hourBlocked = new Array(24).fill(0);
-    keys.forEach((key) => {
+    const heatmapKeys = getRangeKeys("week");
+    heatmapKeys.forEach((key) => {
       const day = analytics.byDay[key];
       if (!day) {
         return;
@@ -1451,7 +1742,7 @@ const renderStats = (state: StorageSchema) => {
     });
 
     const maxHour = Math.max(...hourTotals, 1);
-    statsHeatmap.innerHTML = hourTotals
+    statsUsageHeatmap.innerHTML = hourTotals
       .map((value, hour) => {
         const intensity = value / maxHour;
         const blocked = hourBlocked[hour];
@@ -1467,9 +1758,12 @@ const renderStats = (state: StorageSchema) => {
       })
       .join("");
   }
-  renderTaskLists(state, keys);
-  renderMetrics(state, keys);
-  renderSessions(state, keys);
+  const tagListKeys = getRangeKeys("week");
+  const trendWindow = getRangeWindow(currentTrendRange, currentTrendOffset);
+  const trendKeys = getRangeKeysBetween(trendWindow.start, trendWindow.end);
+  renderTagLists(state, tagListKeys, trendKeys);
+  renderMetrics(state, pomodoroKeys);
+  renderSessions(state, pomodoroKeys);
   renderTimeMachine(state);
 
   const todayWindow = getRangeWindow("day", 0);
@@ -1510,10 +1804,101 @@ const renderStats = (state: StorageSchema) => {
   const weekBuckets = buildStackedTrendBuckets(state, "week", weekWindow.start, weekWindow.end);
   renderTrendChart(statsSummaryChart, weekBuckets);
 
+  const usageToday = buildUsageTotals(state, todayKeys);
+  const usageYesterday = buildUsageTotals(state, yesterdayKeys);
+  const usageWeek = buildUsageTotals(state, weekKeys);
+  const usagePrevWeek = buildUsageTotals(state, prevWeekKeys);
+  const usageTodayChange =
+    usageYesterday.blockedMs > 0
+      ? Math.round(((usageToday.blockedMs - usageYesterday.blockedMs) / usageYesterday.blockedMs) * 100)
+      : 0;
+  const usageWeekChange =
+    usagePrevWeek.blockedMs > 0
+      ? Math.round(((usageWeek.blockedMs - usagePrevWeek.blockedMs) / usagePrevWeek.blockedMs) * 100)
+      : 0;
+  const usageDailyAvg = weekKeys.length ? usageWeek.blockedMs / weekKeys.length : 0;
+  if (statsUsageToday) {
+    statsUsageToday.textContent = formatDuration(usageToday.blockedMs);
+  }
+  if (statsUsageTodayChange) {
+    statsUsageTodayChange.textContent = `${usageTodayChange}% vs yesterday`;
+  }
+  if (statsUsageWeek) {
+    statsUsageWeek.textContent = formatDuration(usageWeek.blockedMs);
+  }
+  if (statsUsageWeekChange) {
+    statsUsageWeekChange.textContent = `${usageWeekChange}% vs last week`;
+  }
+  if (statsUsageAvg) {
+    statsUsageAvg.textContent = formatDuration(usageDailyAvg);
+  }
+  const usageBuckets = buildUsageTrendBuckets(
+    state,
+    "week",
+    weekWindow.start,
+    weekWindow.end,
+    "all"
+  );
+  renderTrendChart(statsUsageChart, usageBuckets);
+
+  if (usageTotal || usageBlocked || usageAllowed || usageOther) {
+    const usageTotals = buildUsageTotals(state, usageSummaryKeys);
+    if (usageTotal) {
+      usageTotal.textContent = formatDuration(usageTotals.totalMs);
+    }
+    if (usageBlocked) {
+      usageBlocked.textContent = formatDuration(usageTotals.blockedMs);
+    }
+    if (usageAllowed) {
+      usageAllowed.textContent = formatDuration(usageTotals.allowedMs);
+    }
+    if (usageOther) {
+      usageOther.textContent = formatDuration(usageTotals.otherMs);
+    }
+  }
+
+  if (statsUsageRing && statsUsageLegend) {
+    const usageKeys = getRangeKeys(currentUsageRange);
+    const totalsByDomain: Record<string, number> = {};
+    usageKeys.forEach((key) => {
+      const day = analytics.byDay[key];
+      if (!day) {
+        return;
+      }
+      if (currentStatsFilter === "blocked") {
+        Object.entries(day.byDomainBlocked ?? {}).forEach(([host, value]) => {
+          totalsByDomain[host] = (totalsByDomain[host] ?? 0) + value;
+        });
+      } else if (currentStatsFilter === "allowed") {
+        const allowedSet = new Set(state.lists.allowedDomains.map((host) => host.toLowerCase()));
+        Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
+          if (allowedSet.has(host.toLowerCase())) {
+            totalsByDomain[host] = (totalsByDomain[host] ?? 0) + value;
+          }
+        });
+      } else {
+        Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
+          totalsByDomain[host] = (totalsByDomain[host] ?? 0) + value;
+        });
+      }
+    });
+    const entries = Object.entries(totalsByDomain)
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value);
+    const total = entries.reduce((sum, item) => sum + item.value, 0);
+    renderRingChart(
+      statsUsageRing,
+      statsUsageLegend,
+      entries.slice(0, 6),
+      total,
+      currentStatsTheme
+    );
+  }
+
   const renderTrendView = (
     range: "day" | "week" | "month" | "year",
     offset: number,
-    taskId: string | null,
+    tagId: string | null,
     chartEl: HTMLElement | null,
     labelEl: HTMLElement | null,
     rangeEl: HTMLElement | null,
@@ -1527,8 +1912,8 @@ const renderStats = (state: StorageSchema) => {
     const keys = getRangeKeysBetween(start, end);
     const prevWindow = getRangeWindow(range, offset - 1);
     const prevKeys = getRangeKeysBetween(prevWindow.start, prevWindow.end);
-    const currentTotals = buildFocusTotals(state, keys, taskId);
-    const prevTotals = buildFocusTotals(state, prevKeys, taskId);
+    const currentTotals = buildFocusTotals(state, keys, tagId);
+    const prevTotals = buildFocusTotals(state, prevKeys, tagId);
     const pctChange =
       prevTotals.totalMs > 0
         ? Math.round(((currentTotals.totalMs - prevTotals.totalMs) / prevTotals.totalMs) * 100)
@@ -1544,11 +1929,13 @@ const renderStats = (state: StorageSchema) => {
     if (rangeEl) {
       rangeEl.textContent = formatRangeLabel(start, end);
     }
-    if (titleEl && taskId) {
-      const task = state.tasks.items.find((item) => item.id === taskId);
-      titleEl.textContent = task?.title ?? "Task";
+    if (titleEl && tagId) {
+      const tag = state.tags.items.find((item) => item.id === tagId);
+      const title = tag?.title ?? "Tag";
+      titleEl.textContent = truncateLabel(title, 18);
+      titleEl.setAttribute("title", title);
     }
-    const buckets = buildStackedTrendBuckets(state, range, start, end, taskId);
+    const buckets = buildStackedTrendBuckets(state, range, start, end, tagId);
     renderTrendChart(chartEl, buckets);
     if (totalEl) {
       totalEl.textContent = formatDuration(currentTotals.totalMs);
@@ -1577,18 +1964,63 @@ const renderStats = (state: StorageSchema) => {
     statsTrendAvg,
     statsTrendAvgChange
   );
+
+  const renderUsageTrendView = () => {
+    const { start, end } = getRangeWindow(currentUsageTrendRange, currentUsageTrendOffset);
+    const keys = getRangeKeysBetween(start, end);
+    const prevWindow = getRangeWindow(currentUsageTrendRange, currentUsageTrendOffset - 1);
+    const prevKeys = getRangeKeysBetween(prevWindow.start, prevWindow.end);
+    const currentTotals = buildUsageTotals(state, keys);
+    const prevTotals = buildUsageTotals(state, prevKeys);
+    const pctChange =
+      prevTotals.blockedMs > 0
+        ? Math.round(((currentTotals.blockedMs - prevTotals.blockedMs) / prevTotals.blockedMs) * 100)
+        : 0;
+    const currentAvg = keys.length ? currentTotals.blockedMs / keys.length : 0;
+    const prevAvg = prevKeys.length ? prevTotals.blockedMs / prevKeys.length : 0;
+    const avgChange =
+      prevAvg > 0 ? Math.round(((currentAvg - prevAvg) / prevAvg) * 100) : 0;
+    if (statsUsageDateLabel) {
+      statsUsageDateLabel.textContent =
+        currentUsageTrendRange === "day" && currentUsageTrendOffset === 0
+          ? "Today"
+          : formatRangeLabel(start, end);
+    }
+    const buckets = buildUsageTrendBuckets(
+      state,
+      currentUsageTrendRange,
+      start,
+      end,
+      currentUsageTrendFilter
+    );
+    renderTrendChart(statsUsageTrendChart, buckets);
+    if (statsUsageTrendTotal) {
+      statsUsageTrendTotal.textContent = formatDuration(currentTotals.blockedMs);
+    }
+    if (statsUsageTrendChange) {
+      statsUsageTrendChange.textContent = `${pctChange}% vs last`;
+    }
+    if (statsUsageTrendAvg) {
+      statsUsageTrendAvg.textContent = formatDuration(currentAvg);
+    }
+    if (statsUsageTrendAvgChange) {
+      statsUsageTrendAvgChange.textContent = `${avgChange}% vs last`;
+    }
+  };
+
+  renderUsageTrendView();
   renderTrendView(
-    currentTaskRange,
-    currentTaskOffset,
-    currentStatsTaskId,
-    statsTaskChart,
-    statsTaskDateLabel,
-    statsTaskRange,
-    statsTaskTitle,
-    statsTaskTotal,
-    statsTaskChange,
-    statsTaskAvg,
-    statsTaskAvgChange
+    currentTagRange,
+    currentTagOffset,
+    currentStatsTagId,
+    statsTagChart,
+    statsTagDateLabel,
+    statsTagRange,
+    statsTagTitle,
+    statsTagTotal,
+    statsTagChange,
+    statsTagAvg,
+    statsTagAvgChange
   );
 };
 
@@ -1894,118 +2326,118 @@ const setInterventionDisclosure = (open: boolean) => {
   }
 };
 
-const getTaskPomodoroConfig = (task: StorageSchema["tasks"]["items"][number] | null) => {
-  if (!task) {
+const getTagPomodoroConfig = (tag: StorageSchema["tags"]["items"][number] | null) => {
+  if (!tag) {
     return { ...DEFAULT_POMODORO };
   }
   return {
     workMin:
-      typeof task.pomodoroWorkMin === "number"
-        ? task.pomodoroWorkMin
+      typeof tag.pomodoroWorkMin === "number"
+        ? tag.pomodoroWorkMin
         : DEFAULT_POMODORO.workMin,
     breakMin:
-      typeof task.pomodoroBreakMin === "number"
-        ? task.pomodoroBreakMin
+      typeof tag.pomodoroBreakMin === "number"
+        ? tag.pomodoroBreakMin
         : DEFAULT_POMODORO.breakMin,
     cycles:
-      typeof task.pomodoroCycles === "number"
-        ? task.pomodoroCycles
+      typeof tag.pomodoroCycles === "number"
+        ? tag.pomodoroCycles
         : DEFAULT_POMODORO.cycles
   };
 };
 
-const formatTaskPomodoro = (config: { workMin: number; breakMin: number; cycles: number }) => {
+const formatTagPomodoro = (config: { workMin: number; breakMin: number; cycles: number }) => {
   const cycleLabel = config.cycles === 0 ? "Endless" : `${config.cycles} cycles`;
   return `${config.workMin}m focus · ${config.breakMin}m break · ${cycleLabel}`;
 };
 
 
-const deleteTaskById = async (taskId: string) => {
+const deleteTagById = async (tagId: string) => {
   const state = await getState();
-  const items = state.tasks.items.filter((item) => item.id !== taskId);
-  const isActive = state.pomodoro.lastTaskId === taskId;
+  const items = state.tags.items.filter((item) => item.id !== tagId);
+  const isActive = state.pomodoro.lastTagId === tagId;
   const pomodoroUpdate = isActive
     ? state.pomodoro.running
-      ? { lastTaskId: null }
+      ? { lastTagId: null }
       : {
-          lastTaskId: null,
+          lastTagId: null,
           workMin: DEFAULT_POMODORO.workMin,
           breakMin: DEFAULT_POMODORO.breakMin,
           cycles: DEFAULT_POMODORO.cycles
         }
-    : { lastTaskId: state.pomodoro.lastTaskId ?? null };
+    : { lastTagId: state.pomodoro.lastTagId ?? null };
   await setState({
-    tasks: { items },
+    tags: { items },
     pomodoro: pomodoroUpdate
   });
 };
 
-const syncTaskCyclesInput = () => {
-  if (!taskCycles || !taskEndless) {
+const syncTagCyclesInput = () => {
+  if (!tagCycles || !tagEndless) {
     return;
   }
-  const endlessOn = taskEndless.checked;
-  taskCycles.disabled = endlessOn;
+  const endlessOn = tagEndless.checked;
+  tagCycles.disabled = endlessOn;
 };
 
-const openTaskModal = (task: StorageSchema["tasks"]["items"][number] | null) => {
-  currentTaskEditId = task?.id ?? null;
-  if (taskModalTitle) {
-    taskModalTitle.textContent = task ? "Edit task" : "New task";
+const openTagModal = (tag: StorageSchema["tags"]["items"][number] | null) => {
+  currentTagEditId = tag?.id ?? null;
+  if (tagModalTitle) {
+    tagModalTitle.textContent = tag ? "Edit tag" : "New tag";
   }
-  if (taskName) {
-    taskName.value = task?.title ?? "";
+  if (tagName) {
+    tagName.value = tag?.title ?? "";
   }
-  const config = getTaskPomodoroConfig(task);
-  if (taskWork) {
-    taskWork.value = String(config.workMin);
+  const config = getTagPomodoroConfig(tag);
+  if (tagWork) {
+    tagWork.value = String(config.workMin);
   }
-  if (taskBreak) {
-    taskBreak.value = String(config.breakMin);
+  if (tagBreak) {
+    tagBreak.value = String(config.breakMin);
   }
-  if (taskEndless) {
-    taskEndless.checked = config.cycles === 0;
+  if (tagEndless) {
+    tagEndless.checked = config.cycles === 0;
   }
-  if (taskCycles) {
-    taskCycles.value = String(config.cycles === 0 ? 1 : config.cycles);
+  if (tagCycles) {
+    tagCycles.value = String(config.cycles === 0 ? 1 : config.cycles);
   }
-  if (taskColor) {
-    taskColor.value = task?.color ?? "#9cff3a";
+  if (tagColor) {
+    tagColor.value = tag?.color ?? "#9cff3a";
   }
-  syncTaskCyclesInput();
-  if (taskDelete) {
-    taskDelete.classList.toggle("hidden", !task);
+  syncTagCyclesInput();
+  if (tagDelete) {
+    tagDelete.classList.toggle("hidden", !tag);
   }
-  openModal("task");
+  openModal("tag");
 };
 
-const openTaskSelectPrompt = (taskId: string | null) => {
-  const title = taskId
-    ? currentTasks?.items.find((item) => item.id === taskId)?.title ?? "Task"
+const openTagSelectPrompt = (tagId: string | null) => {
+  const title = tagId
+    ? currentTags?.items.find((item) => item.id === tagId)?.title ?? "Tag"
     : "Default";
-  pendingTaskSelectId = taskId;
-  if (taskSelectLabel) {
-    taskSelectLabel.textContent = `Set "${title}" as active?`;
+  pendingTagSelectId = tagId;
+  if (tagSelectLabel) {
+    tagSelectLabel.textContent = `Set "${title}" as active?`;
   }
-  openModal("taskSelectConfirm");
+  openModal("tagSelectConfirm");
 };
 
-const setActiveTask = async (taskId: string | null) => {
+const setActiveTag = async (tagId: string | null) => {
   const state = await getState();
-  const task = taskId
-    ? state.tasks.items.find((item) => item.id === taskId) ?? null
+  const tag = tagId
+    ? state.tags.items.find((item) => item.id === tagId) ?? null
     : null;
-  const config = getTaskPomodoroConfig(task);
+  const config = getTagPomodoroConfig(tag);
   if (state.pomodoro.running) {
     await setState({
       pomodoro: {
-        lastTaskId: task ? task.id : null
+        lastTagId: tag ? tag.id : null
       }
     });
   } else {
     await setState({
       pomodoro: {
-        lastTaskId: task ? task.id : null,
+        lastTagId: tag ? tag.id : null,
         workMin: config.workMin,
         breakMin: config.breakMin,
         cycles: config.cycles
@@ -2033,21 +2465,38 @@ const setActiveView = (viewId: string) => {
   }
 };
 
-const setStatsSubview = (view: "summary" | "trend" | "task") => {
+const setStatsSubview = (view: "summary" | "trend" | "usage-trend" | "tag") => {
   currentStatsSubview = view;
   statsSummaryView?.classList.toggle("active", view === "summary");
   statsTrendView?.classList.toggle("active", view === "trend");
-  statsTaskView?.classList.toggle("active", view === "task");
+  statsUsageTrendView?.classList.toggle("active", view === "usage-trend");
+  statsTagView?.classList.toggle("active", view === "tag");
 };
 
-const openTaskStats = async (taskId: string) => {
+const setStatsSegment = (segment: "pomodoro" | "usage") => {
+  currentStatsSegment = segment;
+  statsSegmentButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.segment === segment);
+  });
+  statsPomodoroSegment?.classList.toggle("active", segment === "pomodoro");
+  statsUsageSegment?.classList.toggle("active", segment === "usage");
+};
+
+const openTagStats = async (tagId: string) => {
   const state = await getState();
-  const task = state.tasks.items.find((item) => item.id === taskId);
-  currentStatsTaskId = taskId;
-  if (statsTaskTitle) {
-    statsTaskTitle.textContent = task?.title ?? "Task";
+  const tag = state.tags.items.find((item) => item.id === tagId);
+  currentStatsTagId = tagId;
+  if (statsTagTitle) {
+    const title = tag?.title ?? "Tag";
+    statsTagTitle.textContent = truncateLabel(title, 18);
+    statsTagTitle.setAttribute("title", title);
   }
-  setStatsSubview("task");
+  setStatsSubview("tag");
+  renderStats(state);
+  const main = document.querySelector<HTMLElement>(".app-main");
+  if (main) {
+    main.scrollTop = 0;
+  }
 };
 
 // --- Theme utilities (sync with OS setting) ---
@@ -2145,10 +2594,10 @@ const bindEvents = () => {
       return;
     }
     const state = await getState();
-    const activeTask = state.pomodoro.lastTaskId
-      ? state.tasks.items.find((item) => item.id === state.pomodoro.lastTaskId) ?? null
+    const activeTag = state.pomodoro.lastTagId
+      ? state.tags.items.find((item) => item.id === state.pomodoro.lastTagId) ?? null
       : null;
-    const config = getTaskPomodoroConfig(activeTask);
+    const config = getTagPomodoroConfig(activeTag);
     const now = Date.now();
     const endsAt = now + config.workMin * 60 * 1000;
     await setState({
@@ -2159,14 +2608,14 @@ const bindEvents = () => {
         cycles: config.cycles,
         autoBlockDuringWork: state.pomodoro.autoBlockDuringWork,
         blockDuringBreak: state.pomodoro.blockDuringBreak,
-        lastTaskId: activeTask?.id ?? null,
+        lastTagId: activeTag?.id ?? null,
         running: {
           phase: "work",
           startedAt: now,
           endsAt,
           cycleIndex: 0,
           paused: false,
-          linkedTaskId: activeTask?.id ?? null,
+          linkedTagId: activeTag?.id ?? null,
           prevFocusEnabled: currentFocusEnabled
         }
       }
@@ -2209,48 +2658,48 @@ const bindEvents = () => {
     await setState({ pomodoro: { blockDuringBreak: pomodoroBlockBreak.checked } });
   });
 
-  taskAdd?.addEventListener("click", () => {
-    openTaskModal(null);
+  tagAdd?.addEventListener("click", () => {
+    openTagModal(null);
   });
 
-  taskShowAll?.addEventListener("click", () => {
-    openModal("taskPicker");
+  tagShowAll?.addEventListener("click", () => {
+    openModal("tagPicker");
   });
 
-  taskActiveSettings?.addEventListener("click", () => {
-    const taskId = taskActiveSettings.getAttribute("data-task-settings");
-    if (!taskId || !currentTasks) {
+  tagActiveSettings?.addEventListener("click", () => {
+    const tagId = tagActiveSettings.getAttribute("data-tag-settings");
+    if (!tagId || !currentTags) {
       return;
     }
-    const task = currentTasks.items.find((item) => item.id === taskId) ?? null;
-    if (!task) {
+    const tag = currentTags.items.find((item) => item.id === tagId) ?? null;
+    if (!tag) {
       return;
     }
-    openTaskModal(task);
+    openTagModal(tag);
   });
 
-  taskEndless?.addEventListener("change", () => {
-    syncTaskCyclesInput();
-    if (taskCycles && taskEndless && !taskEndless.checked && !taskCycles.value) {
-      taskCycles.value = "1";
+  tagEndless?.addEventListener("change", () => {
+    syncTagCyclesInput();
+    if (tagCycles && tagEndless && !tagEndless.checked && !tagCycles.value) {
+      tagCycles.value = "1";
     }
   });
 
-  taskSave?.addEventListener("click", async () => {
-    const name = taskName?.value.trim() ?? "";
+  tagSave?.addEventListener("click", async () => {
+    const name = tagName?.value.trim() ?? "";
     if (!name) {
       return;
     }
-    const work = clamp(Number(taskWork?.value ?? DEFAULT_POMODORO.workMin), 1, 120);
-    const rest = clamp(Number(taskBreak?.value ?? DEFAULT_POMODORO.breakMin), 1, 60);
-    const cycles = taskEndless?.checked
+    const work = clamp(Number(tagWork?.value ?? DEFAULT_POMODORO.workMin), 1, 120);
+    const rest = clamp(Number(tagBreak?.value ?? DEFAULT_POMODORO.breakMin), 1, 60);
+    const cycles = tagEndless?.checked
       ? 0
-      : clamp(Number(taskCycles?.value ?? 1), 1, 12);
-    const color = taskColor?.value ?? "#9cff3a";
+      : clamp(Number(tagCycles?.value ?? 1), 1, 12);
+    const color = tagColor?.value ?? "#9cff3a";
     const state = await getState();
-    const items = [...state.tasks.items];
-    if (currentTaskEditId) {
-      const index = items.findIndex((item) => item.id === currentTaskEditId);
+    const items = [...state.tags.items];
+    if (currentTagEditId) {
+      const index = items.findIndex((item) => item.id === currentTagEditId);
       if (index >= 0) {
         items[index] = {
           ...items[index],
@@ -2263,7 +2712,7 @@ const bindEvents = () => {
         };
       }
     } else {
-      const newTask = {
+      const newTag = {
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
         title: name,
         color,
@@ -2274,86 +2723,89 @@ const bindEvents = () => {
         createdAt: Date.now(),
         focusSessionsCompleted: 0
       };
-      items.push(newTask);
+      items.push(newTag);
     }
-    const isActive = state.pomodoro.lastTaskId === currentTaskEditId;
+    const isActive = state.pomodoro.lastTagId === currentTagEditId;
     const pomodoroUpdate =
       isActive && !state.pomodoro.running
-        ? { workMin: work, breakMin: rest, cycles, lastTaskId: currentTaskEditId }
-        : { lastTaskId: state.pomodoro.lastTaskId ?? null };
-    await setState({ tasks: { items }, pomodoro: pomodoroUpdate });
-    closeModal("task");
+        ? { workMin: work, breakMin: rest, cycles, lastTagId: currentTagEditId }
+        : { lastTagId: state.pomodoro.lastTagId ?? null };
+    await setState({ tags: { items }, pomodoro: pomodoroUpdate });
+    closeModal("tag");
   });
 
-  taskDelete?.addEventListener("click", (event) => {
+  tagDelete?.addEventListener("click", (event) => {
     event.stopPropagation();
-    if (!currentTaskEditId) {
+    if (!currentTagEditId) {
       return;
     }
-    currentTaskDeleteId = currentTaskEditId;
-    openModal("taskDeleteConfirm");
+    currentTagDeleteId = currentTagEditId;
+    openModal("tagDeleteConfirm");
   });
 
-  taskDeleteConfirm?.addEventListener("click", async () => {
-    if (!currentTaskDeleteId) {
+  tagDeleteConfirm?.addEventListener("click", async () => {
+    if (!currentTagDeleteId) {
       return;
     }
-    await deleteTaskById(currentTaskDeleteId);
-    currentTaskDeleteId = null;
-    closeModal("taskDeleteConfirm");
-    closeModal("task");
+    await deleteTagById(currentTagDeleteId);
+    currentTagDeleteId = null;
+    closeModal("tagDeleteConfirm");
+    closeModal("tag");
   });
 
-  taskDeleteCancel?.addEventListener("click", () => {
-    currentTaskDeleteId = null;
-    closeModal("taskDeleteConfirm");
+  tagDeleteCancel?.addEventListener("click", () => {
+    currentTagDeleteId = null;
+    closeModal("tagDeleteConfirm");
   });
 
-  const handleTaskSelectClick = (event: MouseEvent, closePicker?: boolean) => {
+  const handleTagSelectClick = (event: MouseEvent, closePicker?: boolean) => {
     const target = event.target as HTMLElement;
-    const settingsButton = target.closest<HTMLElement>("[data-task-settings]");
+    const settingsButton = target.closest<HTMLElement>("[data-tag-settings]");
     if (settingsButton) {
-      const taskId = settingsButton.getAttribute("data-task-settings");
-      if (!taskId || !currentTasks) {
+      const tagId = settingsButton.getAttribute("data-tag-settings");
+      if (!tagId || !currentTags) {
         return;
       }
-      const task = currentTasks.items.find((item) => item.id === taskId) ?? null;
-      if (!task) {
+      const tag = currentTags.items.find((item) => item.id === tagId) ?? null;
+      if (!tag) {
         return;
       }
-      openTaskModal(task);
+      if (closePicker) {
+        closeModal("tagPicker");
+      }
+      openTagModal(tag);
       return;
     }
-    const card = target.closest<HTMLElement>("[data-task-select]");
+    const card = target.closest<HTMLElement>("[data-tag-select]");
     if (!card) {
       return;
     }
-    const isDefault = card.hasAttribute("data-task-default");
-    const taskId = isDefault ? null : card.getAttribute("data-task-id");
-    if (!isDefault && !taskId) {
+    const isDefault = card.hasAttribute("data-tag-default");
+    const tagId = isDefault ? null : card.getAttribute("data-tag-id");
+    if (!isDefault && !tagId) {
       return;
     }
     if (closePicker) {
-      closeModal("taskPicker");
+      closeModal("tagPicker");
     }
-    openTaskSelectPrompt(taskId);
+    openTagSelectPrompt(tagId);
   };
 
-  taskQuickGrid?.addEventListener("click", (event) => {
-    handleTaskSelectClick(event);
+  tagQuickGrid?.addEventListener("click", (event) => {
+    handleTagSelectClick(event);
   });
 
-  taskAllGrid?.addEventListener("click", (event) => {
-    handleTaskSelectClick(event, true);
+  tagAllGrid?.addEventListener("click", (event) => {
+    handleTagSelectClick(event, true);
   });
 
-  taskSelectConfirm?.addEventListener("click", async () => {
-    if (pendingTaskSelectId === undefined) {
+  tagSelectConfirm?.addEventListener("click", async () => {
+    if (pendingTagSelectId === undefined) {
       return;
     }
-    await setActiveTask(pendingTaskSelectId ?? null);
-    pendingTaskSelectId = undefined;
-    closeModal("taskSelectConfirm");
+    await setActiveTag(pendingTagSelectId ?? null);
+    pendingTagSelectId = undefined;
+    closeModal("tagSelectConfirm");
   });
 
   strictDurationButtons.forEach((button) => {
@@ -2612,27 +3064,61 @@ const bindEvents = () => {
     pendingFocusOff = false;
   });
 
-  statsRangeButtons.forEach((button) => {
+  statsPomodoroRangeButtons.forEach((button) => {
     button.addEventListener("click", async () => {
       const range = button.dataset.range as "today" | "week" | "month" | undefined;
       if (!range) {
         return;
       }
-      currentStatsRange = range;
+      currentPomodoroSummaryRange = range;
       await setState({ analytics: { chartRange: range } });
       const state = await getState();
       renderStats(state);
     });
   });
 
-  statsFilterButtons.forEach((button) => {
+  statsUsageSummaryRangeButtons.forEach((button) => {
     button.addEventListener("click", async () => {
-      const filter = button.dataset.filter as "all" | "blocked" | undefined;
+      const range = button.dataset.range as "today" | "week" | "month" | undefined;
+      if (!range) {
+        return;
+      }
+      currentUsageSummaryRange = range;
+      const state = await getState();
+      renderStats(state);
+    });
+  });
+
+  statsSegmentButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const segment = button.dataset.segment as "pomodoro" | "usage" | undefined;
+      if (!segment) {
+        return;
+      }
+      setStatsSegment(segment);
+      void getState().then((state) => renderStats(state));
+    });
+  });
+
+  statsUsageFilterButtons.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const filter = button.dataset.usageFilter as "all" | "blocked" | "allowed" | undefined;
       if (!filter) {
         return;
       }
       currentStatsFilter = filter;
-      await setState({ analytics: { chartFilter: filter } });
+      const state = await getState();
+      renderStats(state);
+    });
+  });
+
+  statsUsageRangeButtons.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const range = button.dataset.usageRange as "today" | "week" | "month" | undefined;
+      if (!range) {
+        return;
+      }
+      currentUsageRange = range;
       const state = await getState();
       renderStats(state);
     });
@@ -2686,6 +3172,14 @@ const bindEvents = () => {
     setStatsSubview("trend");
   });
 
+  statsUsageTrendCard?.addEventListener("click", () => {
+    setStatsSubview("usage-trend");
+    const main = document.querySelector<HTMLElement>(".app-main");
+    if (main) {
+      main.scrollTop = 0;
+    }
+  });
+
   statsTrendCard?.addEventListener("click", () => {
     setStatsSubview("trend");
   });
@@ -2698,11 +3192,23 @@ const bindEvents = () => {
     setStatsSubview("trend");
   });
 
+  statsUsageTrendCard?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    setStatsSubview("usage-trend");
+  });
+
   statsBack?.addEventListener("click", () => {
     setStatsSubview("summary");
   });
 
-  statsTaskBack?.addEventListener("click", () => {
+  statsUsageBack?.addEventListener("click", () => {
+    setStatsSubview("summary");
+  });
+
+  statsTagBack?.addEventListener("click", () => {
     setStatsSubview("trend");
   });
 
@@ -2721,15 +3227,48 @@ const bindEvents = () => {
     });
   });
 
-  statsTaskRangeButtons.forEach((button) => {
+  statsUsageTrendRangeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const range = button.dataset.usageTrendRange as "day" | "week" | "month" | "year" | undefined;
+      if (!range) {
+        return;
+      }
+      currentUsageTrendRange = range;
+      currentUsageTrendOffset = 0;
+      void getState().then((nextState) => renderStats(nextState));
+    });
+  });
+
+  statsUsageTrendFilterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.dataset.usageTrendFilter as "all" | "allowed" | "blocked" | undefined;
+      if (!filter) {
+        return;
+      }
+      currentUsageTrendFilter = filter;
+      void getState().then((nextState) => renderStats(nextState));
+    });
+  });
+
+  statsUsageDatePrev?.addEventListener("click", () => {
+    currentUsageTrendOffset -= 1;
+    void getState().then((nextState) => renderStats(nextState));
+  });
+
+  statsUsageDateNext?.addEventListener("click", () => {
+    currentUsageTrendOffset += 1;
+    void getState().then((nextState) => renderStats(nextState));
+  });
+
+  statsTagRangeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const range = button.dataset.range as "day" | "week" | "month" | "year" | undefined;
       if (!range) {
         return;
       }
-      currentTaskRange = range;
-      currentTaskOffset = 0;
-      statsTaskRangeButtons.forEach((btn) => {
+      currentTagRange = range;
+      currentTagOffset = 0;
+      statsTagRangeButtons.forEach((btn) => {
         btn.classList.toggle("active", btn === button);
       });
       void getState().then((nextState) => renderStats(nextState));
@@ -2746,34 +3285,34 @@ const bindEvents = () => {
     void getState().then((nextState) => renderStats(nextState));
   });
 
-  statsTaskDatePrev?.addEventListener("click", () => {
-    currentTaskOffset -= 1;
+  statsTagDatePrev?.addEventListener("click", () => {
+    currentTagOffset -= 1;
     void getState().then((nextState) => renderStats(nextState));
   });
 
-  statsTaskDateNext?.addEventListener("click", () => {
-    currentTaskOffset += 1;
+  statsTagDateNext?.addEventListener("click", () => {
+    currentTagOffset += 1;
     void getState().then((nextState) => renderStats(nextState));
   });
 
-  statsSummaryTasks?.addEventListener("click", (event) => {
+  statsSummaryTags?.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
-    const row = target.closest<HTMLElement>(".stats-task-row");
-    const taskId = row?.getAttribute("data-task-id");
-    if (!taskId) {
+    const row = target.closest<HTMLElement>(".stats-tag-card");
+    const tagId = row?.getAttribute("data-tag-id");
+    if (!tagId) {
       return;
     }
-    void openTaskStats(taskId);
+    void openTagStats(tagId);
   });
 
-  statsTrendTasks?.addEventListener("click", (event) => {
+  statsTrendTags?.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
-    const row = target.closest<HTMLElement>(".stats-task-row");
-    const taskId = row?.getAttribute("data-task-id");
-    if (!taskId) {
+    const row = target.closest<HTMLElement>(".stats-tag-card");
+    const tagId = row?.getAttribute("data-tag-id");
+    if (!tagId) {
       return;
     }
-    void openTaskStats(taskId);
+    void openTagStats(tagId);
   });
 
   timeMachineDays?.addEventListener("click", async (event) => {
@@ -2814,11 +3353,11 @@ const bindEvents = () => {
 
   exportSessionsCsv?.addEventListener("click", async () => {
     const state = await getState();
-    const keys = getRangeKeys(currentStatsRange);
+    const keys = getRangeKeys(currentPomodoroSummaryRange);
     const keySet = new Set(keys);
-    const taskLookup = new Map(state.tasks.items.map((item) => [item.id, item.title]));
+    const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
     const rows: Array<Array<string | number | null | undefined>> = [
-      ["id", "type", "startedAt", "endedAt", "durationMin", "task", "focusEnabledDuring", "distractions"]
+      ["id", "type", "startedAt", "endedAt", "durationMin", "tag", "focusEnabledDuring", "distractions"]
     ];
     state.analytics.sessions
       .filter((session) => keySet.has(getDayKey(new Date(session.startedAt))))
@@ -2832,17 +3371,17 @@ const bindEvents = () => {
           new Date(session.startedAt).toISOString(),
           new Date(session.endedAt).toISOString(),
           durationMin,
-          session.taskId ? taskLookup.get(session.taskId) ?? "" : "",
+          session.tagId ? tagLookup.get(session.tagId) ?? "" : "",
           session.focusEnabledDuring ? "true" : "false",
           session.distractions
         ]);
       });
-    downloadCsv(`focusboss-sessions-${currentStatsRange}.csv`, rows);
+    downloadCsv(`focusboss-sessions-${currentPomodoroSummaryRange}.csv`, rows);
   });
 
   exportUsageCsv?.addEventListener("click", async () => {
     const state = await getState();
-    const keys = getRangeKeys(currentStatsRange);
+    const keys = getRangeKeys(currentUsageSummaryRange);
     const rows: Array<Array<string | number | null | undefined>> = [
       ["day", "domain", "totalMs", "blockedMs"]
     ];
@@ -2856,7 +3395,25 @@ const bindEvents = () => {
         rows.push([key, host, value, blockedByDomain[host] ?? 0]);
       });
     });
-    downloadCsv(`focusboss-usage-${currentStatsRange}.csv`, rows);
+    downloadCsv(`focusboss-usage-${currentUsageSummaryRange}.csv`, rows);
+  });
+
+  exportBlockedCsv?.addEventListener("click", async () => {
+    const state = await getState();
+    const keys = getRangeKeys(currentUsageSummaryRange);
+    const rows: Array<Array<string | number | null | undefined>> = [
+      ["day", "domain", "blockedMs"]
+    ];
+    keys.forEach((key) => {
+      const day = state.analytics.byDay[key];
+      if (!day) {
+        return;
+      }
+      Object.entries(day.byDomainBlocked ?? {}).forEach(([host, value]) => {
+        rows.push([key, host, value]);
+      });
+    });
+    downloadCsv(`focusboss-blocked-${currentUsageSummaryRange}.csv`, rows);
   });
 
   interventionToggle?.addEventListener("click", () => {
@@ -2992,12 +3549,11 @@ const syncUiFromState = (state: Awaited<ReturnType<typeof getState>>) => {
   renderTheme(state.ui.theme);
   renderOverlayMode(state.overlayMode);
   renderConfirmationPrompt(state.confirmationPrompt);
-  currentStatsRange = state.analytics.chartRange;
-  currentStatsFilter = state.analytics.chartFilter;
+  currentPomodoroSummaryRange = state.analytics.chartRange;
   currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
   renderStrictSession(state.strictSession);
   renderStrictOverlay(state.strictSession);
-  renderTasks(state.tasks, state.pomodoro);
+  renderTags(state.tags, state.pomodoro);
   renderPomodoro(state.pomodoro, state.strictSession.active);
   renderLists(state.lists);
   renderInterventions(state.interventions);
@@ -3013,6 +3569,14 @@ const bootstrap = async () => {
     syncUiFromState(state);
     renderLinks();
     setActiveView("home");
+    const params = new URLSearchParams(window.location.search);
+    const tagSettingsId = params.get("tagSettings");
+    if (tagSettingsId) {
+      const tag = state.tags.items.find((item) => item.id === tagSettingsId) ?? null;
+      if (tag) {
+        openTagModal(tag);
+      }
+    }
   } catch (error) {
     reportUiError(error);
   }

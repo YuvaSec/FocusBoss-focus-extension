@@ -49,8 +49,7 @@
               aria-controls="interventionPanel"
             >
               <span>
-                <h2>Friction Modes</h2>
-                <p class="list-sub">Pick how FocusBoss increases friction.</p>
+                <h3>Friction Modes</h3>
               </span>
               <span id="interventionCurrent" class="intervention-current">None</span>
               <span class="intervention-chevron" aria-hidden="true">
@@ -58,6 +57,7 @@
               </span>
             </button>
             <div id="interventionPanel" class="intervention-panel" aria-hidden="true">
+              <p class="list-sub">Pick how FocusBoss increases friction.</p>
               <div id="interventionList" class="intervention-grid"></div>
             </div>
           </div>
@@ -132,7 +132,7 @@
                 <h3>Pomodoro</h3>
                 <div class="pomodoro-status-row">
                   <div class="pomodoro-status-stack">
-                    <span id="pomodoroTaskPill" class="timer-pill pomodoro-task-pill">Default</span>
+                    <span id="pomodoroTagPill" class="timer-pill pomodoro-tag-pill">Default</span>
                   </div>
                 </div>
               </div>
@@ -201,33 +201,33 @@
             </div>
           </div>
 
-          <div class="card tasks-card" style="margin-top: 12px;">
-            <div class="row tasks-header">
-              <h3>Tasks</h3>
-              <button id="taskAdd" class="task-add" type="button" aria-label="Add task">
-                Add Task
+          <div class="card tags-card" style="margin-top: 12px;">
+            <div class="row tags-header">
+              <h3>Tags</h3>
+              <button id="tagAdd" class="tag-add" type="button" aria-label="Add tag">
+                Add Tag
               </button>
             </div>
-            <div id="taskActiveRow" class="task-active-card">
-              <div class="task-active-header">
-                <div class="task-active-title">
-                  <span class="task-active-label">Selected task</span>
-                  <span class="task-color-dot" id="taskActiveDot" aria-hidden="true"></span>
-                  <span id="taskNameDisplay" class="task-active-name">Default</span>
+            <div id="tagActiveRow" class="tag-active-card">
+              <div class="tag-active-header">
+                <div class="tag-active-title">
+<!--                  <span class="tag-active-label">Selected tag</span>-->
+                  <span class="tag-color-dot" id="tagActiveDot" aria-hidden="true"></span>
+                  <span id="tagNameDisplay" class="tag-active-name">Default</span>
                 </div>
-                <div class="task-controls">
-                  <span class="task-pill"><span class="is-active">Active</span></span>
-                  <button id="taskActiveSettings" class="task-gear hidden" type="button" aria-label="Open settings">
+                <div class="tag-controls">
+                  <span class="tag-pill"><span class="is-active">Active</span></span>
+                  <button id="tagActiveSettings" class="tag-gear hidden" type="button" aria-label="Open settings">
                     <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
                       <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </button>
                 </div>
               </div>
-              <p id="taskActiveDetail" class="task-desc">25m focus · 5m break · Endless</p>
+              <p id="tagActiveDetail" class="tag-desc">25m focus · 5m break · Endless</p>
             </div>
-            <div id="taskQuickGrid" class="task-quick-grid" style="margin-top: 12px;"></div>
-            <button id="taskShowAll" class="btn btn-large task-show-all" type="button">Show all</button>
+            <div id="tagQuickGrid" class="tag-quick-grid" style="margin-top: 12px;"></div>
+            <button id="tagShowAll" class="btn btn-large tag-show-all" type="button">Show all</button>
           </div>
 
         </section>
@@ -235,63 +235,29 @@
         <section class="view hidden" data-view="stats">
           <div class="stats-stack">
             <div id="statsSummaryView" class="stats-subview active">
-              <div class="stats-summary-header">
-                <div>
-                  <h2>Summary</h2>
-                  <p id="statsSummaryDate" class="list-sub">Today</p>
-                </div>
+              <div class="segmented" id="statsSegmentToggle">
+                <button data-segment="pomodoro" class="active">Pomodoro</button>
+                <button data-segment="usage">Web Usage</button>
               </div>
 
-              <div class="stats-summary-controls">
-                <div class="segmented" id="statsRange">
-                  <button data-range="today">Today</button>
-                  <button data-range="week">Week</button>
-                  <button data-range="month">Month</button>
-                </div>
-                <div class="segmented" id="statsFilter">
-                  <button data-filter="all">All</button>
-                  <button data-filter="blocked">Blocked</button>
-                  <button disabled style="opacity: 0;">.</button>
-                </div>
-              </div>
-
-              <div class="card stats-hero-card" style="margin-top: 12px;">
-                <div class="stats-hero-grid">
-                  <div class="metric-card">
-                    <p class="list-sub">Focus time</p>
-                    <div id="metricFocus" class="metric-value">0m</div>
+              <div id="statsPomodoroSegment" class="stats-segment active">
+                <div class="card stats-trend-card" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
+                  <div class="row" style="justify-content: space-between; gap: 10px;">
+                    <h3>Focus Trend</h3>
+                    <span class="stats-card-link">View details →</span>
                   </div>
-                  <div class="metric-card">
-                    <p class="list-sub">Break time (est.)</p>
-                    <div id="metricBreak" class="metric-value">0m</div>
+                  <div class="stats-split stats-trend-split">
+                    <div>
+                      <p class="list-sub">Today's Focus</p>
+                      <div id="statsSummaryToday" class="metric-value">0m</div>
+                      <p id="statsSummaryTodayChange" class="list-sub">0% vs yesterday</p>
+                    </div>
+                    <div>
+                      <p class="list-sub">This Week</p>
+                      <div id="statsSummaryWeek" class="metric-value">0m</div>
+                      <p id="statsSummaryWeekChange" class="list-sub">0% vs last week</p>
+                    </div>
                   </div>
-                  <div class="metric-card">
-                    <p class="list-sub">Tasks completed</p>
-                    <div id="metricTasks" class="metric-value">0</div>
-                  </div>
-                  <div class="metric-card">
-                    <p class="list-sub">Distraction time</p>
-                    <div id="metricDistraction" class="metric-value">0m</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card stats-trend-card" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
-                <div class="row" style="justify-content: space-between; gap: 10px;">
-                  <h3>Focus Trend</h3>
-                </div>
-                <div class="stats-split stats-trend-split">
-                  <div>
-                    <p class="list-sub">Today's Focus</p>
-                    <div id="statsSummaryToday" class="metric-value">0m</div>
-                    <p id="statsSummaryTodayChange" class="list-sub">0% vs yesterday</p>
-                  </div>
-                  <div>
-                    <p class="list-sub">This Week</p>
-                    <div id="statsSummaryWeek" class="metric-value">0m</div>
-                    <p id="statsSummaryWeekChange" class="list-sub">0% vs last week</p>
-                  </div>
-                </div>
                 <div class="stats-summary-avg">
                   <p class="list-sub">Daily Avg</p>
                   <div id="statsSummaryAvg" class="metric-value">0m</div>
@@ -299,18 +265,161 @@
                 <div id="statsSummaryChart" style="min-height: 180px;"></div>
               </div>
 
-              <div class="card" style="margin-top: 12px;">
-                <div class="row">
-                  <h3>Tasks</h3>
-                  <button id="statsShowAll" class="btn btn-small">Show All</button>
+                <div class="card" style="margin-top: 12px;">
+                  <div class="row">
+                    <h3>Tags</h3>
+                    <button id="statsShowAll" class="btn btn-small">Show All</button>
+                  </div>
+                  <div id="statsSummaryTags" class="stats-tag-grid" style="margin-top: 10px;"></div>
                 </div>
-                <div id="statsSummaryTasks" class="stats-task-grid" style="margin-top: 10px;"></div>
+
+                <div class="card stats-hero-card" style="margin-top: 12px;">
+                  <div class="stats-summary-header" style="margin-bottom: 10px;">
+                    <div>
+                      <h2>Summary</h2>
+                      <p id="statsSummaryDate" class="list-sub">Today</p>
+                    </div>
+                  </div>
+                  <div class="segmented stats-range-control" id="statsPomodoroRange" style="margin-bottom: 10px;">
+                    <button data-range="today">Today</button>
+                    <button data-range="week">Week</button>
+                    <button data-range="month">Month</button>
+                  </div>
+                  <div class="stats-hero-grid">
+                    <div class="metric-card">
+                      <p class="list-sub">Focus time</p>
+                      <div id="metricFocus" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Break time (est.)</p>
+                      <div id="metricBreak" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Tags completed</p>
+                      <div id="metricTags" class="metric-value">0</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Distraction time</p>
+                      <div id="metricDistraction" class="metric-value">0m</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card stats-export-card" style="margin-top: 12px;">
+                  <div class="row">
+                    <h3>Export</h3>
+                  </div>
+                  <div class="stats-export-grid" style="margin-top: 10px;">
+                    <button id="exportSessionsCsv" class="btn btn-small">Export sessions CSV</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="statsUsageSegment" class="stats-segment">
+                <div id="statsUsageTrendCard" class="card stats-trend-card stats-usage-trend" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
+                  <div class="row" style="justify-content: space-between; gap: 10px;">
+                    <h3>Web Usage Trend</h3>
+                    <span class="stats-card-link">View details →</span>
+                  </div>
+                  <div class="stats-split stats-trend-split">
+                    <div>
+                      <p class="list-sub">Today's Distraction</p>
+                      <div id="statsUsageToday" class="metric-value">0m</div>
+                      <p id="statsUsageTodayChange" class="list-sub">0% vs yesterday</p>
+                    </div>
+                    <div>
+                      <p class="list-sub">This Week</p>
+                      <div id="statsUsageWeek" class="metric-value">0m</div>
+                      <p id="statsUsageWeekChange" class="list-sub">0% vs last week</p>
+                    </div>
+                  </div>
+                  <div class="stats-summary-avg">
+                    <p class="list-sub">Daily Avg</p>
+                    <div id="statsUsageAvg" class="metric-value">0m</div>
+                  </div>
+                  <div id="statsUsageChart" style="min-height: 180px;"></div>
+                </div>
+
+                <div class="card stats-usage-ring" style="margin-top: 12px;">
+                  <div class="row">
+                    <h3>Top Sites</h3>
+                  </div>
+                  <div class="stats-usage-controls" style="margin-top: 8px;">
+                    <div class="segmented stats-usage-range" id="statsUsageRange">
+                      <button data-usage-range="today">Today</button>
+                      <button data-usage-range="week" class="active">Week</button>
+                      <button data-usage-range="month">Month</button>
+                    </div>
+                    <div class="segmented stats-usage-filter" id="statsUsageFilter">
+                      <button data-usage-filter="all" class="active">All</button>
+                      <button data-usage-filter="blocked">Blocked</button>
+                      <button data-usage-filter="allowed">Allowed</button>
+                    </div>
+                  </div>
+                  <div class="stats-ring-row" style="margin-top: 10px;">
+                    <div id="statsUsageRing" class="stats-ring"></div>
+                    <div id="statsUsageLegend" class="stats-ring-legend"></div>
+                  </div>
+                  <button id="statsUsageShowAll" class="btn btn-small stats-ring-show-all" type="button">Show all</button>
+                </div>
+
+                <div class="card stats-hero-card" style="margin-top: 12px;">
+                  <div class="stats-summary-header" style="margin-bottom: 10px;">
+                    <div>
+                      <h2>Summary</h2>
+                      <p id="statsUsageDate" class="list-sub">Today</p>
+                    </div>
+                  </div>
+                  <div class="segmented stats-range-control" id="statsUsageSummaryRange" style="margin-bottom: 10px;">
+                    <button data-range="today">Today</button>
+                    <button data-range="week">Week</button>
+                    <button data-range="month">Month</button>
+                  </div>
+                  <div class="stats-hero-grid">
+                    <div class="metric-card">
+                      <p class="list-sub">Total web time</p>
+                      <div id="usageTotal" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Blocked sites</p>
+                      <div id="usageBlocked" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Allowed sites</p>
+                      <div id="usageAllowed" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Other sites</p>
+                      <div id="usageOther" class="metric-value">0m</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="margin-top: 12px;">
+                  <div class="row">
+                    <h3>Heatmap</h3>
+                  </div>
+                  <div id="statsUsageHeatmap" class="heatmap" style="margin-top: 10px;"></div>
+                </div>
+
+
+                <div class="card stats-export-card" style="margin-top: 12px;">
+                  <div class="row">
+                    <h3>Export</h3>
+                  </div>
+                  <div class="stats-export-grid" style="margin-top: 10px;">
+                    <button id="exportUsageCsv" class="btn btn-small">Export usage CSV</button>
+                    <button id="exportBlockedCsv" class="btn btn-small">Export blocked CSV</button>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div id="statsTrendView" class="stats-subview">
-              <div class="stats-topbar">
-                <button id="statsBack" class="icon-btn icon-only" type="button" aria-label="Back">←</button>
+              <div class="stats-topbar stats-topbar-right">
+                <button id="statsBack" class="btn btn-small stats-back-btn" type="button" aria-label="Back">
+                  ← Back
+                </button>
                 <div class="stats-range-pill">
                   <button id="statsDatePrev" type="button" aria-label="Previous">‹</button>
                   <span id="statsDateLabel">Today</span>
@@ -318,7 +427,6 @@
                 </div>
               </div>
               <h2 class="stats-title">Focus Trend</h2>
-              <p id="statsDateRange" class="list-sub">Jan 1 - Jan 7</p>
               <div class="segmented four stats-range-toggle" id="statsTrendRange">
                 <button data-range="day">D</button>
                 <button data-range="week" class="active">W</button>
@@ -342,24 +450,65 @@
               </div>
               <div class="card" style="margin-top: 12px;">
                 <div class="row">
-                  <h3>Tasks</h3>
+                  <h3>Tags</h3>
                 </div>
-                <div id="statsTrendTasks" class="list-items" style="margin-top: 10px;"></div>
+                <div id="statsTrendTags" class="stats-tag-grid" style="margin-top: 10px;"></div>
               </div>
             </div>
 
-            <div id="statsTaskView" class="stats-subview">
-              <div class="stats-topbar">
-                <button id="statsTaskBack" class="icon-btn icon-only" type="button" aria-label="Back">←</button>
+            <div id="statsUsageTrendView" class="stats-subview stats-usage-colors">
+              <div class="stats-topbar stats-topbar-right">
+                <button id="statsUsageBack" class="btn btn-small stats-back-btn" type="button" aria-label="Back">
+                  ← Back
+                </button>
                 <div class="stats-range-pill">
-                  <button id="statsTaskDatePrev" type="button" aria-label="Previous">‹</button>
-                  <span id="statsTaskDateLabel">Today</span>
-                  <button id="statsTaskDateNext" type="button" aria-label="Next">›</button>
+                  <button id="statsUsageDatePrev" type="button" aria-label="Previous">‹</button>
+                  <span id="statsUsageDateLabel">Today</span>
+                  <button id="statsUsageDateNext" type="button" aria-label="Next">›</button>
                 </div>
               </div>
-              <h2 id="statsTaskTitle" class="stats-title">Task</h2>
-              <p id="statsTaskRange" class="list-sub">Jan 1 - Jan 7</p>
-              <div class="segmented four stats-range-toggle" id="statsTaskRangeToggle">
+              <h2 class="stats-title">Web Usage Trend</h2>
+              <div class="segmented three stats-range-toggle" id="statsUsageTrendFilter">
+                <button data-usage-trend-filter="all" class="active">All</button>
+                <button data-usage-trend-filter="allowed">Allowed</button>
+                <button data-usage-trend-filter="blocked">Blocked</button>
+              </div>
+              <div class="segmented four stats-range-toggle" id="statsUsageTrendRange">
+                <button data-usage-trend-range="day">D</button>
+                <button data-usage-trend-range="week" class="active">W</button>
+                <button data-usage-trend-range="month">M</button>
+                <button data-usage-trend-range="year">Y</button>
+              </div>
+              <div class="card" style="margin-top: 12px;">
+                <div class="stats-split">
+                  <div>
+                    <p class="list-sub">This period</p>
+                    <div id="statsUsageTrendTotal" class="metric-value">0h 0m</div>
+                    <p id="statsUsageTrendChange" class="list-sub">0% vs last</p>
+                  </div>
+                  <div>
+                    <p class="list-sub">Daily avg</p>
+                    <div id="statsUsageTrendAvg" class="metric-value">0h 0m</div>
+                    <p id="statsUsageTrendAvgChange" class="list-sub">0% vs last</p>
+                  </div>
+                </div>
+                <div id="statsUsageTrendChart" style="min-height: 220px;"></div>
+              </div>
+            </div>
+
+            <div id="statsTagView" class="stats-subview">
+              <div class="stats-topbar stats-topbar-right">
+                <button id="statsTagBack" class="btn btn-small stats-back-btn" type="button" aria-label="Back">
+                  ← Back
+                </button>
+                <div class="stats-range-pill">
+                  <button id="statsTagDatePrev" type="button" aria-label="Previous">‹</button>
+                  <span id="statsTagDateLabel">Today</span>
+                  <button id="statsTagDateNext" type="button" aria-label="Next">›</button>
+                </div>
+              </div>
+              <h2 id="statsTagTitle" class="stats-title">Tag</h2>
+              <div class="segmented four stats-range-toggle" id="statsTagRangeToggle">
                 <button data-range="day">D</button>
                 <button data-range="week" class="active">W</button>
                 <button data-range="month">M</button>
@@ -369,16 +518,16 @@
                 <div class="stats-split">
                   <div>
                     <p class="list-sub">This period</p>
-                    <div id="statsTaskTotal" class="metric-value">0h 0m</div>
-                    <p id="statsTaskChange" class="list-sub">0% vs last</p>
+                    <div id="statsTagTotal" class="metric-value">0h 0m</div>
+                    <p id="statsTagChange" class="list-sub">0% vs last</p>
                   </div>
                   <div>
                     <p class="list-sub">Daily avg</p>
-                    <div id="statsTaskAvg" class="metric-value">0h 0m</div>
-                    <p id="statsTaskAvgChange" class="list-sub">0% vs last</p>
+                    <div id="statsTagAvg" class="metric-value">0h 0m</div>
+                    <p id="statsTagAvgChange" class="list-sub">0% vs last</p>
                   </div>
                 </div>
-                <div id="statsTaskChart" style="min-height: 220px;"></div>
+                <div id="statsTagChart" style="min-height: 220px;"></div>
               </div>
             </div>
           </div>
@@ -558,11 +707,11 @@
       </div>
     </div>
 
-    <div id="taskModal" class="modal hidden" data-modal="task" aria-hidden="true">
+    <div id="tagModal" class="modal hidden" data-modal="tag" aria-hidden="true">
       <div class="modal-backdrop" data-close-modal="true"></div>
       <div class="modal-card">
-        <button id="taskDelete" class="task-delete-btn hidden" type="button" aria-label="Delete task">
-          <svg class="task-delete-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <button id="tagDelete" class="tag-delete-btn hidden" type="button" aria-label="Delete tag">
+          <svg class="tag-delete-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M3 6h18" />
             <path d="M8 6V4h8v2" />
             <path d="M6 6l1 14h10l1-14" />
@@ -571,81 +720,81 @@
           </svg>
         </button>
         <div>
-          <h3 id="taskModalTitle">Task</h3>
-          <p class="list-sub">Define the pomodoro timing for this task.</p>
+          <h3 id="tagModalTitle">Tag</h3>
+          <p class="list-sub">Define the pomodoro timing for this tag.</p>
         </div>
-        <div class="task-details" style="margin-top: 10px;">
-          <div class="task-section">
-            <div class="task-section-title">Name</div>
-            <input id="taskName" class="text-input" placeholder="e.g., Study" />
+        <div class="tag-details" style="margin-top: 10px;">
+          <div class="tag-section">
+            <div class="tag-section-title">Name</div>
+            <input id="tagName" class="text-input" placeholder="e.g., Study" />
           </div>
-          <div class="task-config-row">
-            <div class="task-config">
-              <div class="task-section-title">Focus</div>
-              <input id="taskWork" class="text-input" type="number" min="1" max="120" />
+          <div class="tag-config-row">
+            <div class="tag-config">
+              <div class="tag-section-title">Focus</div>
+              <input id="tagWork" class="text-input" type="number" min="1" max="120" />
             </div>
-            <div class="task-config">
-              <div class="task-section-title">Break</div>
-              <input id="taskBreak" class="text-input" type="number" min="1" max="60" />
+            <div class="tag-config">
+              <div class="tag-section-title">Break</div>
+              <input id="tagBreak" class="text-input" type="number" min="1" max="60" />
             </div>
-            <div class="task-config">
-              <div class="task-section-title">Cycles</div>
-              <input id="taskCycles" class="text-input" type="number" min="1" max="12" />
+            <div class="tag-config">
+              <div class="tag-section-title">Cycles</div>
+              <input id="tagCycles" class="text-input" type="number" min="1" max="12" />
             </div>
           </div>
-          <div class="task-cycle-row">
-            <div class="task-color-picker">
+          <div class="tag-cycle-row">
+            <div class="tag-color-picker">
               <span class="list-sub">Color</span>
-              <input id="taskColor" type="color" value="#9cff3a" aria-label="Task color" />
+              <input id="tagColor" type="color" value="#9cff3a" aria-label="Tag color" />
             </div>
             <label class="toggle small">
-              <input id="taskEndless" type="checkbox" />
+              <input id="tagEndless" type="checkbox" />
               <span></span>
             </label>
             <span class="list-sub">Endless</span>
           </div>
         </div>
         <div class="modal-actions" style="margin-top: 14px;">
-          <button id="taskSave" class="btn btn-large btn-success">Save</button>
+          <button id="tagSave" class="btn btn-large btn-success">Save</button>
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
         </div>
       </div>
     </div>
 
-    <div id="taskDeleteModal" class="modal hidden" data-modal="taskDeleteConfirm" aria-hidden="true">
+    <div id="tagDeleteModal" class="modal hidden" data-modal="tagDeleteConfirm" aria-hidden="true">
       <div class="modal-backdrop" data-close-modal="true"></div>
       <div class="modal-card">
         <div>
-          <h3>Delete task?</h3>
-          <p class="list-sub">This removes the task and its pomodoro settings.</p>
+          <h3>Delete tag?</h3>
+          <p class="list-sub">This removes the tag and its pomodoro settings.</p>
         </div>
         <div class="modal-actions" style="margin-top: 14px;">
-          <button id="taskDeleteConfirm" class="btn btn-large btn-danger">Delete</button>
-          <button id="taskDeleteCancel" class="btn btn-large btn-success" data-close-modal="true">Cancel</button>
+          <button id="tagDeleteConfirm" class="btn btn-large btn-danger">Delete</button>
+          <button id="tagDeleteCancel" class="btn btn-large btn-success" data-close-modal="true">Cancel</button>
         </div>
       </div>
     </div>
 
-    <div id="taskPickerModal" class="modal hidden" data-modal="taskPicker" aria-hidden="true">
+    <div id="tagPickerModal" class="modal hidden" data-modal="tagPicker" aria-hidden="true">
       <div class="modal-backdrop" data-close-modal="true"></div>
       <div class="modal-card">
         <div class="row" style="justify-content: space-between; align-items: center;">
-          <h3>All tasks</h3>
+          <h3>All tags</h3>
           <button class="icon-btn icon-only" type="button" data-close-modal="true" aria-label="Close">X</button>
         </div>
-        <div id="taskAllGrid" class="task-modal-grid" style="margin-top: 12px;"></div>
+        <div id="tagAllGrid" class="tag-modal-grid" style="margin-top: 12px;"></div>
       </div>
     </div>
 
-    <div id="taskSelectModal" class="modal hidden" data-modal="taskSelectConfirm" aria-hidden="true">
+    <div id="tagSelectModal" class="modal hidden" data-modal="tagSelectConfirm" aria-hidden="true">
       <div class="modal-backdrop" data-close-modal="true"></div>
       <div class="modal-card">
         <div>
-          <h3>Set active task?</h3>
-          <p id="taskSelectLabel" class="list-sub">Default</p>
+          <h3>Set active tag?</h3>
+          <p id="tagSelectLabel" class="list-sub">Default</p>
         </div>
         <div class="modal-actions" style="margin-top: 14px;">
-          <button id="taskSelectConfirm" class="btn btn-large btn-success">Set active</button>
+          <button id="tagSelectConfirm" class="btn btn-large btn-success">Set active</button>
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
         </div>
       </div>

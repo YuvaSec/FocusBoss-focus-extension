@@ -373,28 +373,28 @@ const logPomodoroSession = async (
     startedAt,
     endedAt,
     type: "pomodoro" as const,
-    taskId: state.pomodoro.running?.linkedTaskId ?? null,
+    tagId: state.pomodoro.running?.linkedTagId ?? null,
     focusEnabledDuring: state.focusEnabled,
     distractions: 0
   };
   const sessions = [...state.analytics.sessions, session];
-  const linkedTaskId = session.taskId ?? null;
-  let updatedTasks = state.tasks;
-  if (linkedTaskId) {
+  const linkedTagId = session.tagId ?? null;
+  let updatedTags = state.tags;
+  if (linkedTagId) {
     let changed = false;
-    const items = state.tasks.items.map((item) => {
-      if (item.id !== linkedTaskId || item.doneAt) {
+    const items = state.tags.items.map((item) => {
+      if (item.id !== linkedTagId || item.doneAt) {
         return item;
       }
       changed = true;
       return { ...item, focusSessionsCompleted: item.focusSessionsCompleted + 1 };
     });
     if (changed) {
-      updatedTasks = { ...state.tasks, items };
+      updatedTags = { ...state.tags, items };
     }
   }
-  if (updatedTasks !== state.tasks) {
-    await setState({ analytics: { sessions }, tasks: { items: updatedTasks.items } });
+  if (updatedTags !== state.tags) {
+    await setState({ analytics: { sessions }, tags: { items: updatedTags.items } });
     return;
   }
   await setState({ analytics: { sessions } });
@@ -436,7 +436,7 @@ const handlePomodoroPhaseEnd = async () => {
           endsAt: nextEnd,
           cycleIndex: nextCycle,
           paused: false,
-          linkedTaskId: running.linkedTaskId ?? null,
+          linkedTagId: running.linkedTagId ?? null,
           prevFocusEnabled: running.prevFocusEnabled
         }
       },
@@ -463,7 +463,7 @@ const handlePomodoroPhaseEnd = async () => {
         endsAt: nextEnd,
         cycleIndex: running.cycleIndex,
         paused: false,
-        linkedTaskId: running.linkedTaskId ?? null,
+        linkedTagId: running.linkedTagId ?? null,
         prevFocusEnabled: running.prevFocusEnabled
       }
     },
@@ -583,6 +583,24 @@ chrome.runtime.onMessage.addListener(
       void setState({ temporaryAllow: next }).then(() => ensureWritten(5));
     });
 
+    return true;
+  }
+);
+
+chrome.runtime.onMessage.addListener(
+  (
+    message: { type?: string; tagId?: string | null },
+    sender,
+    sendResponse: (response?: { ok: boolean }) => void
+  ) => {
+    if (message?.type !== "openTagSettings") {
+      return;
+    }
+    const tagId = message.tagId ? String(message.tagId) : "";
+    const url = chrome.runtime.getURL(
+      `popup.html${tagId ? `?tagSettings=${encodeURIComponent(tagId)}` : ""}`
+    );
+    chrome.tabs.create({ url }, () => sendResponse({ ok: true }));
     return true;
   }
 );

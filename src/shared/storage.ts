@@ -126,33 +126,33 @@ const migrateState = (existing: unknown): StorageResult => {
     }
   }
 
-  let tasksNeedDefaults = false;
-  if (Array.isArray(migratedState.tasks?.items)) {
+  let tagsNeedDefaults = false;
+  if (Array.isArray(migratedState.tags?.items)) {
     const fallbackWork = migratedState.pomodoro.workMin;
     const fallbackBreak = migratedState.pomodoro.breakMin;
     const fallbackCycles = migratedState.pomodoro.cycles;
-    const items = migratedState.tasks.items.map((item) => {
+    const items = migratedState.tags.items.map((item) => {
       const next = { ...item };
       if (typeof item.color !== "string") {
         next.color = "#9cff3a";
-        tasksNeedDefaults = true;
+        tagsNeedDefaults = true;
       }
       if (typeof item.pomodoroWorkMin !== "number") {
         next.pomodoroWorkMin = fallbackWork;
-        tasksNeedDefaults = true;
+        tagsNeedDefaults = true;
       }
       if (typeof item.pomodoroBreakMin !== "number") {
         next.pomodoroBreakMin = fallbackBreak;
-        tasksNeedDefaults = true;
+        tagsNeedDefaults = true;
       }
       if (typeof item.pomodoroCycles !== "number") {
         next.pomodoroCycles = fallbackCycles;
-        tasksNeedDefaults = true;
+        tagsNeedDefaults = true;
       }
       return next;
     });
-    if (tasksNeedDefaults) {
-      migratedState = { ...migratedState, tasks: { ...migratedState.tasks, items } };
+    if (tagsNeedDefaults) {
+      migratedState = { ...migratedState, tags: { ...migratedState.tags, items } };
     }
   }
 
@@ -161,7 +161,7 @@ const migrateState = (existing: unknown): StorageResult => {
     schemaVersion !== SCHEMA_VERSION ||
     hasMissingKeys(defaultState, existing) ||
     hasLegacyPause ||
-    tasksNeedDefaults;
+    tagsNeedDefaults;
 
   return {
     state: { ...migratedState, schemaVersion: SCHEMA_VERSION },

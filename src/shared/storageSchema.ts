@@ -1,4 +1,4 @@
-export type SchemaVersion = 2;
+export type SchemaVersion = 3;
 
 export type StorageSchema = {
   schemaVersion: SchemaVersion;
@@ -70,7 +70,7 @@ export type StorageSchema = {
     blockDuringBreak: boolean;
     sounds: boolean;
     alwaysOnTop: boolean;
-    lastTaskId?: string | null;
+    lastTagId?: string | null;
     running?: {
       phase: "work" | "break";
       startedAt?: number;
@@ -78,11 +78,11 @@ export type StorageSchema = {
       cycleIndex: number;
       paused: boolean;
       remainingMs?: number;
-      linkedTaskId?: string | null;
+      linkedTagId?: string | null;
       prevFocusEnabled?: boolean;
     } | null;
   };
-  tasks: {
+  tags: {
     activeLimit: number;
     items: Array<{
       id: string;
@@ -134,7 +134,7 @@ export type StorageSchema = {
       startedAt: number;
       endedAt: number;
       type: "pomodoro" | "strict";
-      taskId?: string | null;
+      tagId?: string | null;
       focusEnabledDuring: boolean;
       distractions: number;
       notes?: string;
@@ -151,7 +151,7 @@ export type StorageSchema = {
   pro: { enabled: boolean };
 };
 
-export const SCHEMA_VERSION: SchemaVersion = 2;
+export const SCHEMA_VERSION: SchemaVersion = 3;
 
 export const defaultState: StorageSchema = {
   schemaVersion: SCHEMA_VERSION,
@@ -216,9 +216,9 @@ export const defaultState: StorageSchema = {
     blockDuringBreak: false,
     sounds: true,
     alwaysOnTop: false,
-    lastTaskId: null
+    lastTagId: null
   },
-  tasks: {
+  tags: {
     activeLimit: 3,
     items: []
   },
