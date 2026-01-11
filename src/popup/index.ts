@@ -161,6 +161,10 @@ const pomodoroPause = document.getElementById("pomodoroPause") as HTMLButtonElem
 const pomodoroStop = document.getElementById("pomodoroStop") as HTMLButtonElement | null;
 const pomodoroAutoBlock = document.getElementById("pomodoroAutoBlock") as HTMLInputElement | null;
 const pomodoroBlockBreak = document.getElementById("pomodoroBlockBreak") as HTMLInputElement | null;
+const pomodoroSounds = document.getElementById("pomodoroSounds") as HTMLInputElement | null;
+const analyticsRetention = document.getElementById(
+  "analyticsRetention"
+) as HTMLSelectElement | null;
 const strictStatus = document.getElementById("strictStatus");
 const strictStart = document.getElementById("strictStart") as HTMLButtonElement | null;
 const strictConfirm = document.getElementById("strictConfirm") as HTMLButtonElement | null;
@@ -306,12 +310,14 @@ let currentStatsSubview: "summary" | "trend" | "usage-trend" | "tag" = "summary"
 let currentStatsSegment: "pomodoro" | "usage" = "pomodoro";
 let currentUsageRange: "today" | "week" | "month" = "week";
 let currentStatsTagId: string | null = null;
-let currentTrendRange: "day" | "week" | "month" | "year" = "week";
+type TrendRange = "day" | "week" | "month" | "year" | "3m" | "6m";
+
+let currentTrendRange: TrendRange = "week";
 let currentTrendOffset = 0;
-let currentUsageTrendRange: "day" | "week" | "month" | "year" = "week";
+let currentUsageTrendRange: TrendRange = "week";
 let currentUsageTrendOffset = 0;
 let currentUsageTrendFilter: "all" | "allowed" | "blocked" = "all";
-let currentTagRange: "day" | "week" | "month" | "year" = "week";
+let currentTagRange: TrendRange = "week";
 let currentTagOffset = 0;
 let currentFocusView: "focus" | "distraction" = "focus";
 let currentTimeMachineDay = "";
@@ -525,6 +531,9 @@ const renderPomodoro = (
   }
   if (pomodoroBlockBreak) {
     pomodoroBlockBreak.checked = pomodoro.blockDuringBreak;
+  }
+  if (pomodoroSounds) {
+    pomodoroSounds.checked = pomodoro.sounds;
   }
 
   const running = pomodoro.running;
@@ -842,10 +851,7 @@ const getWeekStart = (date: Date) => {
   return startOfDay(addDays(date, -offset));
 };
 
-const getRangeWindow = (
-  range: "day" | "week" | "month" | "year",
-  offset: number
-) => {
+const getRangeWindow = (range: TrendRange, offset: number) => {
   const now = new Date();
   if (range === "day") {
     const base = addDays(now, offset);
@@ -857,16 +863,77 @@ const getRangeWindow = (
     const end = endOfDay(addDays(start, 6));
     return { start, end };
   }
-  if (range === "month") {
-    const base = addMonths(now, offset);
+  if (range === "month" || range === "3m" || range === "6m") {
+    const span = range === "3m" ? 3 : range === "6m" ? 6 : 1;
+    const base = addMonths(now, offset * span);
     const start = new Date(base.getFullYear(), base.getMonth(), 1);
-    const end = endOfDay(new Date(base.getFullYear(), base.getMonth() + 1, 0));
+    const end = endOfDay(new Date(base.getFullYear(), base.getMonth() + span, 0));
     return { start, end };
   }
   const base = addYears(now, offset);
   const start = new Date(base.getFullYear(), 0, 1);
   const end = endOfDay(new Date(base.getFullYear(), 11, 31));
   return { start, end };
+};
+
+const getRetentionRanges = (retentionDays: number): TrendRange[] => {
+  if (!Number.isFinite(retentionDays) || retentionDays <= 0 || retentionDays >= 365) {
+    return ["day", "week", "month", "year"];
+  }
+  if (retentionDays <= 90) {
+    return ["day", "week", "month", "3m"];
+  }
+  if (retentionDays <= 180) {
+    return ["day", "week", "month", "6m"];
+  }
+  return ["day", "week", "month", "year"];
+};
+
+const clampRange = (range: TrendRange, options: TrendRange[]) => {
+  return options.includes(range) ? range : options[options.length - 1];
+};
+
+const updateRangeButtons = (
+  buttons: HTMLButtonElement[],
+  attrName: "data-range" | "data-usage-trend-range",
+  options: TrendRange[]
+) => {
+  const lastButton = buttons[3];
+  if (!lastButton) {
+    return;
+  }
+  if (options.length < 4) {
+    lastButton.classList.add("hidden");
+    lastButton.removeAttribute(attrName);
+    return;
+  }
+  const lastOption = options[3];
+  lastButton.classList.remove("hidden");
+  lastButton.setAttribute(attrName, lastOption);
+  lastButton.textContent =
+    lastOption === "year" ? "Y" : lastOption === "3m" ? "3M" : "6M";
+};
+
+const applyRetentionToRanges = (retentionDays: number) => {
+  const options = getRetentionRanges(retentionDays);
+  const nextTrend = clampRange(currentTrendRange, options);
+  const nextUsageTrend = clampRange(currentUsageTrendRange, options);
+  const nextTagRange = clampRange(currentTagRange, options);
+  if (nextTrend !== currentTrendRange) {
+    currentTrendRange = nextTrend;
+    currentTrendOffset = 0;
+  }
+  if (nextUsageTrend !== currentUsageTrendRange) {
+    currentUsageTrendRange = nextUsageTrend;
+    currentUsageTrendOffset = 0;
+  }
+  if (nextTagRange !== currentTagRange) {
+    currentTagRange = nextTagRange;
+    currentTagOffset = 0;
+  }
+  updateRangeButtons(statsTrendRangeButtons, "data-range", options);
+  updateRangeButtons(statsUsageTrendRangeButtons, "data-usage-trend-range", options);
+  updateRangeButtons(statsTagRangeButtons, "data-range", options);
 };
 
 const getRangeKeysBetween = (start: Date, end: Date) => {
@@ -942,13 +1009,24 @@ const buildUsageTotals = (state: StorageSchema, keys: string[]) => {
 
 const buildUsageTrendBuckets = (
   state: StorageSchema,
-  range: "day" | "week" | "month" | "year",
+  range: TrendRange,
   start: Date,
   end: Date,
   filter: "all" | "allowed" | "blocked"
 ) => {
   const allowedSet = new Set(state.lists.allowedDomains.map((host) => host.toLowerCase()));
-  const bucketCount = range === "year" ? 12 : range === "day" ? 6 : range === "week" ? 7 : 5;
+  const bucketCount =
+    range === "year"
+      ? 12
+      : range === "day"
+        ? 6
+        : range === "week"
+          ? 7
+          : range === "3m"
+            ? 3
+            : range === "6m"
+              ? 6
+              : 5;
   const buckets = new Array(bucketCount).fill(0).map(() => ({
     allowedMs: 0,
     blockedMs: 0,
@@ -966,7 +1044,11 @@ const buildUsageTrendBuckets = (
               const day = addDays(start, idx);
               return day.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 1);
             })
-          : new Array(5).fill("").map((_, idx) => `W${idx + 1}`);
+          : range === "3m" || range === "6m"
+            ? new Array(bucketCount).fill("").map((_, idx) =>
+                addMonths(start, idx).toLocaleDateString(undefined, { month: "short" })
+              )
+            : new Array(5).fill("").map((_, idx) => `W${idx + 1}`);
 
   const getBucketIndex = (date: Date) => {
     if (range === "year") {
@@ -978,6 +1060,11 @@ const buildUsageTrendBuckets = (
     if (range === "week") {
       const index = Math.floor((startOfDay(date).getTime() - start.getTime()) / 86400000);
       return Math.min(6, Math.max(0, index));
+    }
+    if (range === "3m" || range === "6m") {
+      const monthIndex =
+        (date.getFullYear() - start.getFullYear()) * 12 + (date.getMonth() - start.getMonth());
+      return Math.min(bucketCount - 1, Math.max(0, monthIndex));
     }
     const day = date.getDate();
     return Math.min(4, Math.floor((day - 1) / 7));
@@ -1075,14 +1162,25 @@ const buildFocusTotals = (
 
 const buildStackedTrendBuckets = (
   state: StorageSchema,
-  range: "day" | "week" | "month" | "year",
+  range: TrendRange,
   start: Date,
   end: Date,
   tagId?: string | null
 ) => {
   const tagLookup = new Map(state.tags.items.map((item) => [item.id, item]));
   const totals = new Map<string, number>();
-  const bucketCount = range === "year" ? 12 : range === "day" ? 6 : range === "week" ? 7 : 5;
+  const bucketCount =
+    range === "year"
+      ? 12
+      : range === "day"
+        ? 6
+        : range === "week"
+          ? 7
+          : range === "3m"
+            ? 3
+            : range === "6m"
+              ? 6
+              : 5;
   const bucketMaps = new Array(bucketCount).fill(0).map(() => new Map<string, number>());
   const labels =
     range === "year"
@@ -1096,7 +1194,11 @@ const buildStackedTrendBuckets = (
               const day = addDays(start, idx);
               return day.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 1);
             })
-          : new Array(5).fill("").map((_, idx) => `W${idx + 1}`);
+          : range === "3m" || range === "6m"
+            ? new Array(bucketCount).fill("").map((_, idx) =>
+                addMonths(start, idx).toLocaleDateString(undefined, { month: "short" })
+              )
+            : new Array(5).fill("").map((_, idx) => `W${idx + 1}`);
 
   const getBucketIndex = (date: Date) => {
     if (range === "year") {
@@ -1108,6 +1210,11 @@ const buildStackedTrendBuckets = (
     if (range === "week") {
       const index = Math.floor((startOfDay(date).getTime() - start.getTime()) / 86400000);
       return Math.min(6, Math.max(0, index));
+    }
+    if (range === "3m" || range === "6m") {
+      const monthIndex =
+        (date.getFullYear() - start.getFullYear()) * 12 + (date.getMonth() - start.getMonth());
+      return Math.min(bucketCount - 1, Math.max(0, monthIndex));
     }
     const day = date.getDate();
     return Math.min(4, Math.floor((day - 1) / 7));
@@ -1601,6 +1708,7 @@ const renderTimeMachine = (state: StorageSchema) => {
 
 const renderStats = (state: StorageSchema) => {
   const analytics = state.analytics;
+  applyRetentionToRanges(analytics.retentionDays ?? 90);
   statsPomodoroRangeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.range === currentPomodoroSummaryRange);
   });
@@ -1913,7 +2021,7 @@ const renderStats = (state: StorageSchema) => {
   }
 
   const renderTrendView = (
-    range: "day" | "week" | "month" | "year",
+    range: TrendRange,
     offset: number,
     tagId: string | null,
     chartEl: HTMLElement | null,
@@ -2570,6 +2678,7 @@ const bindEvents = () => {
     await setState({ overlayMode: overlayToggle.checked });
   });
 
+
   confirmToggle?.addEventListener("change", async () => {
     await setState({ confirmationPrompt: confirmToggle.checked });
   });
@@ -2677,6 +2786,15 @@ const bindEvents = () => {
 
   pomodoroBlockBreak?.addEventListener("change", async () => {
     await setState({ pomodoro: { blockDuringBreak: pomodoroBlockBreak.checked } });
+  });
+
+  pomodoroSounds?.addEventListener("change", async () => {
+    await setState({ pomodoro: { sounds: pomodoroSounds.checked } });
+  });
+
+  analyticsRetention?.addEventListener("change", async () => {
+    const value = Number(analyticsRetention.value);
+    await setState({ analytics: { retentionDays: Number.isFinite(value) ? value : 90 } });
   });
 
   tagAdd?.addEventListener("click", () => {
@@ -3261,7 +3379,7 @@ const bindEvents = () => {
 
   statsTrendRangeButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const range = button.dataset.range as "day" | "week" | "month" | "year" | undefined;
+      const range = button.dataset.range as TrendRange | undefined;
       if (!range) {
         return;
       }
@@ -3276,7 +3394,7 @@ const bindEvents = () => {
 
   statsUsageTrendRangeButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const range = button.dataset.usageTrendRange as "day" | "week" | "month" | "year" | undefined;
+      const range = button.dataset.usageTrendRange as TrendRange | undefined;
       if (!range) {
         return;
       }
@@ -3309,7 +3427,7 @@ const bindEvents = () => {
 
   statsTagRangeButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const range = button.dataset.range as "day" | "week" | "month" | "year" | undefined;
+      const range = button.dataset.range as TrendRange | undefined;
       if (!range) {
         return;
       }
@@ -3610,6 +3728,9 @@ const syncUiFromState = (state: Awaited<ReturnType<typeof getState>>) => {
   renderTheme(state.ui.theme);
   renderOverlayMode(state.overlayMode);
   renderConfirmationPrompt(state.confirmationPrompt);
+  if (analyticsRetention) {
+    analyticsRetention.value = String(state.analytics.retentionDays ?? 90);
+  }
   currentPomodoroSummaryRange = state.analytics.chartRange;
   currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
   renderStrictSession(state.strictSession);

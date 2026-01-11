@@ -7,6 +7,7 @@ const PAUSE_ALARM = "pauseResume";
 const POMODORO_ALARM = "pomodoroPhase";
 const POMODORO_HEARTBEAT = "pomodoroHeartbeat";
 const STRICT_ALARM = "strictSessionEnd";
+const ANALYTICS_RETENTION_ALARM = "analyticsRetention";
 const USAGE_UPDATE_MS = 1000;
 const SCHEDULE_PREFIX = "schedule";
 
@@ -28,6 +29,58 @@ const getDayKey = (date = new Date()): string => {
   return `${year}-${month}-${day}`;
 };
 
+const parseDayKey = (key: string): number | null => {
+  const [yearStr, monthStr, dayStr] = key.split("-");
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+  if (!year || !month || !day) {
+    return null;
+  }
+  return Date.UTC(year, month - 1, day);
+};
+
+const pruneAnalytics = async (state: StorageSchema) => {
+  const retentionDays = Number(state.analytics.retentionDays ?? 90);
+  if (!Number.isFinite(retentionDays) || retentionDays <= 0) {
+    return;
+  }
+  const cutoffMs = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  const cutoffDay = new Date(cutoffMs);
+  cutoffDay.setUTCHours(0, 0, 0, 0);
+  const cutoffDayMs = cutoffDay.getTime();
+
+  const nextByDayEntries = Object.entries(state.analytics.byDay).filter(([key]) => {
+    const dayMs = parseDayKey(key);
+    if (dayMs === null) {
+      return true;
+    }
+    return dayMs >= cutoffDayMs;
+  });
+  const nextByDay = Object.fromEntries(nextByDayEntries);
+  const nextSessions = state.analytics.sessions.filter(
+    (session) => session.endedAt >= cutoffMs
+  );
+
+  const byDayChanged =
+    Object.keys(nextByDay).length !== Object.keys(state.analytics.byDay).length;
+  const sessionsChanged = nextSessions.length !== state.analytics.sessions.length;
+
+  if (byDayChanged || sessionsChanged) {
+    await setState({
+      analytics: {
+        byDay: nextByDay,
+        sessions: nextSessions
+      }
+    });
+  }
+};
+
+const scheduleAnalyticsRetention = async () => {
+  await chrome.alarms.clear(ANALYTICS_RETENTION_ALARM);
+  chrome.alarms.create(ANALYTICS_RETENTION_ALARM, { periodInMinutes: 60 * 12 });
+};
+
 const shouldCount = (url?: string | null): boolean => {
   return Boolean(url && url.startsWith("http"));
 };
@@ -35,6 +88,218 @@ const shouldCount = (url?: string | null): boolean => {
 const getTab = (tabId: number): Promise<chrome.tabs.Tab> => {
   return new Promise((resolve) => {
     chrome.tabs.get(tabId, (tab) => resolve(tab));
+  });
+};
+
+const ensureOffscreenDocument = async () => {
+  if (!chrome.offscreen) {
+    return;
+  }
+  const hasDoc = await chrome.offscreen.hasDocument();
+  if (hasDoc) {
+    return;
+  }
+  await chrome.offscreen.createDocument({
+    url: "offscreen.html",
+    reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
+    justification: "Play FocusBoss timer sounds."
+  });
+};
+
+const playOffscreenSound = async (sound: "work" | "break" | "complete" | "stop") => {
+  if (!chrome.offscreen) {
+    return;
+  }
+  await ensureOffscreenDocument();
+  chrome.runtime.sendMessage({ type: "playSound", sound });
+};
+
+type DnrRule = chrome.declarativeNetRequest.Rule;
+
+const escapeRegex = (value: string): string => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+const normalizeDomain = (value: string): string => {
+  return normalizeHost(value.trim());
+};
+
+const wildcardToRegex = (pattern: string): RegExp => {
+  const escaped = pattern
+    .split("*")
+    .map((segment) => segment.split("?").map(escapeRegex).join("."))
+    .join(".*");
+  return new RegExp(`^${escaped}$`, "i");
+};
+
+const parseAdvancedRules = (text: string) => {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"))
+    .map((line) => {
+      const isExclude = line.startsWith("!");
+      const raw = isExclude ? line.slice(1).trim() : line;
+      return { raw, isExclude, regex: wildcardToRegex(raw) };
+    });
+};
+
+const buildFullUrlRegex = (inner: string) => {
+  return `^https?://${inner}$`;
+};
+
+const buildDomainRegex = (domain: string) => {
+  return `(?:www\\.)?${escapeRegex(domain)}(?:/.*)?`;
+};
+
+const buildKeywordRegex = (keyword: string) => {
+  return `.*${escapeRegex(keyword)}.*`;
+};
+
+const buildAdvancedRegex = (pattern: string) => {
+  const regex = wildcardToRegex(pattern);
+  const inner = regex.source.replace(/^\\^/, "").replace(/\\$$/, "");
+  return `(?:www\\.)?${inner}`;
+};
+
+const buildAllowRule = (id: number, regexFilter: string): DnrRule => {
+  return {
+    id,
+    priority: 100,
+    action: { type: chrome.declarativeNetRequest.RuleActionType.ALLOW },
+    condition: {
+      regexFilter,
+      isUrlFilterCaseSensitive: false,
+      resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME]
+    }
+  };
+};
+
+const buildRedirectRule = (id: number, regexFilter: string, target: string): DnrRule => {
+  return {
+    id,
+    priority: 1,
+    action: {
+      type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+      redirect: { regexSubstitution: target }
+    },
+    condition: {
+      regexFilter,
+      isUrlFilterCaseSensitive: false,
+      resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME]
+    }
+  };
+};
+
+const buildDnrRules = (state: StorageSchema): DnrRule[] => {
+  const pause = state.pause ?? { isPaused: false };
+  const active = state.focusEnabled && !pause.isPaused && !state.overlayMode;
+  if (!active) {
+    return [];
+  }
+
+  const rules: DnrRule[] = [];
+  let id = 1;
+  const extensionTarget = `chrome-extension://${chrome.runtime.id}/tab.html#$1`;
+  const lists = state.lists;
+  const advanced = parseAdvancedRules(lists.advancedRulesText ?? "");
+
+  const allowDomains = (lists.allowedDomains ?? [])
+    .map(normalizeDomain)
+    .filter((value) => value.length > 0);
+  const allowKeywords = (lists.allowedKeywords ?? [])
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  const blockDomains = (lists.blockedDomains ?? [])
+    .map(normalizeDomain)
+    .filter((value) => value.length > 0);
+  const blockKeywords = (lists.blockedKeywords ?? [])
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  const tempAllowHosts = state.strictSession.active
+    ? []
+    : Object.entries(state.temporaryAllow ?? {})
+        .filter(([, entry]) => typeof entry?.until === "number" && Date.now() < entry.until)
+        .map(([host]) => normalizeDomain(host))
+        .filter((value) => value.length > 0);
+
+  for (const domain of allowDomains) {
+    rules.push(buildAllowRule(id++, buildFullUrlRegex(buildDomainRegex(domain))));
+  }
+  for (const keyword of allowKeywords) {
+    rules.push(buildAllowRule(id++, buildFullUrlRegex(buildKeywordRegex(keyword))));
+  }
+  for (const host of tempAllowHosts) {
+    rules.push(buildAllowRule(id++, buildFullUrlRegex(buildDomainRegex(host))));
+  }
+  for (const rule of advanced) {
+    if (rule.isExclude) {
+      rules.push(buildAllowRule(id++, buildFullUrlRegex(buildAdvancedRegex(rule.raw))));
+    }
+  }
+
+  for (const rule of advanced) {
+    if (!rule.isExclude) {
+      rules.push(
+        buildRedirectRule(
+          id++,
+          `(${buildFullUrlRegex(buildAdvancedRegex(rule.raw))})`,
+          extensionTarget
+        )
+      );
+    }
+  }
+  for (const domain of blockDomains) {
+    rules.push(
+      buildRedirectRule(id++, `(${buildFullUrlRegex(buildDomainRegex(domain))})`, extensionTarget)
+    );
+  }
+  for (const keyword of blockKeywords) {
+    rules.push(
+      buildRedirectRule(id++, `(${buildFullUrlRegex(buildKeywordRegex(keyword))})`, extensionTarget)
+    );
+  }
+
+  return rules;
+};
+
+const applyDnrRules = async (state: StorageSchema) => {
+  if (!chrome.declarativeNetRequest) {
+    return;
+  }
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
+  const removeRuleIds = existing.map((rule) => rule.id);
+  const addRules = buildDnrRules(state);
+  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
+};
+
+const injectContentScript = (tabId: number) => {
+  return new Promise<void>((resolve) => {
+    chrome.scripting.executeScript({ target: { tabId }, files: ["content/index.js"] }, () => {
+      void chrome.runtime.lastError;
+      resolve();
+    });
+  });
+};
+
+const ensureContentScriptInjected = (mode: "all" | "active" = "all") => {
+  const query =
+    mode === "active"
+      ? { active: true, currentWindow: true }
+      : { url: ["http://*/*", "https://*/*"] };
+  chrome.tabs.query(query, (tabs) => {
+    tabs.forEach((tab) => {
+      const tabId = tab.id;
+      if (typeof tabId !== "number") {
+        return;
+      }
+      chrome.tabs.sendMessage(tabId, { type: "focusBossPing" }, (response) => {
+        if (chrome.runtime.lastError || !response?.ok) {
+          void injectContentScript(tabId);
+        }
+      });
+    });
   });
 };
 
@@ -449,7 +714,19 @@ const handlePomodoroPhaseEnd = async () => {
 
   if (state.pomodoro.cycles > 0 && running.cycleIndex >= state.pomodoro.cycles) {
     const desiredFocus = resolveFocusAfterPomodoroStop(state, running.prevFocusEnabled);
-    await setState({ pomodoro: { running: null }, focusEnabled: desiredFocus });
+    await setState({
+      pomodoro: {
+        running: null,
+        lastCompletion: {
+          mode: "completed",
+          minutes: state.pomodoro.workMin * state.pomodoro.cycles,
+          cycles: state.pomodoro.cycles,
+          endedAt: now,
+          tagId: running.linkedTagId ?? null
+        }
+      },
+      focusEnabled: desiredFocus
+    });
     pomodoroHandling = false;
     return;
   }
@@ -610,7 +887,15 @@ chrome.runtime.onInstalled.addListener(() => {
     .then(schedulePauseAlarm)
     .then(scheduleStrictAlarm)
     .then(schedulePomodoroAlarm)
-    .then(schedulePomodoroHeartbeat);
+    .then(schedulePomodoroHeartbeat)
+    .then(getState)
+    .then((state) => {
+      void applyDnrRules(state);
+      ensureContentScriptInjected("all");
+      void scheduleAnalyticsRetention();
+      void pruneAnalytics(state);
+      return state;
+    });
 });
 
 chrome.runtime.onStartup.addListener(() => {
@@ -618,7 +903,15 @@ chrome.runtime.onStartup.addListener(() => {
     .then(schedulePauseAlarm)
     .then(scheduleStrictAlarm)
     .then(schedulePomodoroAlarm)
-    .then(schedulePomodoroHeartbeat);
+    .then(schedulePomodoroHeartbeat)
+    .then(getState)
+    .then((state) => {
+      void applyDnrRules(state);
+      ensureContentScriptInjected("all");
+      void scheduleAnalyticsRetention();
+      void pruneAnalytics(state);
+      return state;
+    });
 });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -628,6 +921,31 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   if (changes.focusBossState) {
     const oldState = changes.focusBossState.oldValue as StorageSchema | undefined;
     const newState = changes.focusBossState.newValue as StorageSchema | undefined;
+    if (newState) {
+      void applyDnrRules(newState);
+      ensureContentScriptInjected("all");
+      const soundsEnabled = Boolean(newState.pomodoro.sounds);
+      if (soundsEnabled) {
+        const oldRunning = oldState?.pomodoro?.running ?? null;
+        const newRunning = newState.pomodoro.running ?? null;
+        if (!oldRunning && newRunning) {
+          void playOffscreenSound(newRunning.phase === "break" ? "break" : "work");
+        } else if (oldRunning && newRunning && oldRunning.phase !== newRunning.phase) {
+          void playOffscreenSound(newRunning.phase === "break" ? "break" : "work");
+        } else if (oldRunning && !newRunning) {
+          const lastCompletion = newState.pomodoro.lastCompletion;
+          const prevCompletion = oldState?.pomodoro?.lastCompletion;
+          if (lastCompletion?.endedAt && lastCompletion.endedAt !== prevCompletion?.endedAt) {
+            void playOffscreenSound(
+              lastCompletion.mode === "completed" ? "complete" : "stop"
+            );
+          }
+        }
+      }
+      if (oldState?.analytics?.retentionDays !== newState.analytics.retentionDays) {
+        void pruneAnalytics(newState);
+      }
+    }
     const scheduleChanged =
       serializeScheduleEntries(oldState?.schedule?.entries) !==
       serializeScheduleEntries(newState?.schedule?.entries);
@@ -640,6 +958,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     void scheduleStrictAlarm();
     if (pomodoroChanged) {
       void schedulePomodoroAlarm();
+      ensureContentScriptInjected();
       if (!newState?.pomodoro?.running) {
         lastHandledPhase = "";
         lastHandledEndsAt = 0;
@@ -711,6 +1030,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       }
     });
   }
+  if (alarm.name === ANALYTICS_RETENTION_ALARM) {
+    void getState().then(pruneAnalytics);
+  }
   if (alarm.name.startsWith(`${SCHEDULE_PREFIX}:start:`)) {
     void applyScheduleState().then(scheduleAllEntries);
   }
@@ -770,6 +1092,14 @@ void ensureState()
   .then(scheduleStrictAlarm)
   .then(schedulePomodoroAlarm)
   .then(schedulePomodoroHeartbeat)
+  .then(getState)
+  .then((state) => {
+    void applyDnrRules(state);
+    ensureContentScriptInjected("all");
+    void scheduleAnalyticsRetention();
+    void pruneAnalytics(state);
+    return state;
+  })
   .then(scheduleAllEntries)
   .then(applyScheduleState);
 console.log("FocusBoss service worker running");

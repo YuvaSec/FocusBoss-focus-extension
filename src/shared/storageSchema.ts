@@ -71,6 +71,13 @@ export type StorageSchema = {
     sounds: boolean;
     alwaysOnTop: boolean;
     lastTagId?: string | null;
+    lastCompletion?: {
+      mode: "completed" | "interrupted";
+      minutes: number;
+      cycles: number;
+      endedAt: number;
+      tagId?: string | null;
+    };
     running?: {
       phase: "work" | "break";
       startedAt?: number;
@@ -144,6 +151,7 @@ export type StorageSchema = {
     chartThemeId: string;
     chartRange: "today" | "week" | "month";
     chartFilter: "all" | "blocked";
+    retentionDays: number;
   };
   ui: {
     theme: "dark" | "light" | "system";
@@ -216,7 +224,8 @@ export const defaultState: StorageSchema = {
     blockDuringBreak: false,
     sounds: true,
     alwaysOnTop: false,
-    lastTagId: null
+    lastTagId: null,
+    lastCompletion: undefined
   },
   tags: {
     activeLimit: 3,
@@ -232,7 +241,8 @@ export const defaultState: StorageSchema = {
     showWebUsage: true,
     chartThemeId: "default",
     chartRange: "week",
-    chartFilter: "all"
+    chartFilter: "all",
+    retentionDays: 90
   },
   ui: {
     theme: "dark"

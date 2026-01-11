@@ -1,9 +1,11 @@
 import { getState, setState } from "../shared/storage.js";
+import { evaluateRules } from "../shared/rules.js";
 import { getInterventionLabel, pickIntervention } from "../shared/interventions.js";
 
 const nameEl = document.getElementById("interventionName");
 const messageEl = document.getElementById("interventionMessage");
 const metaEl = document.getElementById("interventionMeta");
+const reasonEl = document.getElementById("interventionReason");
 const usageEl = document.getElementById("interventionUsage");
 const stageEl = document.getElementById("interventionStage");
 const actionsEl = document.getElementById("interventionActions");
@@ -37,15 +39,35 @@ const renderEmpty = () => {
   if (nameEl) nameEl.textContent = "No interventions enabled";
   if (messageEl) messageEl.textContent = "Enable an intervention in the popup.";
   if (metaEl) metaEl.textContent = "";
+  if (reasonEl) reasonEl.textContent = "";
   if (usageEl) usageEl.textContent = "";
   if (stageEl) stageEl.innerHTML = "";
   actionsEl?.classList.add("hidden");
   tempAllowSection?.classList.add("hidden");
 };
 
+const decodeMaybe = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
 const getPrevUrl = () => {
   const params = new URLSearchParams(window.location.search);
-  return params.get("prev");
+  const fromQuery = params.get("prev");
+  if (fromQuery) {
+    return decodeMaybe(fromQuery);
+  }
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash) {
+    return null;
+  }
+  if (hash.startsWith("prev=")) {
+    return decodeMaybe(hash.slice(5));
+  }
+  return decodeMaybe(hash);
 };
 
 const wireBackButton = () => {
@@ -308,6 +330,31 @@ const render = async () => {
 
   const prevUrl = getPrevUrl();
   let host: string | null = null;
+  if (reasonEl) {
+    if (prevUrl) {
+      try {
+        const result = evaluateRules(prevUrl, state.lists);
+        if (result.allowed) {
+          reasonEl.textContent = "";
+        } else {
+          const reason = result.reason;
+          if (reason?.type === "blocked-domain") {
+            reasonEl.textContent = `Blocked by domain: ${reason.rule}`;
+          } else if (reason?.type === "blocked-keyword") {
+            reasonEl.textContent = `Blocked by keyword: ${reason.rule}`;
+          } else if (reason?.type === "advanced-block") {
+            reasonEl.textContent = `Blocked by advanced rule: ${reason.rule}`;
+          } else {
+            reasonEl.textContent = "Blocked by Focus rules.";
+          }
+        }
+      } catch {
+        reasonEl.textContent = "";
+      }
+    } else {
+      reasonEl.textContent = "";
+    }
+  }
   if (prevUrl) {
     try {
       host = normalizeHost(new URL(prevUrl).hostname);

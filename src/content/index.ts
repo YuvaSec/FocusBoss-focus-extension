@@ -2,6 +2,13 @@ const STORAGE_KEY = "focusBossState";
 const WIDGET_STORAGE_KEY = "focusBossWidget";
 const DEFAULT_WIDGET_POSITION = { x: 24, y: 24 };
 const DEFAULT_POMODORO = { workMin: 25, breakMin: 5, cycles: 0 };
+const isExtensionContextValid = () => {
+  try {
+    return Boolean(chrome?.runtime?.id);
+  } catch {
+    return false;
+  }
+};
 
 type StorageState = {
   focusEnabled: boolean;
@@ -20,6 +27,13 @@ type StorageState = {
     autoBlockDuringWork: boolean;
     blockDuringBreak: boolean;
     lastTagId: string | null;
+    lastCompletion?: {
+      mode: "completed" | "interrupted";
+      minutes: number;
+      cycles: number;
+      endedAt: number;
+      tagId?: string | null;
+    };
     running: null | {
       phase: "work" | "break";
       startedAt: number;
@@ -181,10 +195,17 @@ const mergePatch = (base: unknown, patch: unknown): unknown => {
 };
 
 const getState = async (): Promise<StorageState | null> => {
+  if (!isExtensionContextValid()) {
+    return null;
+  }
   return new Promise((resolve) => {
-    chrome.storage.local.get(STORAGE_KEY, (stored) => {
-      resolve((stored[STORAGE_KEY] as StorageState) ?? null);
-    });
+    try {
+      chrome.storage.local.get(STORAGE_KEY, (stored) => {
+        resolve((stored[STORAGE_KEY] as StorageState) ?? null);
+      });
+    } catch {
+      resolve(null);
+    }
   });
 };
 
@@ -205,12 +226,19 @@ const setState = async (partial: StoragePatch) => {
   }
   const merged = mergePatch(current, partial) as StorageState;
   await new Promise<void>((resolve) => {
-    chrome.storage.local.set({ [STORAGE_KEY]: merged }, () => resolve());
+    try {
+      chrome.storage.local.set({ [STORAGE_KEY]: merged }, () => resolve());
+    } catch {
+      resolve();
+    }
   });
   return merged;
 };
 
 const subscribeState = (callback: (state: StorageState) => void) => {
+  if (!isExtensionContextValid()) {
+    return () => undefined;
+  }
   const listener = (changes: Record<string, chrome.storage.StorageChange>) => {
     const change = changes[STORAGE_KEY];
     if (change?.newValue) {
@@ -222,25 +250,39 @@ const subscribeState = (callback: (state: StorageState) => void) => {
 };
 
 const getWidgetPrefs = async (): Promise<WidgetPrefs> => {
+  if (!isExtensionContextValid()) {
+    return {};
+  }
   return new Promise((resolve) => {
-    chrome.storage.sync.get(WIDGET_STORAGE_KEY, (stored) => {
-      resolve((stored[WIDGET_STORAGE_KEY] ?? {}) as WidgetPrefs);
-    });
+    try {
+      chrome.storage.sync.get(WIDGET_STORAGE_KEY, (stored) => {
+        resolve((stored[WIDGET_STORAGE_KEY] ?? {}) as WidgetPrefs);
+      });
+    } catch {
+      resolve({});
+    }
   });
 };
 
 const saveWidgetPrefs = async (patch: WidgetPrefs) => {
+  if (!isExtensionContextValid()) {
+    return;
+  }
   const current = await getWidgetPrefs();
   await new Promise<void>((resolve) => {
-    chrome.storage.sync.set(
-      {
-        [WIDGET_STORAGE_KEY]: {
-          ...current,
-          ...patch
-        }
-      },
-      () => resolve()
-    );
+    try {
+      chrome.storage.sync.set(
+        {
+          [WIDGET_STORAGE_KEY]: {
+            ...current,
+            ...patch
+          }
+        },
+        () => resolve()
+      );
+    } catch {
+      resolve();
+    }
   });
 };
 
@@ -274,12 +316,14 @@ const getTagPomodoroConfig = (tag: StorageState["tags"]["items"][number] | null)
 };
 
 const initPomodoroWidget = async () => {
-  if (document.getElementById("focusboss-pomodoro-widget")) {
-    return;
+  const existing = document.getElementById("focusboss-pomodoro-widget");
+  if (existing) {
+    existing.remove();
   }
 
   const root = document.createElement("div");
   root.id = "focusboss-pomodoro-widget";
+  root.dataset.fbActive = "true";
   root.style.position = "fixed";
   root.style.left = `${DEFAULT_WIDGET_POSITION.x}px`;
   root.style.top = `${DEFAULT_WIDGET_POSITION.y}px`;
@@ -1086,6 +1130,20 @@ const initPomodoroWidget = async () => {
       completionActive = false;
       completionBursted = false;
     }
+    const storedCompletion = state.pomodoro.lastCompletion;
+    if (!running && storedCompletion?.endedAt) {
+      completionActive = true;
+      completionMode = storedCompletion.mode;
+      completionMinutes = storedCompletion.minutes;
+      completionCycles = storedCompletion.cycles;
+      minimized = false;
+      ultraMinimized = false;
+      await saveWidgetPrefs({ minimized: false, ultraMinimized: false });
+      if (completionMode === "completed" && !completionBursted) {
+        triggerConfetti();
+        completionBursted = true;
+      }
+    }
     if (!running && lastRunning && typeof lastRunning.endsAt === "number" && lastRunning.endsAt > Date.now()) {
       lastRunning = null;
     }
@@ -1209,6 +1267,44 @@ const initPomodoroWidget = async () => {
     lastRunning = running;
   };
 
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "sync") {
+      return;
+    }
+    const change = changes[WIDGET_STORAGE_KEY];
+    if (!change?.newValue) {
+      return;
+    }
+    prefs = change.newValue as WidgetPrefs;
+    if (typeof prefs.dismissed === "boolean") {
+      dismissed = prefs.dismissed;
+    }
+    if (typeof prefs.seen === "boolean") {
+      seen = prefs.seen;
+    }
+    if (prefs.position) {
+      position = { ...prefs.position };
+    }
+    if (typeof prefs.minimized === "boolean") {
+      minimized = prefs.minimized;
+      widget.classList.toggle("is-minimized", minimized && !ultraMinimized);
+    }
+    if (typeof prefs.ultraMinimized === "boolean") {
+      ultraMinimized = prefs.ultraMinimized;
+      widget.classList.toggle("is-ultra", ultraMinimized);
+    }
+    if (prefs.ultraSide === "left" || prefs.ultraSide === "right") {
+      ultraSide = prefs.ultraSide;
+    }
+    if (typeof prefs.ultraY === "number") {
+      ultraY = prefs.ultraY;
+    }
+    applyPosition();
+    if (latestState) {
+      void updateWidget(latestState);
+    }
+  });
+
   const handleAction = async (action: string) => {
     if (action === "start") {
       completionActive = false;
@@ -1231,6 +1327,7 @@ const initPomodoroWidget = async () => {
           autoBlockDuringWork: state.pomodoro.autoBlockDuringWork,
           blockDuringBreak: state.pomodoro.blockDuringBreak,
           lastTagId: activeTag?.id ?? null,
+          lastCompletion: undefined,
           running: {
             phase: "work",
             startedAt: now,
@@ -1291,8 +1388,19 @@ const initPomodoroWidget = async () => {
         widget.classList.toggle("is-minimized", false);
         widget.classList.toggle("is-ultra", false);
         await saveWidgetPrefs({ minimized: false, ultraMinimized: false });
+        await setState({
+          pomodoro: {
+            running: null,
+            lastCompletion: {
+              mode: "interrupted",
+              minutes: completionMinutes,
+              cycles: completionCycles,
+              endedAt: Date.now(),
+              tagId: running?.linkedTagId ?? null
+            }
+          }
+        });
       }
-      await setState({ pomodoro: { running: null } });
       return;
     }
 
@@ -1527,15 +1635,32 @@ const injectOverlay = () => {
 };
 
 const redirectToIntervention = (href: string) => {
-  chrome.runtime.sendMessage(
-    { type: "redirectToIntervention", prevUrl: href },
-    (response: { ok?: boolean } | undefined) => {
-      if (chrome.runtime.lastError || !response?.ok) {
-        const target = chrome.runtime.getURL(`tab.html?prev=${encodeURIComponent(href)}`);
-        window.location.replace(target);
-      }
+  return new Promise<boolean>((resolve) => {
+    if (!isExtensionContextValid()) {
+      resolve(false);
+      return;
     }
-  );
+    try {
+      chrome.runtime.sendMessage(
+        { type: "redirectToIntervention", prevUrl: href },
+        (response: { ok?: boolean } | undefined) => {
+          if (chrome.runtime.lastError || !response?.ok) {
+            try {
+              const target = chrome.runtime.getURL(`tab.html?prev=${encodeURIComponent(href)}`);
+              window.location.replace(target);
+              resolve(true);
+            } catch {
+              resolve(false);
+            }
+            return;
+          }
+          resolve(true);
+        }
+      );
+    } catch {
+      resolve(false);
+    }
+  });
 };
 
 const evaluate = async () => {
@@ -1568,9 +1693,31 @@ const evaluate = async () => {
   if (state.overlayMode) {
     injectOverlay();
   } else {
-    redirectToIntervention(location.href);
+    const redirected = await redirectToIntervention(location.href);
+    if (!redirected) {
+      injectOverlay();
+    }
   }
 };
 
-void evaluate();
-void initPomodoroWidget();
+const ensureSingleContentInstance = () => {
+  const key = "__focusBossContentInitialized";
+  const target = window as typeof window & { [key]?: boolean };
+  if (target[key]) {
+    return false;
+  }
+  target[key] = true;
+  return true;
+};
+
+if (ensureSingleContentInstance()) {
+  void evaluate();
+  void initPomodoroWidget();
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== "focusBossPing") {
+    return;
+  }
+  sendResponse({ ok: true });
+});
