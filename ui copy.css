@@ -1,0 +1,2956 @@
+/*
+  FocusBoss UI stylesheet
+  Organized by UI area so each block is easy to find and understand.
+*/
+
+/* =========================
+   1) Fonts: which typefaces are loaded and used across the UI
+   ========================= */
+@font-face {
+  font-family: "Poppins";
+  src: url("fonts/poppins-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("fonts/poppins-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =========================
+   2) Theme tokens: reusable colors, spacing, radii, and font sizes
+   These variables are referenced everywhere else in the file.
+   ========================= */
+:root {
+  color-scheme: light dark;
+  --color-bg: #0e1111;
+  --color-surface: #161a1a;
+  --color-surface-alt: #1d2222;
+  --color-text: #f5f5f5;
+  --color-muted: #a4abac;
+  --color-accent: #9cff3a;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --r-card: 16px;
+  --r-control: 12px;
+  --r-chip: 999px;
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 16px;
+  --space-4: 20px;
+  --font-title: 18px;
+  --font-body: 13px;
+  --font-small: 11px;
+  --font-ui: "Poppins", Arial, sans-serif;
+
+
+  --strict-overlay-bg: var(--color-bg);
+  --strict-overlay-text: var(--color-text);
+  --strict-overlay-muted: var(--color-muted);
+  --strict-ring-track: rgba(255, 255, 255, 0.12);
+  --strict-ring-progress: var(--color-accent);
+
+
+  --neo-bg: var(--color-surface);
+  --neo-bg-alt: var(--color-surface-alt);
+  --neo-shadow: 8px 8px 16px rgba(0, 0, 0, 0.35), -8px -8px 16px rgba(255, 255, 255, 0.04);
+  --neo-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.35),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.05);
+  --neo-shadow-sm: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.04);
+  --neo-border: rgba(129, 129, 129, 0.04);
+  --pomodoro-bg: var(--neo-bg);
+  --pomodoro-foreground: var(--color-text);
+  --pomodoro-muted: var(--neo-bg-alt);
+  --pomodoro-muted-foreground: var(--color-muted);
+  --pomodoro-accent: #9cff3a;
+  --pomodoro-shadow: var(--neo-shadow);
+  --pomodoro-shadow-inset: var(--neo-shadow-inset);
+  --pomodoro-shadow-sm: var(--neo-shadow-sm);
+}
+
+
+/* =========================
+   3) Base reset + typography
+   Normalizes spacing and sets global text defaults.
+   ========================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: var(--font-body);
+  min-width: 400px;
+  min-height: 550px;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+/* =========================
+   4) App shell layout: header + main content area
+   Controls overall sizing and scroll behavior.
+   ========================= */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-header {
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--neo-border);
+}
+
+.app-title {
+  font-size: var(--font-title);
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-3);
+  overflow-y: auto;
+  align-content: start;
+  justify-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Popup sizing: cards stretch to full width in the popup view. */
+.app.popup .app-main {
+  justify-items: stretch;
+}
+
+.app.popup .card {
+  max-width: 100%;
+}
+
+/* Scrollbar styling for the main content area. */
+.app-main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.app-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-main::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.4);
+  border-radius: 999px;
+}
+
+.app-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.6);
+}
+
+/* =========================
+   5) Cards and layout helpers
+   Reusable surfaces and row alignment utilities.
+   ========================= */
+.card {
+  background: var(--neo-bg);
+  border: 1px solid var(--neo-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--neo-shadow);
+  padding: var(--space-3);
+  max-width: 720px;
+  width: 100%;
+}
+
+/* Rows: align labels and controls on one line. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.row + .row {
+  margin-top: var(--space-2);
+}
+
+/* =========================
+   6) Status pill styles
+   Visual language for on/off/paused/strict/pomodoro states.
+   ========================= */
+.status-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.status[data-status="on"] {
+  border-color: rgba(156, 255, 58, 0.7);
+  background: rgba(156, 255, 58, 0.14);
+}
+
+.status[data-status="off"] {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.status[data-status="paused"] {
+  border-color: rgba(255, 193, 7, 0.6);
+  background: rgba(255, 193, 7, 0.12);
+}
+
+.status[data-status="strict"] {
+  border-color: rgba(255, 90, 90, 0.6);
+  background: rgba(255, 90, 90, 0.12);
+}
+
+.status[data-status="pomodoro"] {
+  border-color: rgba(75, 198, 255, 0.7);
+  background: rgba(75, 198, 255, 0.14);
+}
+
+.status[data-status="error"] {
+  border-color: rgba(255, 120, 50, 0.7);
+  background: rgba(255, 120, 50, 0.14);
+}
+
+/* =========================
+   7) Navigation bar + icons
+   Bottom tab bar layout and active state styling.
+   ========================= */
+.app-nav {
+  border-top: 1px solid var(--neo-border);
+  background: var(--neo-bg);
+  padding: 8px 16px 10px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+}
+
+.nav-btn {
+  width: 100%;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition: color 200ms ease;
+}
+
+/* Active tab background pill behind the icon. */
+.nav-btn::before {
+  content: "";
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  /*background: rgba(156, 255, 58, 0.16);*/
+  opacity: 0;
+  transition: opacity 200ms ease;
+  z-index: 0;
+}
+
+.nav-btn.active {
+  /*color: var(--color-accent);*/
+}
+
+.nav-btn.active::before {
+  opacity: 1;
+}
+
+/* Active tab indicator line (aligned to nav border). */
+.nav-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  width: 56px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+
+/* Outline nav icons (shared stroke styling). */
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  opacity: 0.75;
+  z-index: 1;
+}
+
+.nav-icon * {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-btn.active .nav-icon {
+  opacity: 1;
+}
+
+/* =========================
+   8) Buttons
+   Base button styling, sizes, and semantic variants.
+   ========================= */
+.btn {
+  border: 0;
+  background: var(--neo-bg);
+  color: var(--color-text);
+  border-radius: var(--r-control);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: var(--font-small);
+  min-width: 64px;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.btn:hover {
+  box-shadow: var(--neo-shadow);
+}
+
+.btn.btn-small {
+  padding: 8px 14px;
+  min-width: 96px;
+  font-size: 12px;
+}
+
+.btn.btn-large {
+  padding: 10px 16px;
+  font-size: 12px;
+  width: 100%;
+}
+
+/* Primary action button: lightly tinted accent color. */
+.btn.btn-primary {
+  background: rgba(156, 255, 58, 0.2);
+  color: var(--color-text);
+}
+
+/* Success and danger buttons: used in modals and confirmations. */
+.btn.btn-danger {
+  background: rgba(255, 90, 90, 0.12);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+  transform: translateY(0);
+}
+
+.btn.btn-danger:hover {
+  box-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn.btn-success {
+  background: rgba(156, 255, 58, 0.18);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+  transform: translateY(0);
+}
+
+.btn.btn-success:hover {
+  box-shadow: 0 10px 24px rgba(156, 255, 58, 0.25);
+  transform: translateY(-1px);
+}
+
+
+/* =========================
+   9) Icon buttons
+   Small icon-only buttons for actions like close/delete.
+   ========================= */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  color: var(--color-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow);
+}
+
+.icon-btn.icon-only {
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+}
+
+/* =========================
+   10) Inputs and form controls
+   Text fields, selects, toggles, and segmented controls.
+   ========================= */
+.text-input {
+  width: 100%;
+  border-radius: var(--r-control);
+  border: 0;
+  padding: var(--space-2);
+  background: var(--neo-bg);
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow-inset);
+}
+
+/* Toggle: custom switch control. */
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle span {
+  position: absolute;
+  inset: 0;
+  background: var(--neo-bg);
+  border-radius: var(--r-chip);
+  border: 0;
+  transition: 0.2s ease;
+  box-shadow: var(--neo-shadow-inset);
+}
+
+.toggle span::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-text);
+  transition: 0.2s ease;
+}
+
+.toggle input:checked + span {
+  background: rgba(156, 255, 58, 0.3);
+  border-color: rgba(156, 255, 58, 0.6);
+}
+
+.toggle input:checked + span::after {
+  transform: translateX(20px);
+  background: var(--color-accent);
+}
+
+/* Compact toggle variant (used in configs). */
+.toggle.small {
+  width: 36px;
+  height: 20px;
+}
+
+.toggle.small span::after {
+  width: 14px;
+  height: 14px;
+  top: 2px;
+  left: 2px;
+}
+
+.toggle.small input:checked + span::after {
+  transform: translateX(16px);
+}
+
+/* Segmented control: pill buttons for tabs/filters. */
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--neo-bg);
+  border-radius: var(--r-control);
+  border: 0;
+  overflow: hidden;
+  box-shadow: var(--neo-shadow-inset);
+}
+
+#entryTypeRow.segmented {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.segmented.four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.segmented.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.segmented.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  padding: var(--space-2);
+  cursor: pointer;
+}
+
+.segmented button.active {
+  background: var(--neo-bg);
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+/* Stats tabs: segmented control layout + animated panels. */
+.stats-tabs-row {
+  flex-wrap: wrap;
+}
+
+.stats-tabs-row > * {
+  min-width: 0;
+}
+
+.stats-tabs-row .segmented {
+  width: 100%;
+}
+
+.segmented.four button {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.stats-panel {
+  opacity: 0;
+  transform: translateY(6px);
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 200ms ease, transform 200ms ease, max-height 200ms ease;
+}
+
+.stats-panel.active {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 480px;
+}
+
+/* =========================
+   11) Chips
+   Small pill buttons for quick choices (durations, tags).
+   ========================= */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--r-chip);
+  border: 0;
+  background: var(--neo-bg);
+  color: var(--color-text);
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+/* Strict mode duration chips: evenly sized grid. */
+#strictDurations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+  gap: 8px;
+}
+
+#strictDurations .chip {
+  justify-content: center;
+  text-align: center;
+}
+
+.chip.active {
+  background: var(--color-accent);
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow-inset);
+}
+
+.chip[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================
+   12) Lists and list items
+   Used in blocked/allowed lists and schedule entries.
+   ========================= */
+.list-items {
+  display: grid;
+  gap: 8px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: var(--r-control);
+  border: 0;
+  background: var(--neo-bg);
+  font-size: var(--font-small);
+  overflow: visible;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.list-item button {
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.list-item button:hover {
+  color: var(--color-accent);
+}
+
+.list-title {
+  font-weight: 600;
+}
+
+.list-sub {
+  font-size: var(--font-small);
+  color: var(--color-muted);
+}
+
+/* =========================
+   13) Modal system
+   Overlay, modal card, and actions layout.
+   ========================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #ececec;
+  backdrop-filter: blur(26px) saturate(180%);
+}
+
+.modal-card {
+  position: relative;
+  width: min(92vw, 420px);
+  border-radius: 24px;
+  padding: 18px;
+  background: var(--neo-bg);
+  border: 1px solid var(--neo-border);
+  box-shadow: var(--neo-shadow);
+  z-index: 1;
+}
+
+
+.modal.hidden {
+  display: none;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.strict-desc {
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+/* =========================
+   14) Strict session overlay
+   Fullscreen lock screen shown during strict mode.
+   ========================= */
+.strict-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5000;
+  background: var(--strict-overlay-bg);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--strict-overlay-text);
+}
+
+.strict-overlay.hidden {
+  display: none;
+}
+
+.strict-overlay-content {
+  text-align: left;
+  display: grid;
+  gap: 8px;
+  max-width: 320px;
+  width: 100%;
+}
+
+.strict-overlay .list-sub {
+  color: var(--strict-overlay-muted);
+}
+
+.strict-overlay-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+
+
+/* =========================
+   15) Tags
+   Tag list, completion states, and range slider.
+   ========================= */
+.tag-form {
+  display: grid;
+  gap: 10px;
+}
+
+.tag-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-range input[type="range"] {
+  flex: 1;
+  accent-color: var(--color-accent);
+}
+
+.tag-empty {
+  color: var(--color-muted);
+}
+
+.tag-item {
+  gap: 10px;
+}
+
+.tag-main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tag-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-meta {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.tag-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-done .tag-title {
+  text-decoration: line-through;
+  color: var(--color-muted);
+}
+
+/* =========================
+   16) Pomodoro
+   Timer layout and controls.
+   ========================= */
+.pomodoro-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.pomodoro-title {
+  min-width: 0;
+}
+
+.pomodoro-title h3 {
+  font-size: 1.5em;
+}
+
+.pomodoro-status-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pomodoro-status-stack {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.pomodoro-tag-pill {
+  max-width: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pomodoro-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pomodoro-control {
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: inherit;
+}
+
+.pomodoro-control.secondary {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--pomodoro-bg);
+  box-shadow: var(--pomodoro-shadow-sm);
+  color: var(--pomodoro-muted-foreground);
+}
+
+.pomodoro-control.secondary:hover {
+  color: var(--pomodoro-foreground);
+}
+
+.pomodoro-control.secondary:active {
+  box-shadow: var(--pomodoro-shadow-inset);
+}
+
+.pomodoro-control.primary {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--pomodoro-accent);
+  color: var(--pomodoro-foreground);
+  box-shadow: 0 4px 16px var(--pomodoro-shadow);
+}
+
+.pomodoro-control.primary:hover {
+  transform: scale(1.05);
+}
+
+.pomodoro-control.primary:active {
+  transform: scale(0.95);
+}
+
+.pomodoro-control svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.pomodoro-control.primary svg {
+  width: 24px;
+  height: 24px;
+}
+
+.pomodoro-control[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pomodoro-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pomodoro-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pomodoro-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--r-control);
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.pomodoro-config-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pomodoro-config-col {
+  padding: 10px 12px;
+  border-radius: var(--r-control);
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  display: grid;
+  gap: 4px;
+  text-align: center;
+}
+
+.pomodoro-config-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.pomodoro-config-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pomodoro-foreground);
+}
+
+/* Tag picker inside Pomodoro card. */
+.tag-disclosure {
+  display: grid;
+  gap: 0;
+}
+
+.tags-card .tags-header {
+  align-items: center;
+}
+
+.tag-active-card {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: var(--r-control);
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  display: grid;
+  gap: 8px;
+}
+
+.tag-active-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tag-active-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tag-active-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.tag-active-name {
+  font-weight: 600;
+  font-size: 13px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: var(--neo-shadow-sm);
+  flex: 0 0 auto;
+}
+
+.tag-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tag-quick-card {
+  background: var(--neo-bg);
+  border-radius: var(--r-control);
+  padding: 10px;
+  box-shadow: var(--neo-shadow-sm);
+  display: grid;
+  gap: 6px;
+  cursor: pointer;
+  min-height: 88px;
+}
+
+.tag-quick-card:hover {
+  box-shadow: var(--neo-shadow);
+}
+
+.tag-quick-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.tag-quick-card .tag-title {
+  font-weight: 600;
+  font-size: 12px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tag-quick-card .tag-desc {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.tag-show-all {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.tag-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(140, 140, 140, 0.35) transparent;
+}
+
+.tag-modal-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tag-modal-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tag-modal-grid::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 140, 0.35);
+  border-radius: 999px;
+}
+
+.tag-modal-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.55);
+}
+
+.stats-export-card .stats-export-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tag-header {
+  position: relative;
+}
+
+.tag-toggle {
+  border: 0;
+  background: var(--neo-bg);
+  color: inherit;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 12px;
+  border-radius: var(--r-control);
+  box-shadow: var(--neo-shadow-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+.tag-toggle:focus-visible {
+  outline: 2px solid rgba(156, 255, 58, 0.45);
+  outline-offset: 2px;
+}
+
+.tag-toggle:hover {
+  box-shadow: var(--neo-shadow);
+}
+
+.tag-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.tag-name {
+  font-weight: 600;
+  font-size: 13px;
+  display: block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.tag-title-block {
+  display: grid;
+  gap: 6px;
+}
+
+.tag-title-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tag-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  color: var(--color-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  align-self: stretch;
+}
+
+.tag-meta-pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-meta-pill {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  color: var(--color-muted);
+  box-shadow: var(--neo-shadow-sm);
+  white-space: nowrap;
+}
+
+.tag-chevron {
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  transition: transform 200ms ease;
+}
+
+.tag-chevron svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tag-add {
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  color: var(--color-muted);
+  border-radius: 999px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--neo-shadow-sm);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tag-add:hover {
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow);
+}
+
+.tag-add:hover {
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow);
+}
+
+.tag-add svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tag-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  transition: max-height 220ms ease, opacity 220ms ease, margin-top 220ms ease,
+    padding-top 220ms ease, padding-bottom 220ms ease;
+}
+
+.tag-disclosure.is-open .tag-panel {
+  max-height: 260px;
+  opacity: 1;
+  margin-top: 0;
+  padding: 8px 12px 12px;
+  background: var(--neo-bg);
+  border-radius: 0 0 var(--r-control) var(--r-control);
+  box-shadow: var(--neo-shadow-sm);
+  overflow-y: auto;
+}
+
+.tag-disclosure.is-open .tag-chevron {
+  transform: rotate(180deg);
+}
+
+.tag-disclosure.is-open .tag-toggle {
+  border-radius: var(--r-control) var(--r-control) 0 0;
+  box-shadow: none;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tag-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.tag-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tag-panel::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.4);
+  border-radius: 999px;
+}
+
+.tag-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 10px;
+  padding: 14px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  cursor: pointer;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.tag-card:hover {
+  border-color: rgba(156, 255, 58, 0.5);
+}
+
+.tag-card:active {
+  transform: translateY(1px);
+}
+
+.tag-title {
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tag-desc {
+  font-size: 12px;
+  color: var(--color-muted);
+  line-height: 1.4;
+  grid-column: 1 / -1;
+}
+
+.tag-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: end;
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.tag-pill {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tag-pill span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  color: var(--color-muted);
+  box-shadow: var(--neo-shadow-sm);
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tag-pill span.is-active {
+  border-color: rgba(156, 255, 58, 0.6);
+  background: rgba(156, 255, 58, 0.18);
+  color: var(--color-text);
+}
+
+.tag-gear {
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  color: var(--color-muted);
+  border-radius: 999px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.tag-gear:hover {
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow);
+}
+
+.tag-gear svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tag-details {
+  display: grid;
+  gap: 10px;
+}
+
+.tag-config-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.tag-config {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tag-config .text-input {
+  width: 100%;
+}
+
+.tag-section {
+  display: grid;
+  gap: 6px;
+}
+
+.tag-section-title {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tag-cycle-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tag-color-picker {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-color-picker input[type="color"] {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 50%;
+  box-shadow: var(--neo-shadow-sm);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  overflow: hidden;
+}
+
+.tag-color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.tag-color-picker input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.tag-color-picker input[type="color"]::-moz-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.tag-delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 120, 120, 0.4);
+  background: rgba(120, 120, 120, 0.08);
+  color: rgba(160, 160, 160, 0.8);
+  transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.tag-delete-btn:hover {
+  border-color: rgba(255, 90, 90, 0.85);
+  color: rgba(255, 90, 90, 0.9);
+  box-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
+}
+
+.tag-delete-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* =========================
+   17) Neumorphic timer (reusable)
+   Shared circular timer used by Pomodoro and Strict mode.
+   ========================= */
+.neo-timer {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 0 auto;
+}
+
+.neo-timer-outer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--neo-timer-bg, var(--neo-bg));
+  box-shadow: var(--neo-timer-shadow, var(--neo-shadow));
+}
+
+.neo-timer-inner {
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  background: var(--neo-timer-bg, var(--neo-bg));
+  box-shadow: var(--neo-timer-shadow-inset, var(--neo-shadow-inset));
+}
+
+.neo-timer-svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.neo-timer-track {
+  fill: none;
+  stroke: var(--neo-timer-muted, var(--neo-bg-alt));
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.neo-timer-progress {
+  fill: none;
+  stroke: var(--neo-timer-accent, var(--color-accent));
+  stroke-width: 12;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease-out;
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
+}
+
+.neo-timer-time {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.neo-timer-value {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -1px;
+  color: var(--neo-timer-foreground, var(--color-text));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.neo-timer-label {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--neo-timer-muted-foreground, var(--color-muted));
+}
+
+.neo-timer-meta {
+  position: absolute;
+  inset: 0;
+}
+
+.neo-timer-meta .timer-pill {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#pomodoroPhasePill {
+  top: 50%;
+  transform: translate(-50%, -66px);
+}
+
+#pomodoroCyclePill {
+  top: 50%;
+  transform: translate(-50%, 34px);
+}
+
+.timer-pill {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow-sm);
+  white-space: nowrap;
+}
+
+#pomodoroCyclePill {
+  color: var(--pomodoro-muted-foreground);
+  border-color: rgba(120, 120, 120, 0.4);
+}
+
+.timer-sep {
+  font-size: 11px;
+  color: var(--color-muted);
+  opacity: 0.6;
+}
+
+.pomodoro-timer {
+  --neo-timer-bg: var(--pomodoro-bg);
+  --neo-timer-foreground: var(--pomodoro-foreground);
+  --neo-timer-muted: var(--pomodoro-muted);
+  --neo-timer-muted-foreground: var(--pomodoro-muted-foreground);
+  --neo-timer-accent: var(--pomodoro-accent);
+  --neo-timer-shadow: var(--pomodoro-shadow);
+  --neo-timer-shadow-inset: var(--pomodoro-shadow-inset);
+}
+
+.strict-timer {
+  --neo-timer-bg: var(--strict-overlay-bg);
+  --neo-timer-foreground: var(--strict-overlay-text);
+  --neo-timer-muted: var(--strict-ring-track);
+  --neo-timer-muted-foreground: var(--strict-overlay-muted);
+  --neo-timer-accent: var(--strict-ring-progress);
+  --neo-timer-shadow: var(--neo-shadow);
+  --neo-timer-shadow-inset: var(--neo-shadow-inset);
+}
+
+/* =========================
+   18) Interventions (friction modes)
+   Cards and detail editing panel for intervention settings.
+   ========================= */
+.intervention-disclosure {
+  display: grid;
+  gap: 10px;
+}
+
+.intervention-toggle {
+  border: 0;
+  background: var(--neo-bg);
+  color: inherit;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-control);
+  box-shadow: var(--neo-shadow-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+.intervention-toggle:hover {
+  box-shadow: var(--neo-shadow);
+}
+
+.intervention-current {
+  font-size: 10px;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  white-space: nowrap;
+}
+
+.intervention-chevron {
+  font-size: 18px;
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  transition: transform 200ms ease;
+}
+
+.intervention-chevron svg {
+  width: 16px;
+  height: 16px;
+}
+
+.intervention-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  transition: max-height 220ms ease, opacity 220ms ease, margin-top 220ms ease,
+    padding-top 220ms ease, padding-bottom 220ms ease;
+}
+
+.intervention-disclosure.is-open .intervention-panel {
+  max-height: 520px;
+  opacity: 1;
+  margin-left: calc(-1 * var(--space-3));
+  margin-right: calc(-1 * var(--space-3));
+  margin-top: 10px;
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: var(--color-surface-alt);
+}
+
+
+.intervention-disclosure.is-open p{
+  padding: 0 0 10px 0 ;
+}
+
+.intervention-disclosure.is-open .intervention-chevron {
+  transform: rotate(90deg);
+}
+
+.intervention-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.intervention-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 10px;
+  padding: 14px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  cursor: pointer;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.intervention-panel .intervention-card {
+  background: var(--neo-bg);
+}
+
+.intervention-panel .intervention-card  p{
+  padding: 10px 0 0 0;
+}
+
+.intervention-card:hover {
+  border-color: rgba(156, 255, 58, 0.5);
+}
+
+.intervention-card:active {
+  transform: translateY(1px);
+}
+
+.intervention-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.intervention-desc {
+  font-size: 12px;
+  color: var(--color-muted);
+  line-height: 1.4;
+  grid-column: 1 / -1;
+}
+
+.intervention-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: end;
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.intervention-pill {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.intervention-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intervention-pill span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  color: var(--color-muted);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.intervention-pill span.is-active {
+  border-color: rgba(156, 255, 58, 0.6);
+  background: rgba(156, 255, 58, 0.18);
+  color: var(--color-text);
+}
+
+.intervention-gear {
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  color: var(--color-muted);
+  border-radius: 999px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.intervention-gear:hover {
+  color: var(--color-text);
+  box-shadow: var(--neo-shadow);
+}
+
+.intervention-gear svg {
+  width: 14px;
+  height: 14px;
+}
+
+.intervention-details {
+  display: grid;
+  gap: 10px;
+}
+
+.intervention-section {
+  display: grid;
+  gap: 6px;
+}
+
+.intervention-section-title {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 360px) {
+  .intervention-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   19) Intervention behaviors (tab.html)
+   ========================= */
+.intervention-stage {
+  display: grid;
+  gap: 10px;
+}
+
+.hold-stage {
+  display: grid;
+  gap: 10px;
+}
+
+.hold-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hold-progress span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--color-accent);
+}
+
+.gate-stage {
+  position: relative;
+  border-radius: var(--r-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  height: 80px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.gate-panel {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(255, 255, 255, 0.04));
+  animation: gate-slide var(--gate-duration, 8s) ease-in-out forwards;
+}
+
+@keyframes gate-slide {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+
+.breath-stage {
+  display: grid;
+  gap: 10px;
+  place-items: center;
+  text-align: center;
+}
+
+.breath-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
+  transform: scale(0.6);
+  transition: transform 4s ease-in-out;
+}
+
+/* =========================
+   18) Schedule UI
+   Day pills, schedule cards, and delete button behavior.
+   ========================= */
+.schedule-days {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.schedule-item {
+  cursor: pointer;
+}
+
+.schedule-meta {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.schedule-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.schedule-actions {
+  display: grid;
+  align-items: center;
+  justify-items: end;
+  gap: 10px;
+}
+
+.schedule-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time-pill {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--neo-bg);
+  color: var(--color-muted);
+  font-size: 10px;
+  white-space: nowrap;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.day-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  border: 0;
+  color: var(--color-muted);
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+/* Schedule delete button: faint by default, red glow on hover. */
+.schedule-actions .icon-btn[data-delete-schedule] {
+  border-radius: 12px;
+  border: 1px solid rgba(120, 120, 120, 0.4);
+  background: rgba(120, 120, 120, 0.08);
+  color: rgba(200, 200, 200, 0.7);
+  transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease;
+}
+
+.schedule-actions .icon-btn[data-delete-schedule]:hover {
+  border-color: rgba(255, 90, 90, 0.85);
+  color: rgba(255, 90, 90, 0.9);
+  box-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
+}
+
+
+/* =========================
+   19) Stats and analytics
+   Lists, bars, charts, legends, and heatmaps.
+   ========================= */
+.stats-row {
+  display: grid;
+  gap: 6px;
+}
+
+.stats-tag-row {
+  cursor: pointer;
+  background: var(--neo-bg);
+}
+
+.stats-tag-row:hover {
+  border-color: rgba(156, 255, 58, 0.5);
+}
+
+.stats-tag-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stats-tag-card {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  cursor: pointer;
+}
+
+.stats-tag-card:hover {
+  border-color: rgba(156, 255, 58, 0.5);
+}
+
+.stats-tag-title {
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stats-tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: var(--neo-shadow-sm);
+  flex: 0 0 auto;
+}
+
+.stats-tag-meta {
+  font-size: 11px;
+  color: var(--color-muted);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.stats-stack {
+  position: relative;
+}
+
+.stats-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stats-summary-header h2 {
+  font-size: 22px;
+}
+
+.stats-summary-controls {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.stats-summary-controls .segmented {
+  background: var(--neo-bg);
+}
+
+.stats-hero-card {
+  padding: 16px;
+  background: var(--color-surface-alt);
+}
+
+.stats-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stats-hero-card .metric-card {
+  background: var(--neo-bg);
+  border: 1px solid var(--color-border);
+}
+
+.stats-subview {
+  transition: transform 240ms ease, opacity 240ms ease;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(12px);
+  position: absolute;
+  inset: 0;
+}
+
+.stats-subview.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+  position: relative;
+}
+
+.stats-subview.active > * + * {
+  margin-top: 12px;
+}
+
+.stats-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.stats-back-btn {
+  white-space: nowrap;
+}
+
+.stats-range-pill {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  font-size: 12px;
+}
+
+.stats-topbar .stats-range-pill {
+  margin-left: auto;
+}
+
+.stats-range-pill button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.stats-title {
+  margin-top: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-range-toggle {
+  margin-top: 10px;
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.stats-segment {
+  display: none;
+}
+
+.stats-segment.active {
+  display: block;
+}
+
+.stats-trend-card {
+  cursor: pointer;
+  background: var(--color-surface-alt);
+}
+
+.stats-trend-card:hover {
+  box-shadow: var(--neo-shadow);
+}
+
+.stats-card-link {
+  font-size: 10px;
+  color: var(--color-muted);
+  text-transform: none;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border: 1px solid var(--color-border);
+  background: var(--neo-bg);
+  border-radius: 999px;
+  padding: 4px 8px;
+  box-shadow: var(--neo-shadow-sm);
+}
+
+.stats-trend-card .row {
+  margin-bottom: 10px;
+}
+
+.stats-trend-card .segmented.two {
+  background: var(--neo-bg);
+}
+
+.stats-trend-split {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.stats-summary-avg {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 10px;
+}
+
+.stats-trend-card #statsStacked {
+  background: var(--neo-bg);
+  border-radius: 16px;
+  padding: 8px 10px;
+}
+
+.trend-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(26px, 1fr));
+  gap: 10px;
+  align-items: end;
+  height: 190px;
+  padding: 12px 6px 0;
+}
+
+.trend-bar {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 6px;
+  justify-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.trend-bar-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+}
+
+.trend-bar-stack {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+}
+
+.trend-segment {
+  width: 100%;
+  border-radius: 0;
+  min-height: 4px;
+  transition: height 200ms ease;
+}
+
+.trend-segment.is-top {
+  border-top-left-radius: 999px;
+  border-top-right-radius: 999px;
+}
+
+.trend-segment.is-bottom {
+  border-bottom-left-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+.trend-bar-stack > .trend-segment:first-child {
+  border-bottom-left-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+.trend-bar-stack > .trend-segment:last-child {
+  border-top-left-radius: 999px;
+  border-top-right-radius: 999px;
+}
+
+.trend-bar-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: var(--neo-shadow-sm);
+  margin-bottom: 2px;
+}
+
+.stats-usage-trend,
+.stats-usage-colors {
+  --usage-allowed: #4cd074;
+  --usage-blocked: #ff5a5f;
+  --usage-other: #4bc6ff;
+}
+
+#statsUsageTrendFilter,
+#statsUsageTrendRange {
+  width: 100%;
+}
+
+#statsUsageTrendFilter button,
+#statsUsageTrendRange button {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.stats-usage-ring .stats-ring-row {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.stats-usage-controls {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.stats-usage-controls .segmented {
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow-sm);
+  width: 100%;
+  display: flex;
+}
+
+.stats-usage-controls .segmented button {
+  padding: 5px 10px;
+  font-size: 11px;
+  flex: 1;
+}
+
+.stats-ring {
+  width: 160px;
+  height: 160px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--neo-bg);
+  box-shadow: var(--neo-shadow), var(--neo-shadow-inset);
+}
+
+.stats-ring svg {
+  width: 160px;
+  height: 160px;
+}
+
+.stats-ring-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  width: 100%;
+}
+
+.stats-ring-legend .legend-item {
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.stats-ring-legend .legend-label {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-ring-show-all {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.trend-label {
+  font-size: 10px;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 32px;
+}
+
+.stats-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 12px;
+}
+
+/* Progress bar used under each top domain. */
+.stats-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(156, 255, 58, 0.25);
+  border: 1px solid rgba(156, 255, 58, 0.4);
+}
+
+.stats-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: rgba(156, 255, 58, 0.8);
+}
+
+.stats-bar.fixed {
+  width: 100%;
+  max-width: 160px;
+}
+
+@media (max-width: 430px) {
+  .stats-bar.fixed {
+    max-width: 140px;
+  }
+}
+
+/* Two-column domain layout. */
+.stats-grid {
+  display: grid;
+  column-gap: 12px;
+  row-gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: visible;
+}
+
+.stats-column {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.stats-item {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.stats-label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  overflow: visible;
+}
+
+.stats-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(156, 255, 58, 0.16);
+  border: 1px solid rgba(156, 255, 58, 0.35);
+  color: var(--color-text);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.stats-domain {
+  font-size: var(--font-small);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric-card {
+  padding: 12px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.chip-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.session-item {
+  display: grid;
+  gap: 6px;
+}
+
+.session-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.session-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.settings-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.settings-link[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.settings-footer {
+  margin-top: 16px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.footer-link {
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+
+.timeline-row {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.timeline-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.timeline-bar span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+}
+
+html[data-theme="light"] .timeline-bar {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Stacked charts: focus vs distraction bars (daily/weekly/monthly). */
+.stacked-list {
+  display: grid;
+  gap: 8px;
+}
+
+.stacked-row {
+  display: grid;
+  gap: 6px;
+  font-size: var(--font-small);
+}
+
+.stacked-bars {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(156, 255, 58, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stacked-bars .focus {
+  background: rgba(156, 255, 58, 0.8);
+}
+
+.stacked-bars .blocked {
+  background: rgba(255, 90, 90, 0.8);
+}
+
+/* Weekly view: vertical stacked bars for each day. */
+.stacked-vertical {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  height: 140px;
+  overflow-x: hidden;
+}
+
+.stacked-vertical.month {
+  height: auto;
+  overflow-x: hidden;
+}
+
+.stacked-col {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 6px;
+  justify-items: center;
+  height: 100%;
+  align-content: end;
+}
+
+/* Pillar bar with stacked focus/blocked segments. */
+.stacked-pillar {
+  width: 100%;
+  max-width: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(156, 255, 58, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stacked-pillar .focus {
+  background: rgba(156, 255, 58, 0.8);
+}
+
+.stacked-pillar .blocked {
+  background: rgba(255, 90, 90, 0.8);
+}
+
+/* Month view: horizontal scroll container for dense bars. */
+.month-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 10px;
+}
+
+.month-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.month-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.4);
+  border-radius: 999px;
+}
+
+/* Month bars: long series of compact pillars. */
+.month-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+}
+
+.month-bar {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 6px;
+  justify-items: center;
+  min-width: 18px;
+}
+
+.stacked-label {
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+/* Legends: colored dot + label. */
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-small);
+  color: var(--color-muted);
+}
+
+.legend .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.legend .dot.focus {
+  background: rgba(156, 255, 58, 0.8);
+}
+
+.legend .dot.blocked {
+  background: rgba(255, 90, 90, 0.8);
+}
+
+/* Donut chart + legend. */
+.donut-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.donut {
+  width: 140px;
+  height: 140px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.donut-svg {
+  position: absolute;
+  inset: 0;
+}
+
+.donut-svg svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.donut-total-value {
+  font-size: clamp(12px, 3.5vw, 18px);
+  font-weight: 600;
+  color: var(--color-text);
+  max-width: 110px;
+  text-align: center;
+  word-break: break-word;
+}
+
+.legend-list {
+  display: grid;
+  gap: 8px;
+  font-size: var(--font-small);
+}
+
+.legend-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.legend-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legend-value {
+  color: var(--color-muted);
+}
+
+/* Hour heatmap: 24-hour activity grid. */
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.heat-cell {
+  border-radius: 8px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* =========================
+   20) Utilities
+   Small helpers used throughout the UI.
+   ========================= */
+.hidden {
+  display: none;
+}
+
+
+
+
+/* =========================
+   21) Light mode overrides
+   All light theme adjustments grouped in one place for easy editing.
+   ========================= */
+[data-theme="light"] {
+  --color-bg: #f3f4f4;
+  --color-surface: #ffffff;
+
+  --color-surface-alt: #eef0f0;
+  --color-border: rgba(0, 0, 0, 0.01);
+
+  --color-text: #1b1f1f;
+  --color-muted: #5b6364;
+
+  --color-accent: hsl(48, 100%, 55%);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --strict-overlay-bg: #ffffff;
+  --strict-overlay-text: #101010;
+  --strict-overlay-muted: #5b6364;
+  --strict-ring-track: rgba(0, 0, 0, 0.12);
+  --strict-ring-progress: var(--color-accent);
+  /*--neo-bg: #f5f6f8;*/
+
+  --neo-bg: #ececec;
+  --neo-bg-alt: #e9edf3;
+  --neo-shadow: 8px 8px 16px rgba(0, 0, 0, 0.12), -8px -8px 16px rgba(255, 255, 255, 0.9);
+  --neo-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  --neo-shadow-sm: 4px 4px 8px rgba(0, 0, 0, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.9);
+  /*--neo-border: rgba(0, 0, 0, 0.05);*/
+  --pomodoro-bg: var(--neo-bg);
+  --pomodoro-foreground: #1a1a1a;
+  --pomodoro-muted: var(--neo-bg-alt);
+  --pomodoro-muted-foreground: #6c7382;
+  --pomodoro-accent: hsl(48, 100%, 55%);
+  --pomodoro-shadow: var(--neo-shadow);
+  --pomodoro-shadow-inset: var(--neo-shadow-inset);
+  --pomodoro-shadow-sm: var(--neo-shadow-sm);
+}
+
+html[data-theme="light"] .toggle input:checked + span {
+  background: rgba(242, 201, 76, 0.35);
+}
+
+
+
+html[data-theme="light"] .btn.btn-danger {
+  background: #ffe7e7;
+  color: #7a1f1f;
+}
+
+html[data-theme="light"] .btn.btn-danger:hover {
+  box-shadow: 0 10px 24px rgba(214, 69, 69, 0.25);
+}
+
+html[data-theme="light"] .btn.btn-success {
+  background: #e8fad9;
+  color: #1f5f1f;
+}
+
+html[data-theme="light"] .btn.btn-success:hover {
+  box-shadow: 0 10px 24px rgba(46, 143, 46, 0.25);
+}
+
+/* Light mode schedule tweaks for contrast and consistency. */
+html[data-theme="light"] .schedule-name {
+  color: #0d0c0b;
+}
+
+html[data-theme="light"] .schedule-days {
+  gap: 6px;
+}
+
+html[data-theme="light"] .schedule-actions .icon-btn[data-delete-schedule] {
+  border-color: rgba(80, 80, 80, 0.2);
+  background: rgba(80, 80, 80, 0.05);
+  color: rgba(80, 80, 80, 0.6);
+}
+
+html[data-theme="light"] .schedule-actions .icon-btn[data-delete-schedule]:hover {
+  border-color: rgba(214, 69, 69, 0.85);
+  color: rgba(214, 69, 69, 0.9);
+  box-shadow: 0 10px 24px rgba(214, 69, 69, 0.2);
+}
+
+
+
+
+
+
+/* =========================
+   22) Responsive adjustments
+   Larger screens: more breathing room for the layout.
+   ========================= */
+@media (min-width: 900px) {
+  .app-main {
+    padding: 28px;
+    gap: 20px;
+  }
+  .card {
+    padding: 22px 24px;
+  }
+  .app-title {
+    font-size: 20px;
+  }
+}

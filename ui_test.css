@@ -8,233 +8,233 @@
       2) Theme tokens: reusable colors, spacing, radii, and font sizes, These variables are referenced everywhere else in the file.
    ==================================================================================================== */
 :root {
-  color-scheme: light dark;
+    color-scheme: light dark;
 
-  --r-card: 16px;
-  --r-control: 12px;
-  --r-segment: 50px;
-  --r-chip: 999px;
-  --space-1: 6px;
-  --space-2: 10px;
-  --space-3: 16px;
-  --space-4: 20px;
-  --font-title: 18px;
-  --font-body: 13px;
-  --font-small: 11px;
-  --font-ui: "Poppins", Arial, sans-serif;
+    --r-card: 16px;
+    --r-control: 12px;
+    --r-segment: 50px;
+    --r-chip: 999px;
+    --space-1: 6px;
+    --space-2: 10px;
+    --space-3: 16px;
+    --space-4: 20px;
+    --font-title: 18px;
+    --font-body: 13px;
+    --font-small: 11px;
+    --font-ui: "Poppins", Arial, sans-serif;
 }
 
 /* ========== THEME (light mode) ========== */
 @layer theme {
-  html[data-theme="light"] {
-    color-scheme: light;
+    html[data-theme="light"] {
+        color-scheme: light;
 
-    --red-muted : #ffc9c2;
-    --red: #ff4430;
-    --red-dark : #a82218;
-    --green-muted: #dfffc6;
-    --green: #2ee842;
-    --green-dark: #1a8f24;
+        --red-muted : #ffc9c2;
+        --red: #ff4430;
+        --red-dark : #a82218;
+        --green-muted: #dfffc6;
+        --green: #2ee842;
+        --green-dark: #1a8f24;
 
-    --fb-bg:#f5f6f2;
-    --fb-border:rgba(27,31,20,.07);
+        --fb-bg:#f5f6f2;
+        --fb-border:rgba(27,31,20,.07);
 
-    --fb-surface:#ffffff;
-    --fb-surface-2:#edf0e6;
+        --fb-surface:#ffffff;
+        --fb-surface-2:#edf0e6;
 
-    --fb-text:#141a10;
-    --fb-text-muted:#4f5a46;
-    --fb-text-muted-light:#95a08c;
+        --fb-text:#141a10;
+        --fb-text-muted:#4f5a46;
+        --fb-text-muted-light:#95a08c;
 
-    --fb-accent:#84cc16;
-    --fb-accent-muted:#e7f7cc;
-    --fb-accent-stale:#a3b19a;
+        --fb-accent:#84cc16;
+        --fb-accent-muted:#e7f7cc;
+        --fb-accent-stale:#a3b19a;
 
-    --fb-status-on: #7fffa0;
-    --fb-status-on-bs: inset 3px 3px 6px #54a86a, inset -3px -3px 6px #aaffd6;
-    --fb-status-off: var(--fb-bg);
-    --fb-status-off-bs:inset 3px 3px 6px #a2a09e, inset -3px -3px 6px #ffffff;
-    --fb-status-paused: #ffc77f;
-    --fb-status-paused-bs: inset 3px 3px 6px #a88354, inset -3px -3px 6px #ffffaa;
-    --fb-status-pomodoro: #ff8080;
-    --fb-status-pomodoro-bs: inset 3px 3px 6px #a85454, inset -3px -3px 6px #ffacac;
-    --fb-status-strict: #7fbdff;
-    --fb-status-strict-bs: inset 3px 3px 6px #547da8, inset -3px -3px 6px #aafdff;
+        --fb-status-on: #7fffa0;
+        --fb-status-on-bs: inset 3px 3px 6px #54a86a, inset -3px -3px 6px #aaffd6;
+        --fb-status-off: var(--fb-bg);
+        --fb-status-off-bs:inset 3px 3px 6px #a2a09e, inset -3px -3px 6px #ffffff;
+        --fb-status-paused: #ffc77f;
+        --fb-status-paused-bs: inset 3px 3px 6px #a88354, inset -3px -3px 6px #ffffaa;
+        --fb-status-pomodoro: #ff8080;
+        --fb-status-pomodoro-bs: inset 3px 3px 6px #a85454, inset -3px -3px 6px #ffacac;
+        --fb-status-strict: #7fbdff;
+        --fb-status-strict-bs: inset 3px 3px 6px #547da8, inset -3px -3px 6px #aafdff;
 
-    --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .12), -8px -8px 16px rgba(255, 255, 255, .9);
-    --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .10), -4px -4px 8px rgba(255, 255, 255, .9);
-    --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .08), inset -4px -4px 8px rgba(255, 255, 255, .9);
-    --fb-neo-lg: inset 1px 1px 1px rgba(255, 255, 255, 1), -2px -2px 2px rgba(255, 255, 255, 0.9), -4px -4px 6px rgba(255, 255, 255, 0.9), -8px -8px 16px rgba(255, 255, 255, 0.9), -12px -12px 24px rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.06), 2px 2px 2px rgba(0, 0, 0, 0.08), 4px 4px 6px rgba(0, 0, 0, 0.08), 8px 8px 16px rgba(0, 0, 0, 0.08), 12px 12px 24px rgba(0, 0, 0, 0.08);
-    --fb-neo-sm: inset 1px 1px 1px rgba(0, 0, 0, 0.04), -1px -1px 2px rgba(0, 0, 0, 0.06), -2px -2px 4px rgba(0, 0, 0, 0.06), inset -1px -1px 1px rgba(255, 255, 255, 0.6), 1px 1px 2px rgba(255, 255, 255, 0.7), 2px 2px 4px rgba(255, 255, 255, 0.7);
-    --fb-neo-inset: inset 1px 1px 1px rgba(255, 255, 255, 0.20), inset -1px -1px 1px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(245, 245, 248, 1), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.20), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.18), -1px -1px 2px 0px rgba(255, 255, 255, 0.18), -2px -2px 4px 0px rgba(255, 255, 255, 0.16), inset 1px 1px 1px 1px rgba(0, 0, 0, 0.03), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.03), 1px 1px 2px 0px rgba(0, 0, 0, 0.03), 2px 2px 4px 0px rgba(0, 0, 0, 0.03) ;
-    --fb-glass2-inset: inset 1px 1px 0 rgba(0, 0, 0, 0.05), inset -1px -1px 0 rgba(255, 255, 255, 0.65);
+        --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .12), -8px -8px 16px rgba(255, 255, 255, .9);
+        --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .10), -4px -4px 8px rgba(255, 255, 255, .9);
+        --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .08), inset -4px -4px 8px rgba(255, 255, 255, .9);
+        --fb-neo-lg: inset 1px 1px 1px rgba(255, 255, 255, 1), -2px -2px 2px rgba(255, 255, 255, 0.9), -4px -4px 6px rgba(255, 255, 255, 0.9), -8px -8px 16px rgba(255, 255, 255, 0.9), -12px -12px 24px rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.06), 2px 2px 2px rgba(0, 0, 0, 0.08), 4px 4px 6px rgba(0, 0, 0, 0.08), 8px 8px 16px rgba(0, 0, 0, 0.08), 12px 12px 24px rgba(0, 0, 0, 0.08);
+        --fb-neo-sm: inset 1px 1px 1px rgba(0, 0, 0, 0.04), -1px -1px 2px rgba(0, 0, 0, 0.06), -2px -2px 4px rgba(0, 0, 0, 0.06), inset -1px -1px 1px rgba(255, 255, 255, 0.6), 1px 1px 2px rgba(255, 255, 255, 0.7), 2px 2px 4px rgba(255, 255, 255, 0.7);
+        --fb-neo-inset: inset 1px 1px 1px rgba(255, 255, 255, 0.20), inset -1px -1px 1px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(245, 245, 248, 1), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.20), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.18), -1px -1px 2px 0px rgba(255, 255, 255, 0.18), -2px -2px 4px 0px rgba(255, 255, 255, 0.16), inset 1px 1px 1px 1px rgba(0, 0, 0, 0.03), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.03), 1px 1px 2px 0px rgba(0, 0, 0, 0.03), 2px 2px 4px 0px rgba(0, 0, 0, 0.03) ;
+        --fb-glass2-inset: inset 1px 1px 0 rgba(0, 0, 0, 0.05), inset -1px -1px 0 rgba(255, 255, 255, 0.65);
 
-    --shadow-card: 0 4px 16px rgba(0, 0, 0, .08);
+        --shadow-card: 0 4px 16px rgba(0, 0, 0, .08);
 
-    --pomodoro-bg: var(--fb-surface-2);
-    --pomodoro-foreground: var(--fb-text);
-    --pomodoro-muted: var(--fb-surface-2);
-    --pomodoro-muted-foreground: var(--fb-text-muted);
-    --pomodoro-accent: var(--fb-accent);
-    --pomodoro-shadow: var(--fb-shadow-lg);
-    --pomodoro-shadow-inset: var(--fb-shadow-inset);
-    --pomodoro-shadow-sm: var(--fb-shadow-sm);
+        --pomodoro-bg: var(--fb-surface-2);
+        --pomodoro-foreground: var(--fb-text);
+        --pomodoro-muted: var(--fb-surface-2);
+        --pomodoro-muted-foreground: var(--fb-text-muted);
+        --pomodoro-accent: var(--fb-accent);
+        --pomodoro-shadow: var(--fb-shadow-lg);
+        --pomodoro-shadow-inset: var(--fb-shadow-inset);
+        --pomodoro-shadow-sm: var(--fb-shadow-sm);
 
-    --strict-overlay-bg: var(--fb-surface-2);
-    --strict-overlay-text: var(--fb-text);
-    --strict-overlay-muted: var(--fb-text-muted);
-    --strict-ring-track: var(--fb-accent-muted);
-    --strict-ring-progress: var(--fb-accent);
+        --strict-overlay-bg: var(--fb-surface-2);
+        --strict-overlay-text: var(--fb-text);
+        --strict-overlay-muted: var(--fb-text-muted);
+        --strict-ring-track: var(--fb-accent-muted);
+        --strict-ring-progress: var(--fb-accent);
 
-    --scrollbar-thumb: rgba(120, 120, 120, 0.4);
-    --scrollbar-thumb-hover: rgba(120, 120, 120, 0.6);
-    --scrollbar-thumb-subtle: rgba(140, 140, 140, 0.35);
-    --scrollbar-thumb-subtle-hover: rgba(140, 140, 140, 0.55);
+        --scrollbar-thumb: rgba(120, 120, 120, 0.4);
+        --scrollbar-thumb-hover: rgba(120, 120, 120, 0.6);
+        --scrollbar-thumb-subtle: rgba(140, 140, 140, 0.35);
+        --scrollbar-thumb-subtle-hover: rgba(140, 140, 140, 0.55);
 
-    --black:rgba(255, 255, 255, 0.02);
-    --black-muted:rgba(255, 255, 255, 0.01);
-    --black-light:rgba(255, 255, 255, 0.08);
-    --black-light-muted:rgba(255, 255, 255, 0.12);
+        --black:rgba(255, 255, 255, 0.02);
+        --black-muted:rgba(255, 255, 255, 0.01);
+        --black-light:rgba(255, 255, 255, 0.08);
+        --black-light-muted:rgba(255, 255, 255, 0.12);
 
-    --btn-primary-bg: rgba(156, 255, 58, 0.2);
-    --btn-danger-bg: var(--red-muted);
-    --btn-danger-text: var(--red-dark);
-    --btn-success-bg: var(--green-muted);
-    --btn-success-text: var(--green-dark);
-    --btn-sheen: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
+        --btn-primary-bg: rgba(156, 255, 58, 0.2);
+        --btn-danger-bg: var(--red-muted);
+        --btn-danger-text: var(--red-dark);
+        --btn-success-bg: var(--green-muted);
+        --btn-success-text: var(--green-dark);
+        --btn-sheen: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
 
-    --toggle-checked-bg: rgba(242, 201, 76, 0.35);
-    --toggle-checked-border: rgba(156, 255, 58, 0.6);
+        --toggle-checked-bg: rgba(242, 201, 76, 0.35);
+        --toggle-checked-border: rgba(156, 255, 58, 0.6);
 
-    --tag-delete-border: rgba(80, 80, 80, 0.2);
-    --tag-delete-bg: rgba(80, 80, 80, 0.05);
-    --tag-delete-color: rgba(80, 80, 80, 0.6);
-    --tag-delete-hover-shadow: 0 10px 24px rgba(214, 69, 69, 0.2);
+        --tag-delete-border: rgba(80, 80, 80, 0.2);
+        --tag-delete-bg: rgba(80, 80, 80, 0.05);
+        --tag-delete-color: rgba(80, 80, 80, 0.6);
+        --tag-delete-hover-shadow: 0 10px 24px rgba(214, 69, 69, 0.2);
 
-    --schedule-delete-border: rgba(80, 80, 80, 0.2);
-    --schedule-delete-bg: rgba(80, 80, 80, 0.05);
-    --schedule-delete-color: rgba(80, 80, 80, 0.6);
-    --schedule-delete-hover-shadow: 0 10px 24px rgba(214, 69, 69, 0.2);
-    --schedule-days-gap: 6px;
+        --schedule-delete-border: rgba(80, 80, 80, 0.2);
+        --schedule-delete-bg: rgba(80, 80, 80, 0.05);
+        --schedule-delete-color: rgba(80, 80, 80, 0.6);
+        --schedule-delete-hover-shadow: 0 10px 24px rgba(214, 69, 69, 0.2);
+        --schedule-days-gap: 6px;
 
-    --chart-allowed: var(--green);
-    --chart-blocked: var(--red);
-    --chart-other: var(--fb-status-strict);
-    --chart-accent-strong: rgba(156, 255, 58, 0.8);
-    --chart-accent-soft: rgba(156, 255, 58, 0.25);
-    --chart-accent-border: rgba(156, 255, 58, 0.4);
+        --chart-allowed: var(--green);
+        --chart-blocked: var(--red);
+        --chart-other: var(--fb-status-strict);
+        --chart-accent-strong: rgba(156, 255, 58, 0.8);
+        --chart-accent-soft: rgba(156, 255, 58, 0.25);
+        --chart-accent-border: rgba(156, 255, 58, 0.4);
 
-    --gate-gradient: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(0, 0, 0, 0.04));
-    --breath-gradient: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
-    --timer-progress-shadow: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
-  }
+        --gate-gradient: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(0, 0, 0, 0.04));
+        --breath-gradient: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
+        --timer-progress-shadow: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
+    }
 }
 
 /* ========== THEME (Dark mode) ========== */
 @layer theme {
-  html:not([data-theme]), html[data-theme="dark"] {
-    color-scheme: dark;
+    html:not([data-theme]), html[data-theme="dark"] {
+        color-scheme: dark;
 
-    --red-muted : #5c3a3a;
-    --red: #ff6754;
-    --red-dark : #a82218;
+        --red-muted : #5c3a3a;
+        --red: #ff6754;
+        --red-dark : #a82218;
 
-    --green-muted: #475c3a;
-    --green: #005c0b;
-    --green-dark: #1a8f24;
+        --green-muted: #475c3a;
+        --green: #005c0b;
+        --green-dark: #1a8f24;
 
-    --fb-bg: #0f1214;
-    --fb-border: rgba(255,255,255,.06);
+        --fb-bg: #0f1214;
+        --fb-border: rgba(255,255,255,.06);
 
-    --fb-surface: #14191c;
-    --fb-surface-2: #101518;
+        --fb-surface: #14191c;
+        --fb-surface-2: #101518;
 
-    --fb-text: #eef2f3;
-    --fb-text-muted: #aab4b7;
-    --fb-text-muted-light: #778387;
+        --fb-text: #eef2f3;
+        --fb-text-muted: #aab4b7;
+        --fb-text-muted-light: #778387;
 
-    --fb-accent: #ffd84d;
-    --fb-accent-muted: #2a2f33;
-    --fb-accent-stale: #8a97a1;
+        --fb-accent: #ffd84d;
+        --fb-accent-muted: #2a2f33;
+        --fb-accent-stale: #8a97a1;
 
-    --fb-status-on: #005029;
-    --fb-status-on-bs: inset 3px 3px 6px #00351b, inset -3px -3px 6px #006b37;
-    --fb-status-off: #0f1214;
-    --fb-status-off-bs: inset 3px 3px 6px #0a0c0d, inset -3px -3px 6px #14181b;
-    --fb-status-paused: #504100;
-    --fb-status-paused-bs: inset 3px 3px 6px #3d3200, inset -3px -3px 6px #7b6500;
-    --fb-status-pomodoro: #590000;
-    --fb-status-pomodoro-bs: inset 3px 3px 6px #3b0000, inset -3px -3px 6px #790000;
-    --fb-status-strict: #002b53;
-    --fb-status-strict-bs: inset 3px 3px 6px #001c37, inset -3px -3px 6px #003a6f;
+        --fb-status-on: #005029;
+        --fb-status-on-bs: inset 3px 3px 6px #00351b, inset -3px -3px 6px #006b37;
+        --fb-status-off: #0f1214;
+        --fb-status-off-bs: inset 3px 3px 6px #0a0c0d, inset -3px -3px 6px #14181b;
+        --fb-status-paused: #504100;
+        --fb-status-paused-bs: inset 3px 3px 6px #3d3200, inset -3px -3px 6px #7b6500;
+        --fb-status-pomodoro: #590000;
+        --fb-status-pomodoro-bs: inset 3px 3px 6px #3b0000, inset -3px -3px 6px #790000;
+        --fb-status-strict: #002b53;
+        --fb-status-strict-bs: inset 3px 3px 6px #001c37, inset -3px -3px 6px #003a6f;
 
-    --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .35), -8px -8px 16px rgba(255, 255, 255, .04);
-    --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .35), inset -4px -4px 8px rgba(255, 255, 255, .05);
-    --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .30), -4px -4px 8px rgba(255, 255, 255, .04);
-    --fb-neo-lg:inset 1px 1px 1px rgba(255, 255, 255, 0.06), -2px -2px 2px rgba(255, 255, 255, 0.08), -4px -4px 6px rgba(255, 255, 255, 0.08), -8px -8px 16px rgba(255, 255, 255, 0.08), -12px -12px 24px rgba(255, 255, 255, 0.08), inset -1px -1px 1px rgba(0, 0, 0, 0.6), 2px 2px 2px rgba(0, 0, 0, 0.7), 4px 4px 6px rgba(0, 0, 0, 0.7), 8px 8px 16px rgba(0, 0, 0, 0.7), 12px 12px 24px rgba(0, 0, 0, 0.7);
-    --fb-neo-sm:inset 1px 1px 1px rgba(255, 255, 255, 0.04), -1px -1px 2px rgba(255, 255, 255, 0.06), -2px -2px 4px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.4), 1px 1px 2px rgba(0, 0, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.5);
-    --fb-neo-inset: inset 1px 1px 1px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.40), inset 0 0 0 1px rgba(20, 20, 24, 1), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.06), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.05), -1px -1px 2px 0px rgba(255, 255, 255, 0.05), -2px -2px 4px 0px rgba(255, 255, 255, 0.04), inset 1px 1px 1px 1px rgba(0, 0, 0, 0.40), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.38), 1px 1px 2px 0px rgba(0, 0, 0, 0.38), 2px 2px 4px 0px rgba(0, 0, 0, 0.36) ;
-    --fb-glass2-inset: inset 0  1px 0 rgba(255,255,255,.07), inset 1px 0 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.55), inset -1px 0 0 rgba(0,0,0,.48);
+        --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .35), -8px -8px 16px rgba(255, 255, 255, .04);
+        --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .35), inset -4px -4px 8px rgba(255, 255, 255, .05);
+        --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .30), -4px -4px 8px rgba(255, 255, 255, .04);
+        --fb-neo-lg:inset 1px 1px 1px rgba(255, 255, 255, 0.06), -2px -2px 2px rgba(255, 255, 255, 0.08), -4px -4px 6px rgba(255, 255, 255, 0.08), -8px -8px 16px rgba(255, 255, 255, 0.08), -12px -12px 24px rgba(255, 255, 255, 0.08), inset -1px -1px 1px rgba(0, 0, 0, 0.6), 2px 2px 2px rgba(0, 0, 0, 0.7), 4px 4px 6px rgba(0, 0, 0, 0.7), 8px 8px 16px rgba(0, 0, 0, 0.7), 12px 12px 24px rgba(0, 0, 0, 0.7);
+        --fb-neo-sm:inset 1px 1px 1px rgba(255, 255, 255, 0.04), -1px -1px 2px rgba(255, 255, 255, 0.06), -2px -2px 4px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.4), 1px 1px 2px rgba(0, 0, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.5);
+        --fb-neo-inset: inset 1px 1px 1px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.40), inset 0 0 0 1px rgba(20, 20, 24, 1), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.06), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.05), -1px -1px 2px 0px rgba(255, 255, 255, 0.05), -2px -2px 4px 0px rgba(255, 255, 255, 0.04), inset 1px 1px 1px 1px rgba(0, 0, 0, 0.40), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.38), 1px 1px 2px 0px rgba(0, 0, 0, 0.38), 2px 2px 4px 0px rgba(0, 0, 0, 0.36) ;
+        --fb-glass2-inset: inset 0  1px 0 rgba(255,255,255,.07), inset 1px 0 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.55), inset -1px 0 0 rgba(0,0,0,.48);
 
-    --shadow-card: 0 4px 16px rgba(0, 0, 0, .20);
+        --shadow-card: 0 4px 16px rgba(0, 0, 0, .20);
 
-    --pomodoro-bg: var(--fb-surface-2);
-    --pomodoro-foreground: var(--fb-text);
-    --pomodoro-muted: var(--fb-surface-2);
-    --pomodoro-muted-foreground: var(--fb-text-muted);
-    --pomodoro-accent: var(--fb-accent);
-    --pomodoro-shadow: var(--fb-shadow-lg);
-    --pomodoro-shadow-inset: var(--fb-shadow-inset);
-    --pomodoro-shadow-sm: var(--fb-shadow-sm);
+        --pomodoro-bg: var(--fb-surface-2);
+        --pomodoro-foreground: var(--fb-text);
+        --pomodoro-muted: var(--fb-surface-2);
+        --pomodoro-muted-foreground: var(--fb-text-muted);
+        --pomodoro-accent: var(--fb-accent);
+        --pomodoro-shadow: var(--fb-shadow-lg);
+        --pomodoro-shadow-inset: var(--fb-shadow-inset);
+        --pomodoro-shadow-sm: var(--fb-shadow-sm);
 
-    --strict-overlay-bg: var(--fb-surface-2);
-    --strict-overlay-text: var(--fb-text);
-    --strict-overlay-muted: var(--fb-text-muted);
-    --strict-ring-track: var(--fb-accent-muted);
-    --strict-ring-progress: var(--fb-accent);
+        --strict-overlay-bg: var(--fb-surface-2);
+        --strict-overlay-text: var(--fb-text);
+        --strict-overlay-muted: var(--fb-text-muted);
+        --strict-ring-track: var(--fb-accent-muted);
+        --strict-ring-progress: var(--fb-accent);
 
-    --scrollbar-thumb: rgba(120, 120, 120, 0.4);
-    --scrollbar-thumb-hover: rgba(120, 120, 120, 0.6);
-    --scrollbar-thumb-subtle: rgba(140, 140, 140, 0.35);
-    --scrollbar-thumb-subtle-hover: rgba(140, 140, 140, 0.55);
+        --scrollbar-thumb: rgba(120, 120, 120, 0.4);
+        --scrollbar-thumb-hover: rgba(120, 120, 120, 0.6);
+        --scrollbar-thumb-subtle: rgba(140, 140, 140, 0.35);
+        --scrollbar-thumb-subtle-hover: rgba(140, 140, 140, 0.55);
 
-    --black:rgba(255, 255, 255, 0.02);
-    --black-muted:rgba(255, 255, 255, 0.01);
-    --black-light:rgba(255, 255, 255, 0.08);
-    --black-light-muted:rgba(255, 255, 255, 0.12);
+        --black:rgba(255, 255, 255, 0.02);
+        --black-muted:rgba(255, 255, 255, 0.01);
+        --black-light:rgba(255, 255, 255, 0.08);
+        --black-light-muted:rgba(255, 255, 255, 0.12);
 
-    --btn-primary-bg: rgba(156, 255, 58, 0.2);
-    --btn-danger-bg: var(--red-muted);
-    --btn-danger-text: var(--fb-text);
-    --btn-success-bg: var(--green-muted);
-    --btn-success-text: var(--fb-text);
-    --btn-sheen: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
+        --btn-primary-bg: rgba(156, 255, 58, 0.2);
+        --btn-danger-bg: var(--red-muted);
+        --btn-danger-text: var(--fb-text);
+        --btn-success-bg: var(--green-muted);
+        --btn-success-text: var(--fb-text);
+        --btn-sheen: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
 
-    --toggle-checked-bg: rgba(156, 255, 58, 0.3);
-    --toggle-checked-border: rgba(156, 255, 58, 0.6);
+        --toggle-checked-bg: rgba(156, 255, 58, 0.3);
+        --toggle-checked-border: rgba(156, 255, 58, 0.6);
 
-    --tag-delete-border: rgba(120, 120, 120, 0.4);
-    --tag-delete-bg: rgba(120, 120, 120, 0.08);
-    --tag-delete-color: rgba(160, 160, 160, 0.8);
-    --tag-delete-hover-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
+        --tag-delete-border: rgba(120, 120, 120, 0.4);
+        --tag-delete-bg: rgba(120, 120, 120, 0.08);
+        --tag-delete-color: rgba(160, 160, 160, 0.8);
+        --tag-delete-hover-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
 
-    --schedule-delete-border: rgba(120, 120, 120, 0.4);
-    --schedule-delete-bg: rgba(120, 120, 120, 0.08);
-    --schedule-delete-color: rgba(200, 200, 200, 0.7);
-    --schedule-delete-hover-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
-    --schedule-days-gap: 4px;
+        --schedule-delete-border: rgba(120, 120, 120, 0.4);
+        --schedule-delete-bg: rgba(120, 120, 120, 0.08);
+        --schedule-delete-color: rgba(200, 200, 200, 0.7);
+        --schedule-delete-hover-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
+        --schedule-days-gap: 4px;
 
-    --chart-allowed: var(--green);
-    --chart-blocked: var(--red);
-    --chart-other: var(--fb-status-strict);
-    --chart-accent-strong: rgba(156, 255, 58, 0.8);
-    --chart-accent-soft: rgba(156, 255, 58, 0.25);
-    --chart-accent-border: rgba(156, 255, 58, 0.4);
+        --chart-allowed: var(--green);
+        --chart-blocked: var(--red);
+        --chart-other: var(--fb-status-strict);
+        --chart-accent-strong: rgba(156, 255, 58, 0.8);
+        --chart-accent-soft: rgba(156, 255, 58, 0.25);
+        --chart-accent-border: rgba(156, 255, 58, 0.4);
 
-    --gate-gradient: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(255, 255, 255, 0.04));
-    --breath-gradient: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
-    --timer-progress-shadow: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
-  }
+        --gate-gradient: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(255, 255, 255, 0.04));
+        --breath-gradient: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
+        --timer-progress-shadow: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
+    }
 }
 
 /* ====================================================================================================
@@ -303,12 +303,12 @@ p {margin: 0;color: var(--fb-text-muted);}
       8) Inputs and form controls, Text fields, selects, toggles, and segmented controls.
    ==================================================================================================== */
 .text-input { width: 100%; border-radius: var(--r-control); border: 2px double var(--fb-border); outline: none;
-  padding: var(--space-2); background: var(--fb-surface-2); color: var(--fb-text); box-shadow: var(--fb-shadow-inset);
+    padding: var(--space-2); background: var(--fb-surface-2); color: var(--fb-text); box-shadow: var(--fb-shadow-inset);
 }
 
 .toggle { display: flex; align-items: center; position: relative; width: 64px; height: 34px;box-shadow: var(--fb-neo-inset);border-radius: var(--r-chip); cursor: pointer;}
 .toggle input {opacity: 0;width: 0;height: 0;}
-.toggle span { position: absolute; inset: 0;border-radius: var(--r-chip);border: 0; transition: 0.2s ease; box-shadow: var(--fb-neo-inset);}
+.toggle span { position: absolute; inset: 0;border-radius: var(--r-chip);border: 0; background: var(--fb-bg); transition: 0.2s ease; box-shadow: var(--fb-neo-inset);}
 .toggle span::after { content: ""; position: absolute; top: 4px; left: 4px;width: 26px; height: 26px; border-radius: 50%; background: var(--fb-accent-stale); transition: 0.2s ease;}
 .toggle input:checked + span { background: var(--toggle-checked-bg);border-color: var(--toggle-checked-border);}
 .toggle input:checked + span::after { transform: translateX(30px);background: var(--fb-accent); }
@@ -346,13 +346,13 @@ p {margin: 0;color: var(--fb-text-muted);}
       10) Buttons, Base button styling, sizes, and semantic variants.
    ==================================================================================================== */
 .btn {color: var(--fb-text); position: relative; overflow: hidden; border: 0;
-  background: var(--fb-accent-muted); border-radius: var(--r-control); padding: 8px 12px; cursor: pointer;
-  font-size: var(--font-small); min-width: 64px;box-shadow: var(--fb-neo-sm);
+    background: var(--fb-accent-muted); border-radius: var(--r-control); padding: 8px 12px; cursor: pointer;
+    font-size: var(--font-small); min-width: 64px;box-shadow: var(--fb-neo-sm);
 }
 .btn::after {
-  content: ""; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
-  background: var(--btn-sheen);
-  transform: skewX(-20deg);transition: transform 0.6s ease, left 0.6s ease;pointer-events: none;
+    content: ""; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
+    background: var(--btn-sheen);
+    transform: skewX(-20deg);transition: transform 0.6s ease, left 0.6s ease;pointer-events: none;
 }
 .btn:hover {box-shadow: var(--fb-neo-lg); transform: translateY(-1px); background: var(--fb-accent); transition: box-shadow 8000ms ease, transform 500ms ease, background 500ms ease; color: var(--fb-bg)}
 .btn:hover::after {left: 150%;}
@@ -375,9 +375,9 @@ p {margin: 0;color: var(--fb-text-muted);}
    12) Lists and list items
    ==================================================================================================== */
 .list-items { display: grid; gap: 8px; }
-.list-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); font-size: var(--font-small); overflow: visible; box-shadow: var(--fb-neo-sm); }
-.list-delete-btn { border-radius: 12px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
-.list-delete-btn:hover { border-color: var(--red); color: var(--red); box-shadow: var(--tag-delete-hover-shadow); }
+.list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: var(--r-control); border: 0; background: var(--fb-bg); font-size: var(--font-small); overflow: visible; box-shadow: var(--fb-neo-inset); }
+.list-item button { border: 0; background: transparent; color: var(--fb-text-muted-light); cursor: pointer; }
+.list-item button:hover { color: var(--fb-accent);}
 .list-title { font-weight: 600; }
 .list-sub { color: var(--fb-text-muted); }
 
@@ -516,12 +516,8 @@ body.modal-open { overflow: hidden; }
 .pomodoro-control.primary svg { width: 24px; height: 24px; }
 .pomodoro-control[disabled] { opacity: 0.45; cursor: not-allowed; }
 .pomodoro-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.pomodoro-toggle-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.pomodoro-toggle { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border-radius: var(--r-control); background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); }
-.pomodoro-toggle .list-sub { line-height: 1.3; min-height: 2.6em; margin: 0; }
-.pomodoro-toggle .toggle.small { flex: 0 0 auto; width: 44px; height: 24px; }
-.pomodoro-toggle .toggle.small span::after { width: 16px; height: 16px; top: 4px; left: 4px; }
-.pomodoro-toggle .toggle.small input:checked + span::after { transform: translateX(20px); }
+.pomodoro-toggle-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pomodoro-toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: var(--r-control); background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); }
 .pomodoro-config-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .pomodoro-config-col { padding: 10px 12px; border-radius: var(--r-control); background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); display: grid; gap: 4px; text-align: center; }
 .pomodoro-config-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fb-text-muted); }
@@ -645,36 +641,15 @@ body.modal-open { overflow: hidden; }
 .stats-segment.active { display: block; }
 .stats-trend-card { cursor: pointer; background: var(--fb-surface-2); }
 .stats-trend-card:hover { box-shadow: var(--fb-neo-lg); }
-.stats-card-link { font-size: 10px; color: var(--fb-text-muted); text-transform: none; letter-spacing: 0.02em; white-space: nowrap; border: 1px solid var(--fb-border); background: transparent; border-radius: 999px; padding: 3px 8px; box-shadow: none; opacity: 0.7; display: inline-flex; align-items: center; }
-.stats-trend-card:hover .stats-card-link { opacity: 1; }
-.secondary-icon { display: inline-flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1; opacity: 0.7; margin-left: 4px; }
-.stats-card-link .secondary-icon { font-size: 16px; margin-left: 6px; line-height: 1; }
-.nudge-icon { animation: stats-nudge 1.6s ease-in-out infinite; }
-.nudge-down { animation: stats-nudge-down 1.6s ease-in-out infinite; }
-@keyframes stats-nudge {
-  0%, 70%, 100% { transform: translateX(0); opacity: 0.6; }
-  85% { transform: translateX(4px); opacity: 1; }
-}
-@keyframes stats-nudge-down {
-  0%, 70%, 100% { transform: translateY(0); opacity: 0.6; }
-  85% { transform: translateY(3px); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .nudge-icon,
-  .nudge-down { animation: none; }
-}
+.stats-card-link { font-size: 10px; color: var(--fb-text-muted); text-transform: none; letter-spacing: 0.02em; white-space: nowrap; border: 1px solid var(--fb-border); background: var(--fb-bg); border-radius: 999px; padding: 4px 8px; box-shadow: var(--fb-neo-sm); }
 .stats-trend-card .row { margin-bottom: 10px; }
 .stats-trend-card .segmented.two { background: var(--fb-surface-2); }
 .stats-trend-split { border-bottom: 1px solid var(--fb-border); padding-bottom: 10px; margin-bottom: 10px; }
 .stats-summary-avg { display: grid; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--fb-border); margin-bottom: 10px; }
 .stats-trend-card #statsStacked { background: var(--fb-bg); border-radius: 16px; padding: 8px 10px; }
 
-.trend-chart { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: end; }
-.trend-axis { display: flex; flex-direction: column; justify-content: space-between; height: 190px; padding: 12px 0 18px; font-size: 10px; color: var(--fb-text-muted); text-align: right; min-width: 32px; }
-.trend-bars { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(26px, 1fr)); gap: 10px; align-items: end; height: 190px; padding: 12px 6px 0; }
-.trend-grid { position: absolute; inset: 12px 6px 18px; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
-.trend-grid span { height: 1px; background: var(--fb-border); opacity: 0.6; }
-.trend-bar { display: grid; grid-template-rows: 1fr auto; gap: 6px; justify-items: center; height: 100%; min-width: 0; position: relative; z-index: 1; }
+.trend-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(26px, 1fr)); gap: 10px; align-items: end; height: 190px; padding: 12px 6px 0; }
+.trend-bar { display: grid; grid-template-rows: 1fr auto; gap: 6px; justify-items: center; height: 100%; min-width: 0; }
 .trend-bar-track { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }
 .trend-bar-stack { width: 100%; height: 100%; display: flex; flex-direction: column-reverse; justify-content: flex-start; }
 .trend-segment { width: 100%; border-radius: 0; min-height: 4px; transition: height 200ms ease; }
@@ -700,14 +675,6 @@ body.modal-open { overflow: hidden; }
 .stats-ring-legend .legend-item { justify-content: flex-start; gap: 6px; }
 .stats-ring-legend .legend-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .stats-ring-show-all { width: 100%; margin-top: 10px; }
-.tag-show-all,
-#statsShowAll,
-.stats-ring-show-all,
-.stats-export-card .btn { background: transparent; box-shadow: none; border: 1px solid var(--fb-border); color: var(--fb-text-muted); }
-.tag-show-all:hover,
-#statsShowAll:hover,
-.stats-ring-show-all:hover,
-.stats-export-card .btn:hover { color: var(--fb-text); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); }
 
 .trend-label { font-size: 10px; color: var(--fb-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 32px; }
 
@@ -777,10 +744,10 @@ body.modal-open { overflow: hidden; }
 .donut-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; pointer-events: none; }
 .donut-total-value { font-size: clamp(12px, 3.5vw, 18px); font-weight: 600; color: var(--fb-text); max-width: 110px; text-align: center; word-break: break-word; }
 .legend-list { display: grid; gap: 8px; font-size: var(--font-small); }
-.legend-item { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; font-size: 11px; }
+.legend-item { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; }
 .legend-dot { width: 10px; height: 10px; border-radius: 999px; }
 .legend-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.legend-value { color: var(--fb-text); font-weight: 600; }
+.legend-value { color: var(--fb-text-muted); }
 
 .heatmap { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .heat-cell { border-radius: 8px; height: 28px; display: grid; place-items: center; font-size: 10px; color: var(--fb-text); border: 1px solid var(--fb-border); }
@@ -794,7 +761,7 @@ body.modal-open { overflow: hidden; }
    23) Responsive adjustments
    ==================================================================================================== */
 @media (min-width: 900px) {
-  .app-main { padding: 28px; gap: 20px; }
-  .card { padding: 22px 24px; }
-  .app-title { font-size: 20px; }
+    .app-main { padding: 28px; gap: 20px; }
+    .card { padding: 22px 24px; }
+    .app-title { font-size: 20px; }
 }

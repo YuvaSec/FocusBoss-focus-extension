@@ -237,6 +237,9 @@ const tagSave = document.getElementById("tagSave");
 const tagDelete = document.getElementById("tagDelete");
 const tagDeleteConfirm = document.getElementById("tagDeleteConfirm") as HTMLButtonElement | null;
 const tagDeleteCancel = document.getElementById("tagDeleteCancel") as HTMLButtonElement | null;
+const listDeleteConfirm = document.getElementById("listDeleteConfirm") as HTMLButtonElement | null;
+const listDeleteCancel = document.getElementById("listDeleteCancel") as HTMLButtonElement | null;
+const listDeleteValue = document.getElementById("listDeleteValue");
 const PAUSE_TYPES = ["1h", "eod", "manual"] as const;
 type PauseType = (typeof PAUSE_TYPES)[number];
 
@@ -326,6 +329,9 @@ let currentTags: Awaited<ReturnType<typeof getState>>["tags"] | null = null;
 let lastTagsKey = "";
 let currentTagEditId: string | null = null;
 let currentTagDeleteId: string | null = null;
+type ListDeleteKey = "blockedDomains" | "blockedKeywords" | "allowedDomains" | "allowedKeywords";
+let pendingListDeleteValue: string | null = null;
+let pendingListDeleteKey: ListDeleteKey | null = null;
 let pendingTagSelectId: string | null | undefined = undefined;
 let lastPomodoroAdvanceKey = "";
 let lastPomodoroAdvanceAttemptAt = 0;
@@ -1157,34 +1163,45 @@ const renderTrendChart = (
 ) => {
   if (!target) return;
   const max = Math.max(1, ...buckets.map((b) => b.total));
+  const axisLabels = [max, max / 2, 0].map((value) => formatDuration(value));
   target.innerHTML = `
-    <div class="trend-bars">
-      ${buckets
-        .map((bucket) => {
-          const segments = bucket.segments
-            .map((segment, index) => {
-              const pct = (segment.value / max) * 100;
-              const isBottom = index === 0;
-              const isTop = index === bucket.segments.length - 1;
-              return `
-                <span
-                  class="trend-segment ${isBottom ? "is-bottom" : ""} ${isTop ? "is-top" : ""}"
-                  style="height: ${pct}%; background: ${segment.color};"
-                  title="${segment.value ? formatDuration(segment.value) : ""}"
-                ></span>
-              `;
-            })
-            .join("");
-          return `
-            <div class="trend-bar">
-              <div class="trend-bar-track">
-                ${bucket.total > 0 ? `<div class="trend-bar-stack">${segments}</div>` : `<span class="trend-bar-dot"></span>`}
+    <div class="trend-chart">
+      <div class="trend-axis">
+        ${axisLabels.map((label) => `<span>${label}</span>`).join("")}
+      </div>
+      <div class="trend-bars">
+        <div class="trend-grid">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        ${buckets
+          .map((bucket) => {
+            const segments = bucket.segments
+              .map((segment, index) => {
+                const pct = (segment.value / max) * 100;
+                const isBottom = index === 0;
+                const isTop = index === bucket.segments.length - 1;
+                return `
+                  <span
+                    class="trend-segment ${isBottom ? "is-bottom" : ""} ${isTop ? "is-top" : ""}"
+                    style="height: ${pct}%; background: ${segment.color};"
+                    title="${segment.value ? formatDuration(segment.value) : ""}"
+                  ></span>
+                `;
+              })
+              .join("");
+            return `
+              <div class="trend-bar">
+                <div class="trend-bar-track">
+                  ${bucket.total > 0 ? `<div class="trend-bar-stack">${segments}</div>` : `<span class="trend-bar-dot"></span>`}
+                </div>
+                <span class="trend-label">${bucket.label}</span>
               </div>
-              <span class="trend-label">${bucket.label}</span>
-            </div>
-          `;
-        })
-        .join("")}
+            `;
+          })
+          .join("")}
+      </div>
     </div>
   `;
 };
@@ -2190,7 +2207,11 @@ const renderLists = (lists: Awaited<ReturnType<typeof getState>>["lists"]) => {
     ? items
         .map(
           (value) =>
-            `<div class=\"list-item\"><span>${value}</span><button data-value=\"${value}\">Remove</button></div>`
+            `<div class=\"list-item\"><span>${value}</span><button class=\"icon-btn icon-only list-delete-btn\" type=\"button\" data-value=\"${value}\" aria-label=\"Remove entry\">
+              <svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" aria-hidden=\"true\" focusable=\"false\">
+                <path fill=\"currentColor\" d=\"M9.75 3a.75.75 0 00-.75.75V4.5H5.25a.75.75 0 000 1.5h.75l.624 12.06A2.25 2.25 0 008.87 20.25h6.26a2.25 2.25 0 002.246-2.19L18 6h.75a.75.75 0 000-1.5H15v-.75A.75.75 0 0014.25 3h-4.5zM9 8.25a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zm4.5 0a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zM10.5 4.5h3v.75h-3V4.5z\" />
+              </svg>
+            </button></div>`
         )
         .join("")
     : `<p style=\"color: var(--color-muted); font-size: var(--font-small);\">No entries yet.</p>`;
@@ -2758,6 +2779,31 @@ const bindEvents = () => {
     closeModal("tagDeleteConfirm");
   });
 
+  listDeleteConfirm?.addEventListener("click", async () => {
+    if (!pendingListDeleteValue || !pendingListDeleteKey) {
+      return;
+    }
+    const state = await getState();
+    const list = [...state.lists[pendingListDeleteKey]] as string[];
+    const next = list.filter((entry) => entry !== pendingListDeleteValue);
+    await setState({ lists: { [pendingListDeleteKey]: next } });
+    pendingListDeleteValue = null;
+    pendingListDeleteKey = null;
+    if (listDeleteValue) {
+      listDeleteValue.textContent = "";
+    }
+    closeModal("listDeleteConfirm");
+  });
+
+  listDeleteCancel?.addEventListener("click", () => {
+    pendingListDeleteValue = null;
+    pendingListDeleteKey = null;
+    if (listDeleteValue) {
+      listDeleteValue.textContent = "";
+    }
+    closeModal("listDeleteConfirm");
+  });
+
   const handleTagSelectClick = (event: MouseEvent, closePicker?: boolean) => {
     const target = event.target as HTMLElement;
     const settingsButton = target.closest<HTMLElement>("[data-tag-settings]");
@@ -2911,11 +2957,12 @@ const bindEvents = () => {
     if (!value) {
       return;
     }
-    const state = await getState();
-    const key = getListKey();
-    const list = [...state.lists[key as keyof typeof state.lists]] as string[];
-    const next = list.filter((entry) => entry !== value);
-    await setState({ lists: { [key]: next } });
+    pendingListDeleteValue = value;
+    pendingListDeleteKey = getListKey() as ListDeleteKey;
+    if (listDeleteValue) {
+      listDeleteValue.textContent = value;
+    }
+    openModal("listDeleteConfirm");
   });
 
   scheduleAdd?.addEventListener("click", async () => {
@@ -3478,6 +3525,13 @@ const bindEvents = () => {
         if (modalId === "focusOffConfirm") {
           pendingFocusOff = false;
         }
+        if (modalId === "listDeleteConfirm") {
+          pendingListDeleteValue = null;
+          pendingListDeleteKey = null;
+          if (listDeleteValue) {
+            listDeleteValue.textContent = "";
+          }
+        }
         closeModal(modalId);
       }
     }
@@ -3490,6 +3544,13 @@ const bindEvents = () => {
       if (modalId) {
         if (modalId === "focusOffConfirm") {
           pendingFocusOff = false;
+        }
+        if (modalId === "listDeleteConfirm") {
+          pendingListDeleteValue = null;
+          pendingListDeleteKey = null;
+          if (listDeleteValue) {
+            listDeleteValue.textContent = "";
+          }
         }
         closeModal(modalId);
       }

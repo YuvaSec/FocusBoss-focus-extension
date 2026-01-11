@@ -227,7 +227,9 @@
               <p id="tagActiveDetail" class="tag-desc">25m focus · 5m break · Endless</p>
             </div>
             <div id="tagQuickGrid" class="tag-quick-grid" style="margin-top: 12px;"></div>
-            <button id="tagShowAll" class="btn btn-large tag-show-all" type="button">Show all</button>
+            <button id="tagShowAll" class="btn btn-large tag-show-all" type="button">
+              Show all <span class="secondary-icon nudge-icon" aria-hidden="true">›</span>
+            </button>
           </div>
 
         </section>
@@ -244,7 +246,7 @@
                 <div class="card stats-trend-card" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
                   <div class="row" style="justify-content: space-between; gap: 10px;">
                     <h3>Focus Trend</h3>
-                    <span class="stats-card-link">View details →</span>
+                    <span class="stats-card-link">View details <span class="secondary-icon nudge-icon" aria-hidden="true">›</span></span>
                   </div>
                   <div class="stats-split stats-trend-split">
                     <div>
@@ -268,7 +270,9 @@
                 <div class="card" style="margin-top: 12px;">
                   <div class="row">
                     <h3>Tags</h3>
-                    <button id="statsShowAll" class="btn btn-small">Show All</button>
+                    <button id="statsShowAll" class="btn btn-small">
+                      Show all <span class="secondary-icon nudge-icon" aria-hidden="true">›</span>
+                    </button>
                   </div>
                   <div id="statsSummaryTags" class="stats-tag-grid" style="margin-top: 10px;"></div>
                 </div>
@@ -310,7 +314,9 @@
                     <h3>Export</h3>
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
-                    <button id="exportSessionsCsv" class="btn btn-small">Export sessions CSV</button>
+                    <button id="exportSessionsCsv" class="btn btn-small">
+                      Export sessions CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -319,7 +325,7 @@
                 <div id="statsUsageTrendCard" class="card stats-trend-card stats-usage-trend" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
                   <div class="row" style="justify-content: space-between; gap: 10px;">
                     <h3>Web Usage Trend</h3>
-                    <span class="stats-card-link">View details →</span>
+                    <span class="stats-card-link">View details <span class="secondary-icon nudge-icon" aria-hidden="true">›</span></span>
                   </div>
                   <div class="stats-split stats-trend-split">
                     <div>
@@ -360,7 +366,9 @@
                     <div id="statsUsageRing" class="stats-ring"></div>
                     <div id="statsUsageLegend" class="stats-ring-legend"></div>
                   </div>
-                  <button id="statsUsageShowAll" class="btn btn-small stats-ring-show-all" type="button">Show all</button>
+                  <button id="statsUsageShowAll" class="btn btn-small stats-ring-show-all" type="button">
+                    Show all <span class="secondary-icon nudge-icon" aria-hidden="true">›</span>
+                  </button>
                 </div>
 
                 <div class="card stats-hero-card" style="margin-top: 12px;">
@@ -408,8 +416,12 @@
                     <h3>Export</h3>
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
-                    <button id="exportUsageCsv" class="btn btn-small">Export usage CSV</button>
-                    <button id="exportBlockedCsv" class="btn btn-small">Export blocked CSV</button>
+                    <button id="exportUsageCsv" class="btn btn-small">
+                      Export usage CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                    </button>
+                    <button id="exportBlockedCsv" class="btn btn-small">
+                      Export blocked CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -771,6 +783,20 @@
         <div class="modal-actions" style="margin-top: 14px;">
           <button id="tagDeleteConfirm" class="btn btn-large btn-danger">Delete</button>
           <button id="tagDeleteCancel" class="btn btn-large btn-success" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="listDeleteModal" class="modal hidden" data-modal="listDeleteConfirm" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div>
+          <h3>Remove entry?</h3>
+          <p id="listDeleteValue" class="list-sub"></p>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button id="listDeleteConfirm" class="btn btn-large btn-danger">Remove</button>
+          <button id="listDeleteCancel" class="btn btn-large btn-success" data-close-modal="true">Cancel</button>
         </div>
       </div>
     </div>
