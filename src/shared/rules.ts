@@ -4,6 +4,8 @@ export type BlockReason =
   | { type: "allowed"; rule?: string }
   | { type: "advanced-exclude"; rule: string }
   | { type: "advanced-block"; rule: string }
+  | { type: "blocked-youtube-video"; rule: string }
+  | { type: "blocked-youtube-playlist"; rule: string }
   | { type: "blocked-domain"; rule: string }
   | { type: "blocked-keyword"; rule: string };
 
@@ -13,6 +15,12 @@ export type RuleLists = {
   allowedDomains: string[];
   allowedKeywords: string[];
   advancedRulesText: string;
+  youtubeExceptions?: {
+    allowedVideos: string[];
+    blockedVideos: string[];
+    allowedPlaylists: string[];
+    blockedPlaylists: string[];
+  };
 };
 
 type CompiledAdvancedRule = {
@@ -74,7 +82,10 @@ const matchDomainList = (host: string, list: string[]): string | null => {
   const normalized = normalizeHost(host);
   for (const entry of list) {
     const clean = normalizeHost(entry.trim());
-    if (clean && clean === normalized) {
+    if (
+      clean &&
+      (clean === normalized || (normalized === "m.youtube.com" && clean === "youtube.com"))
+    ) {
       return entry;
     }
   }
@@ -92,6 +103,28 @@ const matchKeywordList = (href: string, list: string[]): string | null => {
   return null;
 };
 
+const extractYoutubeVideoId = (url: URL): string | null => {
+  const host = normalizeHost(url.hostname);
+  if (host === "youtu.be") {
+    const id = url.pathname.replace("/", "").trim();
+    return id || null;
+  }
+  if (host.endsWith("youtube.com") && url.pathname === "/watch") {
+    const id = url.searchParams.get("v");
+    return id || null;
+  }
+  return null;
+};
+
+const extractYoutubePlaylistId = (url: URL): string | null => {
+  const host = normalizeHost(url.hostname);
+  if (!host.endsWith("youtube.com") && host !== "youtu.be") {
+    return null;
+  }
+  const id = url.searchParams.get("list");
+  return id || null;
+};
+
 export const evaluateRules = (
   url: string,
   lists: RuleLists,
@@ -102,6 +135,14 @@ export const evaluateRules = (
   const host = normalizeHost(urlObj.hostname);
   const pathTarget = `${host}${urlObj.pathname}${urlObj.search}`.toLowerCase();
   const advanced = compiled ?? parseAdvancedRules(lists.advancedRulesText);
+  const youtubeExceptions = lists.youtubeExceptions ?? {
+    allowedVideos: [],
+    blockedVideos: [],
+    allowedPlaylists: [],
+    blockedPlaylists: []
+  };
+  const youtubeId = extractYoutubeVideoId(urlObj);
+  const playlistId = extractYoutubePlaylistId(urlObj);
 
   const allowedDomain = matchDomainList(host, lists.allowedDomains);
   if (allowedDomain) {
@@ -113,6 +154,13 @@ export const evaluateRules = (
     return { allowed: true, reason: { type: "allowed", rule: allowedKeyword } };
   }
 
+  if (youtubeId && youtubeExceptions.allowedVideos.includes(youtubeId)) {
+    return { allowed: true, reason: { type: "allowed", rule: youtubeId } };
+  }
+  if (playlistId && youtubeExceptions.allowedPlaylists.includes(playlistId)) {
+    return { allowed: true, reason: { type: "allowed", rule: playlistId } };
+  }
+
   const advancedExclude = matchAdvanced(pathTarget, advanced, true);
   if (advancedExclude) {
     return { allowed: true, reason: { type: "advanced-exclude", rule: advancedExclude } };
@@ -121,6 +169,13 @@ export const evaluateRules = (
   const advancedBlock = matchAdvanced(pathTarget, advanced, false);
   if (advancedBlock) {
     return { allowed: false, reason: { type: "advanced-block", rule: advancedBlock } };
+  }
+
+  if (youtubeId && youtubeExceptions.blockedVideos.includes(youtubeId)) {
+    return { allowed: false, reason: { type: "blocked-youtube-video", rule: youtubeId } };
+  }
+  if (playlistId && youtubeExceptions.blockedPlaylists.includes(playlistId)) {
+    return { allowed: false, reason: { type: "blocked-youtube-playlist", rule: playlistId } };
   }
 
   const blockedDomain = matchDomainList(host, lists.blockedDomains);

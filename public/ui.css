@@ -298,6 +298,7 @@ p {margin: 0;color: var(--fb-text-muted);}
 
 .row {display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);}
 .row + .row {margin-top: var(--space-2);}
+.list-input-row .text-input { flex: 1; min-width: 0; }
 
 /* ====================================================================================================
       8) Inputs and form controls, Text fields, selects, toggles, and segmented controls.
@@ -309,11 +310,14 @@ p {margin: 0;color: var(--fb-text-muted);}
 .toggle { display: flex; align-items: center; position: relative; width: 64px; height: 34px;box-shadow: var(--fb-neo-inset);border-radius: var(--r-chip); cursor: pointer;}
 .toggle input {opacity: 0;width: 0;height: 0;}
 .toggle span { position: absolute; inset: 0;border-radius: var(--r-chip);border: 0; transition: 0.2s ease; box-shadow: var(--fb-neo-inset);}
+.toggle span::before { content: "Off"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; padding: 0 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--fb-text-muted-light); text-transform: uppercase; pointer-events: none;}
 .toggle span::after { content: ""; position: absolute; top: 4px; left: 4px;width: 26px; height: 26px; border-radius: 50%; background: var(--fb-accent-stale); transition: 0.2s ease;}
 .toggle input:checked + span { background: var(--toggle-checked-bg);border-color: var(--toggle-checked-border);}
+.toggle input:checked + span::before { content: "On"; justify-content: flex-start; color: var(--fb-text-muted); }
 .toggle input:checked + span::after { transform: translateX(30px);background: var(--fb-accent); }
 
 .toggle.small { width: 36px; height: 20px; }
+.toggle.small span::before { display: none; }
 .toggle.small span::after { width: 12px; height: 12px; top: 4px; left: 4px;}
 .toggle.small input:checked + span::after { transform: translateX(16px); }
 
@@ -374,12 +378,60 @@ p {margin: 0;color: var(--fb-text-muted);}
 /* ====================================================================================================
    12) Lists and list items
    ==================================================================================================== */
-.list-items { display: grid; gap: 8px; }
-.list-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); font-size: var(--font-small); overflow: visible; box-shadow: var(--fb-neo-sm); }
+.list-items { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.list-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); font-size: var(--font-small); overflow: hidden; box-shadow: var(--fb-neo-sm); }
+.list-item-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.list-item-text { flex: 1; min-width: 0; max-width: 12ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list-item-badge { font-size: 10px; padding: 2px 6px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); white-space: nowrap; }
+.list-empty { grid-column: 1 / -1; padding: 12px; border-radius: var(--r-control); border: 1px dashed var(--fb-border); background: var(--fb-surface-2); display: grid; gap: 6px; }
+.list-empty-title { margin: 0; font-size: var(--font-small); font-weight: 600; color: var(--fb-text); }
+.list-empty-hint { margin: 0; font-size: 12px; color: var(--fb-text-muted); }
+.list-empty-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .list-delete-btn { border-radius: 12px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
 .list-delete-btn:hover { border-color: var(--red); color: var(--red); box-shadow: var(--tag-delete-hover-shadow); }
 .list-title { font-weight: 600; }
 .list-sub { color: var(--fb-text-muted); }
+
+/* ====================================================================================================
+   YouTube exceptions card
+   ==================================================================================================== */
+.youtube-disclosure { display: grid; gap: 0; margin-bottom: 12px; }
+.youtube-toggle { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; }
+.youtube-toggle:hover { border-color: var(--fb-accent); }
+.youtube-toggle:active { transform: translateY(1px); }
+.youtube-toggle h4 { color: var(--fb-text); }
+.youtube-panel { max-height: 0; opacity: 0; overflow: hidden; transition: opacity 200ms ease, max-height 200ms ease; margin-left: calc(-1 * var(--space-3)); margin-right: calc(-1 * var(--space-3)); padding-left: var(--space-3); padding-right: var(--space-3); }
+.youtube-disclosure.is-open .youtube-panel { max-height: 420px; opacity: 1; margin-top: 10px; padding-top: 12px; padding-bottom: 12px; background: var(--fb-surface-2); }
+.youtube-disclosure.is-open .tag-chevron { transform: rotate(90deg); }
+.youtube-input-row .text-input { flex: 1; min-width: 0; }
+.youtube-input-row .select-input { width: 120px; flex: 0 0 120px; }
+.youtube-input-row .btn { white-space: nowrap; }
+.youtube-helper-row { margin-top: 6px; align-items: center; gap: 8px; }
+.youtube-helper-row .list-sub { margin: 0; font-size: 11px; color: var(--fb-text-muted); }
+.youtube-helper-row .chip { padding: 4px 10px; font-size: 11px; }
+.helper-sep { color: var(--fb-text-muted); font-size: 11px; }
+.youtube-divider { height: 1px; border-top: 1px dashed rgba(140, 150, 150, 0.35); margin-top: 8px; }
+.save-btn { padding: 9px 18px; min-width: 92px; }
+.select-input { appearance: none; cursor: pointer; }
+
+/* ====================================================================================================
+   Advanced rule builder
+   ==================================================================================================== */
+.advanced-disclosure { display: grid; gap: 0; margin-top: 12px; }
+.advanced-toggle { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; }
+.advanced-toggle:hover { border-color: var(--fb-accent); }
+.advanced-toggle:active { transform: translateY(1px); }
+.advanced-toggle h4 { color: var(--fb-text); }
+.advanced-panel { max-height: 0; opacity: 0; overflow: hidden; transition: opacity 200ms ease, max-height 200ms ease; margin-left: calc(-1 * var(--space-3)); margin-right: calc(-1 * var(--space-3)); padding-left: var(--space-3); padding-right: var(--space-3); }
+.advanced-disclosure.is-open .advanced-panel { max-height: 520px; opacity: 1; margin-top: 10px; padding-top: 12px; padding-bottom: 12px; background: var(--fb-surface-2); }
+.advanced-disclosure.is-open .tag-chevron { transform: rotate(90deg); }
+.advanced-list { display: grid; gap: 8px; }
+.advanced-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.advanced-item .text-input { padding: 8px 10px; font-size: 12px; }
+.advanced-input-row .text-input { flex: 1; min-width: 0; }
+.advanced-examples { border: 1px solid var(--fb-border); border-radius: 14px; padding: 10px 12px; background: var(--fb-surface-2); }
+.advanced-examples summary { cursor: pointer; color: var(--fb-text); font-weight: 600; }
+.advanced-example-list { display: grid; gap: 6px; margin-top: 8px; color: var(--fb-text-muted); font-size: 12px; }
 
 /* ====================================================================================================
    13) Modal system

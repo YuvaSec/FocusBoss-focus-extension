@@ -54,7 +54,9 @@ const decodeMaybe = (value: string) => {
   }
 };
 
-const getPrevUrl = () => {
+let cachedPrevUrl: string | null = null;
+
+const getPrevUrlFromLocation = () => {
   const params = new URLSearchParams(window.location.search);
   const fromQuery = params.get("prev");
   if (fromQuery) {
@@ -70,14 +72,39 @@ const getPrevUrl = () => {
   return decodeMaybe(hash);
 };
 
+const fetchPrevUrl = async (): Promise<string | null> => {
+  if (cachedPrevUrl !== null) {
+    return cachedPrevUrl;
+  }
+  cachedPrevUrl = getPrevUrlFromLocation();
+  if (cachedPrevUrl) {
+    return cachedPrevUrl;
+  }
+  const tab = await new Promise<chrome.tabs.Tab | undefined>((resolve) => {
+    chrome.tabs.getCurrent((current) => resolve(current));
+  });
+  const tabId = tab?.id;
+  if (typeof tabId !== "number") {
+    return null;
+  }
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage({ type: "getBlockedNav", tabId }, (response) => {
+      cachedPrevUrl = response?.url ?? null;
+      resolve(cachedPrevUrl);
+    });
+  });
+};
+
 const wireBackButton = () => {
   backButton?.addEventListener("click", () => {
-    const prev = getPrevUrl();
-    if (prev) {
-      window.location.replace(prev);
-    } else {
-      window.close();
-    }
+    void (async () => {
+      const prev = await fetchPrevUrl();
+      if (prev) {
+        window.location.replace(prev);
+      } else {
+        window.close();
+      }
+    })();
   });
 };
 
@@ -88,7 +115,7 @@ const wireTempAllow = () => {
       if (!minutes) {
         return;
       }
-      const prev = getPrevUrl();
+      const prev = await fetchPrevUrl();
       if (!prev) {
         return;
       }
@@ -328,7 +355,7 @@ const render = async () => {
     }
   }
 
-  const prevUrl = getPrevUrl();
+  const prevUrl = await fetchPrevUrl();
   let host: string | null = null;
   if (reasonEl) {
     if (prevUrl) {
@@ -343,7 +370,11 @@ const render = async () => {
           } else if (reason?.type === "blocked-keyword") {
             reasonEl.textContent = `Blocked by keyword: ${reason.rule}`;
           } else if (reason?.type === "advanced-block") {
-            reasonEl.textContent = `Blocked by advanced rule: ${reason.rule}`;
+            reasonEl.textContent = `Blocked by exception rule: ${reason.rule}`;
+          } else if (reason?.type === "blocked-youtube-video") {
+            reasonEl.textContent = `Blocked YouTube video: ${reason.rule}`;
+          } else if (reason?.type === "blocked-youtube-playlist") {
+            reasonEl.textContent = `Blocked YouTube playlist: ${reason.rule}`;
           } else {
             reasonEl.textContent = "Blocked by Focus rules.";
           }

@@ -95,7 +95,7 @@
             <div class="segmented" id="listTypeControl">
               <button data-list="blocked" class="active">Blocked</button>
               <button data-list="allowed">Allowed</button>
-              <button data-list="advanced">Advanced</button>
+              <button data-list="advanced">Exceptions</button>
             </div>
             <div id="entryTypeRow" class="segmented" style="margin-top: 12px;">
               <button data-entry="domain" class="active">Websites</button>
@@ -104,25 +104,96 @@
           </div>
 
           <div id="listEditor" class="card" style="margin-top: 12px;">
-            <div class="row">
+            <div class="row list-input-row">
               <input id="listInput" class="text-input" placeholder="Add site or keyword" />
               <button id="listAddButton" class="btn">Add</button>
             </div>
             <div id="listItems" class="list-items" style="margin-top: 12px;"></div>
           </div>
 
-          <div id="advancedEditor" class="card hidden">
-            <textarea
-              id="advancedRules"
-              class="text-input"
-              rows="6"
-              placeholder="# one rule per line&#10;!example.com/private/*&#10;example.com/*"
-            ></textarea>
+          <div id="advancedEditor" class="card hidden" style="margin-top: 8px;">
+            <div id="youtubeExceptions" class="youtube-disclosure">
+              <button class="youtube-toggle" type="button" aria-expanded="false">
+                <div>
+                  <h4>YouTube exceptions</h4>
+                  <p class="list-sub">Allow or block specific videos and playlists.</p>
+                </div>
+                <span class="tag-chevron">›</span>
+              </button>
+              <div id="youtubePanel" class="youtube-panel">
+                <div id="youtubeExceptionMode" class="segmented two">
+                  <button data-mode="allowed" class="active">Allowed</button>
+                  <button data-mode="blocked">Blocked</button>
+                </div>
+                <div class="row youtube-input-row" style="margin-top: 10px;">
+                  <input
+                    id="youtubeExceptionInput"
+                    class="text-input"
+                    placeholder="Paste link or ID"
+                  />
+                  <select id="youtubeExceptionType" class="text-input select-input">
+                    <option value="video">Video</option>
+                    <option value="playlist">Playlist</option>
+                  </select>
+                  <button id="youtubeExceptionAdd" class="btn">Add</button>
+                </div>
+                <div class="row youtube-helper-row">
+                  <button id="youtubeExceptionUseTab" class="chip" type="button">Use current tab</button>
+                </div>
+                <div class="youtube-divider"></div>
+                <div id="youtubeExceptionItems" class="list-items" style="margin-top: 12px;"></div>
+              </div>
+            </div>
+            <div id="advancedExceptions" class="advanced-disclosure">
+              <button class="advanced-toggle" type="button" aria-expanded="false">
+                <div>
+                  <h4>Exceptions</h4>
+                  <p class="list-sub">Allow or block specific paths and patterns.</p>
+                </div>
+                <span class="tag-chevron">›</span>
+              </button>
+              <div class="advanced-panel">
+                <div id="advancedPatternMode" class="segmented two">
+                  <button data-mode="allow" class="active">Allow patterns</button>
+                  <button data-mode="block">Block patterns</button>
+                </div>
+                <div class="row advanced-input-row" style="margin-top: 10px;">
+                  <input
+                    id="advancedPatternInput"
+                    class="text-input"
+                    placeholder="example.com/path/*"
+                  />
+                  <button id="advancedPatternAdd" class="btn">Add</button>
+                </div>
+                <div id="advancedAllowList" class="advanced-list" style="margin-top: 12px;"></div>
+                <div id="advancedBlockList" class="advanced-list hidden" style="margin-top: 12px;"></div>
+                <details id="advancedAllowExamples" class="advanced-examples" style="margin-top: 12px;">
+                  <summary>Allow examples</summary>
+                  <div class="advanced-example-list">
+                    <div><strong>example.com/private/*</strong> Allow a private path</div>
+                    <div><strong>example.com/help/*</strong> Allow help pages only</div>
+                    <div><strong>*.example.com/learn/*</strong> Allow a learning subdomain</div>
+                  </div>
+                </details>
+                <details id="advancedBlockExamples" class="advanced-examples hidden" style="margin-top: 12px;">
+                  <summary>Block examples</summary>
+                  <div class="advanced-example-list">
+                    <div><strong>example.com</strong> Block any page on domain</div>
+                    <div><strong>example.com/</strong> Block main page only</div>
+                    <div><strong>example.com/*</strong> Block all pages</div>
+                    <div><strong>*.example.com</strong> Block all subdomains</div>
+                    <div><strong>example.com/app/*</strong> Block all under /app/</div>
+                    <div><strong>example.com/?</strong> ? = match any single character</div>
+                  </div>
+                </details>
+              </div>
+            </div>
             <div class="row" style="margin-top: 10px;">
-              <p>Wildcards: * and ?</p>
-              <button id="advancedSave" class="btn">Save</button>
+              <div></div>
+              <button id="advancedSave" class="btn save-btn">Save</button>
             </div>
           </div>
+
         </section>
 
         <section class="view hidden" data-view="timer">
@@ -559,15 +630,11 @@
                   <p>Blocking style</p>
                   <button class="icon-btn" data-open-modal="blockingInfo" aria-label="Blocking style info">?</button>
                 </div>
-                <p>Overlay on page or redirect.</p>
               </div>
-              <div style="display: grid; justify-items: end; gap: 6px;">
-                <label class="toggle">
-                  <input id="overlayToggle" type="checkbox" />
-                  <span></span>
-                </label>
-                <span id="overlayLabel" class="list-sub">Overlay</span>
-              </div>
+            </div>
+            <div class="segmented two" id="blockingStyleControl" style="margin-top: 10px;">
+              <button data-blocking-style="overlay">Overlay</button>
+              <button data-blocking-style="redirect">Redirect</button>
             </div>
           </div>
 
@@ -621,6 +688,19 @@
               <button id="scheduleAdd" class="btn btn-small">Add</button>
             </div>
             <div id="scheduleList" class="list-items" style="margin-top: 10px;"></div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
+            <div class="row">
+              <div>
+                <h3>Backup &amp; Restore</h3>
+                <p class="list-sub">Export settings or restore from a backup file.</p>
+              </div>
+            </div>
+            <div class="row" style="gap: 8px; margin-top: 10px;">
+              <button class="btn btn-small" data-open-modal="backup" style="flex: 1;">Backup</button>
+              <button class="btn btn-small" data-open-modal="restore" style="flex: 1;">Restore</button>
+            </div>
           </div>
 
           <div class="card" style="margin-top: 12px;">
@@ -858,12 +938,12 @@
       <div class="modal-backdrop" data-close-modal="true"></div>
       <div class="modal-card">
         <div>
-          <h3>Blocking style</h3>
+          <h2>Blocking style</h2>
           <p class="list-sub">Choose how FocusBoss interrupts a blocked page.</p>
         </div>
         <div style="margin-top: 10px;">
-          <p class="list-sub"><strong>Overlay</strong> keeps you on the page but blocks interaction.</p>
-          <p class="list-sub" style="margin-top: 6px;"><strong>Redirect</strong> sends you to the intervention screen.</p>
+          <p class="list-sub"><h3>Overlay</h3> keeps you on the page but blocks interaction.</p>
+          <p class="list-sub" style="margin-top: 6px;"><h3>Redirect</h3> sends you to the intervention screen.</p>
         </div>
         <div class="modal-actions" style="margin-top: 14px;">
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
@@ -950,6 +1030,59 @@
         </div>
         <div id="statusInfoBody" style="margin-top: 12px;"></div>
         <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="backupModal" class="modal hidden" data-modal="backup" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Backup</h2>
+        </div>
+        <p class="list-sub">Download a backup of your FocusBoss settings.</p>
+        <div style="display: flex; align-items: center; gap: 6px; margin-top: 12px;">
+          <label class="toggle small">
+            <input id="backupIncludeAnalytics" type="checkbox" />
+            <span></span>
+          </label>
+          <span class="list-sub">Include analytics</span>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button id="backupDownload" class="btn btn-large btn-success">Download</button>
+          <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="restoreModal" class="modal hidden" data-modal="restore" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Restore</h2>
+        </div>
+        <p class="list-sub">Restore from a FocusBoss backup file.</p>
+        <input id="restoreFile" type="file" accept="application/json" class="hidden" />
+        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+          <button id="restoreFileButton" class="btn btn-small" type="button">Choose file</button>
+          <span id="restoreFileName" class="list-sub">No file selected</span>
+        </div>
+        <div style="margin-top: 12px;">
+          <p class="list-sub" style="margin-bottom: 6px;">Restore mode</p>
+          <div class="segmented two" id="restoreModeControl">
+            <button data-restore-mode="merge" class="active">Merge</button>
+            <button data-restore-mode="overwrite">Overwrite</button>
+          </div>
+          <p class="list-sub" style="margin-top: 6px;">Merge keeps existing data. Overwrite replaces everything.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-top: 12px;">
+          <label class="toggle small">
+            <input id="restoreIncludeAnalytics" type="checkbox" />
+            <span></span>
+          </label>
+          <span class="list-sub">Include analytics if present</span>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button id="restoreApply" class="btn btn-large btn-success">Restore</button>
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
         </div>
       </div>

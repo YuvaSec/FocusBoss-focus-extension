@@ -16,6 +16,14 @@
       "run_at": "document_idle"
     }
   ],
-  "permissions": ["storage", "tabs", "alarms", "scripting", "declarativeNetRequest", "offscreen"],
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "scripting",
+    "declarativeNetRequest",
+    "offscreen",
+    "webNavigation"
+  ],
   "host_permissions": ["<all_urls>"]
 }

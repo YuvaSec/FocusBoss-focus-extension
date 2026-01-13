@@ -1,3 +1,4 @@
+(() => {
 const STORAGE_KEY = "focusBossState";
 const WIDGET_STORAGE_KEY = "focusBossWidget";
 const DEFAULT_WIDGET_POSITION = { x: 24, y: 24 };
@@ -10,6 +11,15 @@ const isExtensionContextValid = () => {
   }
 };
 
+const initTarget = window as typeof window & { __focusBossContentInitialized?: boolean };
+if (initTarget.__focusBossContentInitialized) {
+  return;
+}
+initTarget.__focusBossContentInitialized = true;
+if (!isExtensionContextValid()) {
+  return;
+}
+
 type StorageState = {
   focusEnabled: boolean;
   overlayMode: boolean;
@@ -19,6 +29,12 @@ type StorageState = {
     allowedDomains: string[];
     allowedKeywords: string[];
     advancedRulesText?: string;
+    youtubeExceptions?: {
+      allowedVideos: string[];
+      blockedVideos: string[];
+      allowedPlaylists: string[];
+      blockedPlaylists: string[];
+    };
   };
   pomodoro: {
     workMin: number;
@@ -60,12 +76,16 @@ type StorageState = {
   };
   strictSession?: {
     active: boolean;
+    endsAt?: number;
+    startedAt?: number;
   };
+  temporaryAllow?: Record<string, { until: number }>;
 };
 
 type WidgetPrefs = {
   position?: { x: number; y: number };
   dismissed?: boolean;
+  completionDismissedAt?: number;
   seen?: boolean;
   minimized?: boolean;
   ultraMinimized?: boolean;
@@ -102,7 +122,11 @@ const parseAdvancedRules = (text: string) => {
     });
 };
 
-const matchAdvanced = (target: string, compiled: ReturnType<typeof parseAdvancedRules>, exclude: boolean) => {
+const matchAdvanced = (
+  target: string,
+  compiled: ReturnType<typeof parseAdvancedRules>,
+  exclude: boolean
+) => {
   for (const rule of compiled) {
     if (rule.isExclude !== exclude) {
       continue;
@@ -116,7 +140,12 @@ const matchAdvanced = (target: string, compiled: ReturnType<typeof parseAdvanced
 
 const matchDomainList = (host: string, list: string[]) => {
   const normalized = normalizeHost(host);
-  return list.some((entry) => normalizeHost(entry.trim()) === normalized);
+  return list.some((entry) => {
+    const clean = normalizeHost(entry.trim());
+    return (
+      clean === normalized || (normalized === "m.youtube.com" && clean === "youtube.com")
+    );
+  });
 };
 
 const matchKeywordList = (href: string, list: string[]) => {
@@ -125,6 +154,28 @@ const matchKeywordList = (href: string, list: string[]) => {
     const needle = entry.trim().toLowerCase();
     return needle.length > 0 && haystack.includes(needle);
   });
+};
+
+const extractYoutubeVideoId = (url: URL): string | null => {
+  const host = normalizeHost(url.hostname);
+  if (host === "youtu.be") {
+    const id = url.pathname.replace("/", "").trim();
+    return id || null;
+  }
+  if (host.endsWith("youtube.com") && url.pathname === "/watch") {
+    const id = url.searchParams.get("v");
+    return id || null;
+  }
+  return null;
+};
+
+const extractYoutubePlaylistId = (url: URL): string | null => {
+  const host = normalizeHost(url.hostname);
+  if (!host.endsWith("youtube.com") && host !== "youtu.be") {
+    return null;
+  }
+  const id = url.searchParams.get("list");
+  return id || null;
 };
 
 const truncateLabel = (value: string, maxLength: number) => {
@@ -139,6 +190,14 @@ const isBlockedByRules = (href: string, lists: any): boolean => {
   const host = normalizeHost(urlObj.hostname);
   const target = `${host}${urlObj.pathname}${urlObj.search}`.toLowerCase();
   const advanced = parseAdvancedRules(lists.advancedRulesText ?? "");
+  const youtubeExceptions = lists.youtubeExceptions ?? {
+    allowedVideos: [],
+    blockedVideos: [],
+    allowedPlaylists: [],
+    blockedPlaylists: []
+  };
+  const youtubeId = extractYoutubeVideoId(urlObj);
+  const playlistId = extractYoutubePlaylistId(urlObj);
 
   if (matchDomainList(host, lists.allowedDomains ?? [])) {
     return false;
@@ -146,10 +205,22 @@ const isBlockedByRules = (href: string, lists: any): boolean => {
   if (matchKeywordList(href, lists.allowedKeywords ?? [])) {
     return false;
   }
+  if (youtubeId && youtubeExceptions.allowedVideos.includes(youtubeId)) {
+    return false;
+  }
+  if (playlistId && youtubeExceptions.allowedPlaylists.includes(playlistId)) {
+    return false;
+  }
   if (matchAdvanced(target, advanced, true)) {
     return false;
   }
   if (matchAdvanced(target, advanced, false)) {
+    return true;
+  }
+  if (youtubeId && youtubeExceptions.blockedVideos.includes(youtubeId)) {
+    return true;
+  }
+  if (playlistId && youtubeExceptions.blockedPlaylists.includes(playlistId)) {
     return true;
   }
   if (matchDomainList(host, lists.blockedDomains ?? [])) {
@@ -255,8 +326,15 @@ const getWidgetPrefs = async (): Promise<WidgetPrefs> => {
   }
   return new Promise((resolve) => {
     try {
-      chrome.storage.sync.get(WIDGET_STORAGE_KEY, (stored) => {
-        resolve((stored[WIDGET_STORAGE_KEY] ?? {}) as WidgetPrefs);
+      chrome.storage.local.get(WIDGET_STORAGE_KEY, (stored) => {
+        const localPrefs = stored[WIDGET_STORAGE_KEY] as WidgetPrefs | undefined;
+        if (localPrefs && Object.keys(localPrefs).length > 0) {
+          resolve(localPrefs);
+          return;
+        }
+        chrome.storage.sync.get(WIDGET_STORAGE_KEY, (syncStored) => {
+          resolve((syncStored[WIDGET_STORAGE_KEY] ?? {}) as WidgetPrefs);
+        });
       });
     } catch {
       resolve({});
@@ -271,15 +349,10 @@ const saveWidgetPrefs = async (patch: WidgetPrefs) => {
   const current = await getWidgetPrefs();
   await new Promise<void>((resolve) => {
     try {
-      chrome.storage.sync.set(
-        {
-          [WIDGET_STORAGE_KEY]: {
-            ...current,
-            ...patch
-          }
-        },
-        () => resolve()
-      );
+      const nextPrefs = { ...current, ...patch };
+      chrome.storage.local.set({ [WIDGET_STORAGE_KEY]: nextPrefs }, () => {
+        chrome.storage.sync.set({ [WIDGET_STORAGE_KEY]: nextPrefs }, () => resolve());
+      });
     } catch {
       resolve();
     }
@@ -357,6 +430,27 @@ const initPomodoroWidget = async () => {
         position: relative;
         transition: transform 200ms ease, opacity 200ms ease, width 220ms ease, height 220ms ease,
           padding 220ms ease, box-shadow 220ms ease;
+      }
+      .fb-widget::before {
+        content: "";
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 48px;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        opacity: 0;
+        transition: opacity 200ms ease;
+        pointer-events: none;
+      }
+      .fb-widget:hover::before {
+        opacity: 0.9;
+      }
+      .fb-widget.is-ultra::before {
+        display: none;
       }
       .fb-widget.is-hidden {
         opacity: 0;
@@ -592,7 +686,7 @@ const initPomodoroWidget = async () => {
         display: none;
         width: 100%;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
       }
       .fb-mini-header {
         display: flex;
@@ -664,7 +758,7 @@ const initPomodoroWidget = async () => {
       .fb-mini-row {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         width: 100%;
       }
       .fb-mini-toggle {
@@ -811,10 +905,10 @@ const initPomodoroWidget = async () => {
         padding: 12px;
       }
       .fb-widget.is-minimized {
-        height: 98px;
+        height: 118px;
         grid-template-rows: 6px 1fr;
-        padding: 6px 12px 10px;
-        gap: 4px;
+        padding: 8px 12px 12px;
+        gap: 8px;
       }
       .fb-widget.is-minimized .fb-ring-wrap,
       .fb-widget.is-minimized .fb-footer {
@@ -1181,6 +1275,18 @@ const initPomodoroWidget = async () => {
         completionBursted = true;
       }
     }
+    if (shouldShow && !root.isConnected) {
+      document.documentElement.appendChild(root);
+    }
+    if (!shouldShow) {
+      widget.classList.add("is-hidden");
+      root.style.pointerEvents = "none";
+      if (dismissed && root.isConnected) {
+        root.remove();
+      }
+    } else {
+      root.style.pointerEvents = "auto";
+    }
     widget.classList.toggle("is-hidden", !shouldShow);
     widget.classList.toggle("is-minimized", minimized && !ultraMinimized);
     widget.classList.toggle("is-ultra", ultraMinimized);
@@ -1268,7 +1374,7 @@ const initPomodoroWidget = async () => {
   };
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== "sync") {
+    if (areaName !== "sync" && areaName !== "local") {
       return;
     }
     const change = changes[WIDGET_STORAGE_KEY];
@@ -1460,6 +1566,8 @@ const initPomodoroWidget = async () => {
       lastRunning = null;
       await saveWidgetPrefs({ dismissed: true });
       widget.classList.add("is-hidden");
+      root.style.pointerEvents = "none";
+      root.remove();
       return;
     }
 
@@ -1667,8 +1775,16 @@ const evaluate = async () => {
   if (!location.href.startsWith("http")) {
     return;
   }
-  const stored = await chrome.storage.local.get(STORAGE_KEY);
-  const state = stored[STORAGE_KEY];
+  if (!isExtensionContextValid()) {
+    return;
+  }
+  let stored: Record<string, unknown> | undefined;
+  try {
+    stored = await chrome.storage.local.get(STORAGE_KEY);
+  } catch {
+    return;
+  }
+  const state = stored?.[STORAGE_KEY] as StorageState | undefined;
   if (!state) {
     return;
   }
@@ -1700,20 +1816,31 @@ const evaluate = async () => {
   }
 };
 
-const ensureSingleContentInstance = () => {
-  const key = "__focusBossContentInitialized";
-  const target = window as typeof window & { [key]?: boolean };
-  if (target[key]) {
-    return false;
-  }
-  target[key] = true;
-  return true;
+void evaluate();
+void initPomodoroWidget();
+const startSpaWatcher = () => {
+  let lastHref = location.href;
+  const maybeRun = () => {
+    if (location.href === lastHref) {
+      return;
+    }
+    lastHref = location.href;
+    void evaluate();
+  };
+  const wrapHistory = (method: "pushState" | "replaceState") => {
+    const original = history[method];
+    history[method] = function (...args) {
+      const result = original.apply(this, args as any);
+      maybeRun();
+      return result;
+    };
+  };
+  wrapHistory("pushState");
+  wrapHistory("replaceState");
+  window.addEventListener("popstate", maybeRun);
+  window.setInterval(maybeRun, 1000);
 };
-
-if (ensureSingleContentInstance()) {
-  void evaluate();
-  void initPomodoroWidget();
-}
+startSpaWatcher();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type !== "focusBossPing") {
@@ -1721,3 +1848,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   sendResponse({ ok: true });
 });
+})();

@@ -54,13 +54,14 @@ Deliverable: longer stats history and safe storage growth.
 - [x] Add retention settings (90/180/365/forever).
 - [x] Add a background cleanup job (alarms) to prune old data.
 - [x] Clamp stats range buttons based on retention (3M/6M/Y).
-- [ ] Move heavy analytics to indexed by day/month keys.
-- [ ] Enable export routines to produce CSV/JSON.
+- [x] Move heavy analytics to indexed by day/month keys.
+
+[//]: # (- [ ] Enable export routines to produce CSV/JSON.)
 
 ### 6) Exports [planned]
 Deliverable: user can download reports and backups.
 - Add "Export CSV" and "Export JSON" in Stats.
-- Add "Backup/Restore" in Settings.
+- [x] Add "Backup/Restore" in Settings (merge/overwrite + optional analytics).
 - Use downloads API for file output; fallback to copy-to-clipboard if disabled.
 
 ## UI/UX changes

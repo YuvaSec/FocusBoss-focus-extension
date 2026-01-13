@@ -4,7 +4,7 @@ import {
   INTERVENTION_DEFS,
   type InterventionKey
 } from "../shared/interventions.js";
-import type { StorageSchema } from "../shared/storageSchema.js";
+import { SCHEMA_VERSION, defaultState, type StorageSchema } from "../shared/storageSchema.js";
 
 // --- DOM references (grab once, reuse) ---
 const statusPillText = document.getElementById("statusPillText");
@@ -18,8 +18,11 @@ const navButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".nav
 const navBar = document.querySelector<HTMLElement>(".app-nav");
 const views = Array.from(document.querySelectorAll<HTMLElement>(".view"));
 const themeControl = document.getElementById("themeControl");
-const overlayToggle = document.getElementById("overlayToggle") as HTMLInputElement | null;
-const overlayLabel = document.getElementById("overlayLabel");
+const blockingStyleButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#blockingStyleControl button")
+);
+
+const STORAGE_KEY = "focusBossState";
 const confirmToggle = document.getElementById("confirmToggle") as HTMLInputElement | null;
 const focusOffConfirm = document.getElementById("focusOffConfirm") as HTMLButtonElement | null;
 const focusOffCancel = document.getElementById("focusOffCancel") as HTMLButtonElement | null;
@@ -151,6 +154,20 @@ const scheduleStart = document.getElementById("scheduleStart") as HTMLInputEleme
 const scheduleEnd = document.getElementById("scheduleEnd") as HTMLInputElement | null;
 const scheduleDays = document.getElementById("scheduleDays");
 const scheduleSave = document.getElementById("scheduleSave");
+const backupIncludeAnalytics = document.getElementById(
+  "backupIncludeAnalytics"
+) as HTMLInputElement | null;
+const backupDownload = document.getElementById("backupDownload") as HTMLButtonElement | null;
+const restoreFile = document.getElementById("restoreFile") as HTMLInputElement | null;
+const restoreFileButton = document.getElementById("restoreFileButton") as HTMLButtonElement | null;
+const restoreFileName = document.getElementById("restoreFileName");
+const restoreIncludeAnalytics = document.getElementById(
+  "restoreIncludeAnalytics"
+) as HTMLInputElement | null;
+const restoreModeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#restoreModeControl button")
+);
+const restoreApply = document.getElementById("restoreApply") as HTMLButtonElement | null;
 const pomodoroTagPill = document.getElementById("pomodoroTagPill");
 const pomodoroRing = document.getElementById("pomodoroRing") as SVGCircleElement | null;
 const pomodoroTimerValue = document.getElementById("pomodoroTimerValue");
@@ -190,10 +207,316 @@ const entryTypeRow = document.getElementById("entryTypeRow");
 const listEditor = document.getElementById("listEditor");
 const listInput = document.getElementById("listInput") as HTMLInputElement | null;
 const listAddButton = document.getElementById("listAddButton");
+const LIST_PREFILL_TTL_MS = 10_000;
+let lastListPrefillAt = 0;
+type AdvancedDraft = { source: string; allow: string[]; block: string[] };
+let advancedDraft: AdvancedDraft | null = null;
+let latestAdvancedText = "";
+type AdvancedPatternMode = "allow" | "block";
+let advancedPatternMode: AdvancedPatternMode = "allow";
+type YoutubeExceptionMode = "allowed" | "blocked";
+type YoutubeExceptionKind = "video" | "playlist";
+let youtubeExceptionMode: YoutubeExceptionMode = "allowed";
+
+const prefillListInputFromTab = async () => {
+  if (!listInput) {
+    return;
+  }
+  if (listInput.value.trim().length > 0) {
+    return;
+  }
+  const tabUrl = await new Promise<string | null>((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      resolve(tabs[0]?.url ?? null);
+    });
+  });
+  if (!tabUrl || (!tabUrl.startsWith("http://") && !tabUrl.startsWith("https://"))) {
+    return;
+  }
+  if (currentEntryType === "domain") {
+    try {
+      listInput.value = new URL(tabUrl).hostname.replace(/^www\./i, "");
+    } catch {
+      return;
+    }
+  } else {
+    listInput.value = tabUrl;
+  }
+};
+
+const maybePrefillListInput = () => {
+  const now = Date.now();
+  if (now - lastListPrefillAt < LIST_PREFILL_TTL_MS) {
+    return;
+  }
+  lastListPrefillAt = now;
+  void prefillListInputFromTab();
+};
+
+const escapeHtml = (value: string) => {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
+const buildAdvancedDraft = (text: string): AdvancedDraft => {
+  const allow: string[] = [];
+  const block: string[] = [];
+  text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"))
+    .forEach((line) => {
+      if (line.startsWith("!")) {
+        allow.push(line.slice(1).trim());
+      } else {
+        block.push(line);
+      }
+    });
+  return { source: text, allow, block };
+};
+
+const ensureAdvancedDraft = (text: string) => {
+  if (!advancedDraft || advancedDraft.source !== text) {
+    advancedDraft = buildAdvancedDraft(text);
+  }
+};
+
+const renderAdvancedList = (
+  container: HTMLElement | null,
+  values: string[],
+  type: "allow" | "block"
+) => {
+  if (!container) {
+    return;
+  }
+  if (values.length === 0) {
+    container.innerHTML = "<p class=\"list-sub\" style=\"margin: 0;\">No rules yet.</p>";
+    return;
+  }
+  container.innerHTML = values
+    .map((value, index) => {
+      const safe = escapeHtml(value);
+      return `
+        <div class="advanced-item" data-adv-type="${type}" data-index="${index}">
+          <input class="text-input" value="${safe}" placeholder="example.com/path/*" />
+          <button class="icon-btn icon-only list-delete-btn" type="button" data-adv-remove="true" aria-label="Remove rule">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M9.75 3a.75.75 0 00-.75.75V4.5H5.25a.75.75 0 000 1.5h.75l.624 12.06A2.25 2.25 0 008.87 20.25h6.26a2.25 2.25 0 002.246-2.19L18 6h.75a.75.75 0 000-1.5H15v-.75A.75.75 0 0014.25 3h-4.5zM9 8.25a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zm4.5 0a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zM10.5 4.5h3v.75h-3V4.5z" />
+            </svg>
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+};
+
+const renderAdvancedDraft = () => {
+  if (!advancedDraft) {
+    return;
+  }
+  renderAdvancedList(advancedAllowList, advancedDraft.allow, "allow");
+  renderAdvancedList(advancedBlockList, advancedDraft.block, "block");
+};
+
+const setAdvancedDraftValue = (type: "allow" | "block", index: number, value: string) => {
+  if (!advancedDraft) {
+    return;
+  }
+  const list = type === "allow" ? advancedDraft.allow : advancedDraft.block;
+  if (index < 0 || index >= list.length) {
+    return;
+  }
+  list[index] = value;
+};
+
+const removeAdvancedDraftValue = (type: "allow" | "block", index: number) => {
+  if (!advancedDraft) {
+    return;
+  }
+  const list = type === "allow" ? advancedDraft.allow : advancedDraft.block;
+  list.splice(index, 1);
+  renderAdvancedDraft();
+};
+
+const renderAdvancedPatternMode = () => {
+  advancedPatternModeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.mode === advancedPatternMode);
+  });
+  if (advancedAllowList) {
+    advancedAllowList.classList.toggle("hidden", advancedPatternMode !== "allow");
+  }
+  if (advancedBlockList) {
+    advancedBlockList.classList.toggle("hidden", advancedPatternMode !== "block");
+  }
+  advancedAllowExamples?.classList.toggle("hidden", advancedPatternMode !== "allow");
+  advancedBlockExamples?.classList.toggle("hidden", advancedPatternMode !== "block");
+};
+
+const normalizeAdvancedValue = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const url = new URL(trimmed);
+      return `${url.hostname.replace(/^www\./i, "")}${url.pathname}${url.search}`;
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed.replace(/^www\./i, "");
+};
+
+const prefillAdvancedInputFromTab = async () => {
+  if (!advancedPatternInput || advancedPatternInput.value.trim().length > 0) {
+    return;
+  }
+  const tabUrl = await new Promise<string | null>((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      resolve(tabs[0]?.url ?? null);
+    });
+  });
+  if (!tabUrl || (!tabUrl.startsWith("http://") && !tabUrl.startsWith("https://"))) {
+    return;
+  }
+  try {
+    const url = new URL(tabUrl);
+    advancedPatternInput.value = `${url.hostname.replace(/^www\./i, "")}${url.pathname}${url.search}`;
+  } catch {
+    return;
+  }
+};
+
+const extractYoutubeId = (kind: YoutubeExceptionKind, raw: string) => {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return "";
+  }
+  const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const url = new URL(withScheme);
+    const host = url.hostname.replace(/^www\./i, "");
+    if (!host.endsWith("youtube.com") && host !== "youtu.be") {
+      return trimmed;
+    }
+    if (kind === "video") {
+      if (host === "youtu.be") {
+        return url.pathname.replace("/", "").trim();
+      }
+      return url.searchParams.get("v") ?? "";
+    }
+    if (kind === "playlist") {
+      return url.searchParams.get("list") ?? "";
+    }
+  } catch {
+    return trimmed;
+  }
+  return trimmed;
+};
+
+const prefillYoutubeExceptionFromTab = async () => {
+  if (!youtubeExceptionInput || !youtubeExceptionType) {
+    return;
+  }
+  const tabUrl = await new Promise<string | null>((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      resolve(tabs[0]?.url ?? null);
+    });
+  });
+  if (!tabUrl || (!tabUrl.startsWith("http://") && !tabUrl.startsWith("https://"))) {
+    return;
+  }
+  const kind = youtubeExceptionType.value as YoutubeExceptionKind;
+  const parsed = extractYoutubeId(kind, tabUrl);
+  youtubeExceptionInput.value = parsed || tabUrl;
+  youtubeExceptionInput.focus();
+};
+
+const getYoutubeListKey = (mode: YoutubeExceptionMode, kind: YoutubeExceptionKind) => {
+  if (mode === "allowed") {
+    return kind === "video" ? "allowedVideos" : "allowedPlaylists";
+  }
+  return kind === "video" ? "blockedVideos" : "blockedPlaylists";
+};
+
+const renderYoutubeExceptions = (lists: StorageSchema["lists"]) => {
+  if (!youtubeExceptionItems || !youtubeExceptionType) {
+    return;
+  }
+  youtubeModeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.mode === youtubeExceptionMode);
+  });
+  const kind = (youtubeExceptionType.value as YoutubeExceptionKind) ?? "video";
+  const youtubeLists = lists.youtubeExceptions ?? {
+    allowedVideos: [],
+    blockedVideos: [],
+    allowedPlaylists: [],
+    blockedPlaylists: []
+  };
+  const allowedCount = youtubeLists.allowedVideos.length + youtubeLists.allowedPlaylists.length;
+  const blockedCount = youtubeLists.blockedVideos.length + youtubeLists.blockedPlaylists.length;
+  youtubeModeButtons.forEach((button) => {
+    if (button.dataset.mode === "allowed") {
+      button.textContent = `Allowed (${allowedCount})`;
+    } else if (button.dataset.mode === "blocked") {
+      button.textContent = `Blocked (${blockedCount})`;
+    }
+  });
+  const key = getYoutubeListKey(youtubeExceptionMode, kind);
+  const items = youtubeLists[key];
+  const kindLabel = kind === "video" ? "Video" : "Playlist";
+  youtubeExceptionItems.innerHTML = items.length
+    ? items
+        .map(
+          (value) => {
+            const tooltip =
+              kind === "video"
+                ? `https://www.youtube.com/watch?v=${value}`
+                : `https://www.youtube.com/playlist?list=${value}`;
+            return `<div class="list-item"><div class="list-item-group"><span class="list-item-text" title="${tooltip}">${value}</span><span class="list-item-badge">${kindLabel}</span></div><button class="icon-btn icon-only list-delete-btn" type="button" data-youtube-kind="${kind}" data-youtube-value="${value}" aria-label="Remove entry">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M9.75 3a.75.75 0 00-.75.75V4.5H5.25a.75.75 0 000 1.5h.75l.624 12.06A2.25 2.25 0 008.87 20.25h6.26a2.25 2.25 0 002.246-2.19L18 6h.75a.75.75 0 000-1.5H15v-.75A.75.75 0 0014.25 3h-4.5zM9 8.25a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zm4.5 0a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zM10.5 4.5h3v.75h-3V4.5z" />
+              </svg>
+            </button></div>`
+          }
+        )
+        .join("")
+    : `<p style="color: var(--color-muted); font-size: var(--font-small);">No entries yet.</p>`;
+};
 const listItems = document.getElementById("listItems");
 const advancedEditor = document.getElementById("advancedEditor");
-const advancedRules = document.getElementById("advancedRules") as HTMLTextAreaElement | null;
+const advancedAllowList = document.getElementById("advancedAllowList");
+const advancedBlockList = document.getElementById("advancedBlockList");
 const advancedSave = document.getElementById("advancedSave");
+const advancedDisclosure = document.getElementById("advancedExceptions");
+const advancedPatternModeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#advancedPatternMode button")
+);
+const advancedPatternInput = document.getElementById(
+  "advancedPatternInput"
+) as HTMLInputElement | null;
+const advancedPatternAdd = document.getElementById("advancedPatternAdd");
+const advancedAllowExamples = document.getElementById("advancedAllowExamples");
+const advancedBlockExamples = document.getElementById("advancedBlockExamples");
+const youtubeDisclosure = document.getElementById("youtubeExceptions");
+const youtubePanel = document.getElementById("youtubePanel");
+const youtubeModeButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#youtubeExceptionMode button")
+);
+const youtubeExceptionInput = document.getElementById(
+  "youtubeExceptionInput"
+) as HTMLInputElement | null;
+const youtubeExceptionType = document.getElementById(
+  "youtubeExceptionType"
+) as HTMLSelectElement | null;
+const youtubeExceptionAdd = document.getElementById("youtubeExceptionAdd");
+const youtubeExceptionItems = document.getElementById("youtubeExceptionItems");
+const youtubeExceptionUseTab = document.getElementById("youtubeExceptionUseTab");
 const interventionList = document.getElementById("interventionList");
 const interventionDisclosure = document.querySelector<HTMLElement>("[data-intervention-disclosure]");
 const interventionToggle = document.getElementById("interventionToggle") as HTMLButtonElement | null;
@@ -453,9 +776,13 @@ const renderFocus = (
   });
 };
 
-const renderStrictSession = (strictSession: { active: boolean; endsAt?: number }) => {
+const renderStrictSession = (
+  strictSession: { active: boolean; endsAt?: number },
+  pomodoroRunning: boolean
+) => {
   currentStrictActive = strictSession.active;
   currentStrictEndsAt = typeof strictSession.endsAt === "number" ? strictSession.endsAt : null;
+  const strictBlocked = strictSession.active || pomodoroRunning;
   if (strictStatus) {
     strictStatus.textContent = strictSession.active
       ? `Running until ${formatUntil(currentStrictEndsAt ?? Date.now())}`
@@ -464,15 +791,19 @@ const renderStrictSession = (strictSession: { active: boolean; endsAt?: number }
   strictDurationButtons.forEach((button) => {
     const value = Number(button.dataset.strictMin ?? "0");
     button.classList.toggle("active", value === currentStrictMinutes);
-    button.disabled = strictSession.active;
+    button.disabled = strictBlocked;
   });
   if (strictStart) {
-    strictStart.disabled = strictSession.active;
+    strictStart.disabled = strictBlocked;
   }
   if (strictConfirmText) {
-    strictConfirmText.textContent = strictSession.active
-      ? "Strict session is already running."
-      : `You won’t be able to turn Focus off for ${currentStrictMinutes} minutes.`;
+    if (strictSession.active) {
+      strictConfirmText.textContent = "Strict session is already running.";
+    } else if (pomodoroRunning) {
+      strictConfirmText.textContent = "Stop the Pomodoro before starting strict mode.";
+    } else {
+      strictConfirmText.textContent = `You won’t be able to turn Focus off for ${currentStrictMinutes} minutes.`;
+    }
   }
 };
 
@@ -959,15 +1290,170 @@ const formatTimeLabel = (timestamp: number): string => {
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 };
 
-const buildTagTotals = (state: StorageSchema, keys: string[]) => {
-  const keySet = new Set(keys);
-  const totals = new Map<string, number>();
-  state.analytics.sessions.forEach((session) => {
-    if (session.type !== "pomodoro" || !session.tagId) {
-      return;
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+};
+
+const mergeDefaults = (defaults: unknown, existing: unknown): unknown => {
+  if (Array.isArray(defaults)) {
+    return Array.isArray(existing) ? existing : defaults;
+  }
+  if (isPlainObject(defaults)) {
+    const result: Record<string, unknown> = { ...(isPlainObject(existing) ? existing : {}) };
+    for (const key of Object.keys(defaults)) {
+      result[key] = mergeDefaults(defaults[key], isPlainObject(existing) ? existing[key] : undefined);
     }
-    const key = getDayKey(new Date(session.startedAt));
-    if (!keySet.has(key)) {
+    return result;
+  }
+  return existing === undefined ? defaults : existing;
+};
+
+const mergePatch = (base: unknown, patch: unknown): unknown => {
+  if (patch === undefined) {
+    return base;
+  }
+  if (patch === null) {
+    return null;
+  }
+  if (Array.isArray(base) || Array.isArray(patch)) {
+    return Array.isArray(patch) ? patch : base;
+  }
+  if (isPlainObject(base) && isPlainObject(patch)) {
+    const result: Record<string, unknown> = { ...base };
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === undefined) {
+        continue;
+      }
+      result[key] = mergePatch(result[key], value);
+    }
+    return result;
+  }
+  return patch ?? base;
+};
+
+const getMonthKey = (date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
+
+const buildSessionIndexes = (sessions: StorageSchema["analytics"]["sessions"]) => {
+  const byDay: Record<string, StorageSchema["analytics"]["sessions"]> = {};
+  const byMonth: Record<string, StorageSchema["analytics"]["sessions"]> = {};
+  sessions.forEach((session) => {
+    const when = new Date(session.startedAt ?? session.endedAt);
+    const dayKey = getDayKey(when);
+    const monthKey = getMonthKey(when);
+    if (!byDay[dayKey]) {
+      byDay[dayKey] = [];
+    }
+    if (!byMonth[monthKey]) {
+      byMonth[monthKey] = [];
+    }
+    byDay[dayKey].push(session);
+    byMonth[monthKey].push(session);
+  });
+  return { byDay, byMonth };
+};
+
+const sanitizeBackupState = (state: StorageSchema, includeAnalytics: boolean) => {
+  const analytics = state.analytics;
+  const nextAnalytics = includeAnalytics
+    ? (() => {
+        const indexes = buildSessionIndexes(analytics.sessions ?? []);
+        return {
+          ...analytics,
+          sessionsByDay: indexes.byDay,
+          sessionsByMonth: indexes.byMonth
+        };
+      })()
+    : {
+        ...analytics,
+        byDay: {},
+        sessions: [],
+        sessionsByDay: {},
+        sessionsByMonth: {}
+      };
+
+  return {
+    ...state,
+    schemaVersion: SCHEMA_VERSION,
+    pause: { isPaused: false, pauseType: null, pauseEndAt: null },
+    temporaryAllow: {},
+    strictSession: {
+      ...state.strictSession,
+      active: false,
+      endsAt: undefined,
+      startedAt: undefined,
+      prevFocusEnabled: undefined,
+      blockedSnapshot: undefined
+    },
+    pomodoro: {
+      ...state.pomodoro,
+      running: null,
+      lastCompletion: undefined
+    },
+    analytics: nextAnalytics
+  };
+};
+
+const writeFullState = async (state: StorageSchema) => {
+  await new Promise<void>((resolve) => {
+    chrome.storage.local.set({ [STORAGE_KEY]: state }, () => resolve());
+  });
+};
+
+const buildRestoreState = (
+  backupState: StorageSchema,
+  includeAnalytics: boolean,
+  mode: "merge" | "overwrite",
+  currentState: StorageSchema
+) => {
+  const sanitized = sanitizeBackupState(backupState, includeAnalytics);
+  if (mode === "overwrite") {
+    const withDefaults = mergeDefaults(defaultState, sanitized) as StorageSchema;
+    return { ...withDefaults, schemaVersion: SCHEMA_VERSION };
+  }
+  const analyticsSettingsOnly = includeAnalytics
+    ? sanitized.analytics
+    : {
+        showWebUsage: sanitized.analytics.showWebUsage,
+        chartThemeId: sanitized.analytics.chartThemeId,
+        chartRange: sanitized.analytics.chartRange,
+        chartFilter: sanitized.analytics.chartFilter,
+        retentionDays: sanitized.analytics.retentionDays
+      };
+  const patch = {
+    ...sanitized,
+    analytics: analyticsSettingsOnly
+  };
+  const merged = mergePatch(currentState, patch) as StorageSchema;
+  return { ...merged, schemaVersion: SCHEMA_VERSION };
+};
+
+const getSessionsForKeys = (state: StorageSchema, keys: string[]) => {
+  const byDay = state.analytics.sessionsByDay ?? {};
+  const sessions: StorageSchema["analytics"]["sessions"] = [];
+  keys.forEach((key) => {
+    const daySessions = byDay[key];
+    if (Array.isArray(daySessions)) {
+      sessions.push(...daySessions);
+    }
+  });
+  if (sessions.length > 0 || Object.keys(byDay).length > 0) {
+    return sessions;
+  }
+  const keySet = new Set(keys);
+  return state.analytics.sessions.filter((session) =>
+    keySet.has(getDayKey(new Date(session.startedAt)))
+  );
+};
+
+const buildTagTotals = (state: StorageSchema, keys: string[]) => {
+  const totals = new Map<string, number>();
+  const sessions = getSessionsForKeys(state, keys);
+  sessions.forEach((session) => {
+    if (session.type !== "pomodoro" || !session.tagId) {
       return;
     }
     const duration = Math.max(0, session.endedAt - session.startedAt);
@@ -1141,17 +1627,13 @@ const buildFocusTotals = (
   keys: string[],
   tagId?: string | null
 ) => {
-  const keySet = new Set(keys);
   let totalMs = 0;
-  state.analytics.sessions.forEach((session) => {
+  const sessions = getSessionsForKeys(state, keys);
+  sessions.forEach((session) => {
     if (session.type !== "pomodoro") {
       return;
     }
     if (tagId && session.tagId !== tagId) {
-      return;
-    }
-    const key = getDayKey(new Date(session.startedAt));
-    if (!keySet.has(key)) {
       return;
     }
     totalMs += Math.max(0, session.endedAt - session.startedAt);
@@ -1220,12 +1702,16 @@ const buildStackedTrendBuckets = (
     return Math.min(4, Math.floor((day - 1) / 7));
   };
 
-  state.analytics.sessions.forEach((session) => {
+  const keys = getRangeKeysBetween(start, end);
+  const keySet = new Set(keys);
+  const sessions = getSessionsForKeys(state, keys);
+  sessions.forEach((session) => {
     if (session.type !== "pomodoro") return;
     if (!session.tagId) return;
     if (tagId && session.tagId !== tagId) return;
     const date = new Date(session.startedAt);
-    if (date < start || date > end) return;
+    const dayKey = getDayKey(date);
+    if (!keySet.has(dayKey)) return;
     const index = getBucketIndex(date);
     if (index < 0 || index >= bucketMaps.length) return;
     const duration = Math.max(0, session.endedAt - session.startedAt);
@@ -1505,11 +1991,8 @@ const renderRingChart = (
 };
 
 const renderMetrics = (state: StorageSchema, keys: string[]) => {
+  const sessionsInRange = getSessionsForKeys(state, keys);
   const keySet = new Set(keys);
-  const sessionsInRange = state.analytics.sessions.filter((session) => {
-    const dateKey = getDayKey(new Date(session.startedAt));
-    return keySet.has(dateKey);
-  });
   const focusMs = sessionsInRange.reduce(
     (acc, session) => acc + Math.max(0, session.endedAt - session.startedAt),
     0
@@ -1535,10 +2018,9 @@ const renderSessions = (state: StorageSchema, keys: string[]) => {
   if (!statsSessions) {
     return;
   }
-  const keySet = new Set(keys);
   const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
-  const sessions = [...state.analytics.sessions]
-    .filter((session) => keySet.has(getDayKey(new Date(session.startedAt))))
+  const sessions = getSessionsForKeys(state, keys)
+    .slice()
     .sort((a, b) => b.startedAt - a.startedAt)
     .slice(0, 12);
 
@@ -1669,8 +2151,8 @@ const renderTimeMachine = (state: StorageSchema) => {
   const usageEntries = Object.entries(day?.byDomain ?? {})
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
-  const sessions = state.analytics.sessions
-    .filter((session) => getDayKey(new Date(session.startedAt)) === currentTimeMachineDay)
+  const sessions = getSessionsForKeys(state, [currentTimeMachineDay])
+    .slice()
     .sort((a, b) => b.startedAt - a.startedAt)
     .slice(0, 6);
 
@@ -2232,12 +2714,13 @@ const openScheduleModal = (
 };
 
 const renderOverlayMode = (overlayMode: boolean) => {
-  if (overlayToggle) {
-    overlayToggle.checked = overlayMode;
+  if (!blockingStyleButtons.length) {
+    return;
   }
-  if (overlayLabel) {
-    overlayLabel.textContent = overlayMode ? "Overlay" : "Redirect";
-  }
+  blockingStyleButtons.forEach((button) => {
+    const isOverlay = button.dataset.blockingStyle === "overlay";
+    button.classList.toggle("active", isOverlay === overlayMode);
+  });
 };
 
 const renderConfirmationPrompt = (enabled: boolean) => {
@@ -2279,6 +2762,39 @@ const getListKey = () => {
   return "advancedRulesText";
 };
 
+const getSimpleListKey = () => {
+  if (currentListType === "blocked") {
+    return currentEntryType === "domain" ? "blockedDomains" : "blockedKeywords";
+  }
+  return currentEntryType === "domain" ? "allowedDomains" : "allowedKeywords";
+};
+
+const buildListEmptyState = () => {
+  const isBlocked = currentListType === "blocked";
+  const isDomain = currentEntryType === "domain";
+  const noun = isDomain ? "website" : "keyword";
+  const pluralNoun = isDomain ? "websites" : "keywords";
+  const title = `${isBlocked ? "Blocked" : "Allowed"} ${pluralNoun} will show up here.`;
+  const hint = `Try ${isBlocked ? "blocking" : "allowing"} a ${noun} like`;
+  const example = isDomain
+    ? isBlocked
+      ? "youtube.com"
+      : "calendar.google.com"
+    : isBlocked
+      ? "news"
+      : "tutorial";
+  const safeExample = escapeHtml(example);
+  return `
+    <div class="list-empty">
+      <p class="list-empty-title">${title}</p>
+      <p class="list-empty-hint">${hint}</p>
+      <div class="list-empty-actions">
+        <button class="chip list-example-chip" type="button" data-list-example="${safeExample}">${safeExample}</button>
+      </div>
+    </div>
+  `;
+};
+
 const renderLists = (lists: Awaited<ReturnType<typeof getState>>["lists"]) => {
   const isAdvanced = currentListType === "advanced";
   entryTypeRow?.classList.toggle("hidden", isAdvanced);
@@ -2295,16 +2811,18 @@ const renderLists = (lists: Awaited<ReturnType<typeof getState>>["lists"]) => {
     }
   });
 
-  if (advancedRules) {
-    advancedRules.value = lists.advancedRulesText ?? "";
-  }
-
   if (!listItems) {
     return;
   }
 
   if (isAdvanced) {
     listItems.innerHTML = "";
+    latestAdvancedText = lists.advancedRulesText ?? "";
+    ensureAdvancedDraft(latestAdvancedText);
+    renderAdvancedDraft();
+    renderYoutubeExceptions(lists);
+    renderAdvancedPatternMode();
+    void prefillAdvancedInputFromTab();
     return;
   }
 
@@ -2315,14 +2833,16 @@ const renderLists = (lists: Awaited<ReturnType<typeof getState>>["lists"]) => {
     ? items
         .map(
           (value) =>
-            `<div class=\"list-item\"><span>${value}</span><button class=\"icon-btn icon-only list-delete-btn\" type=\"button\" data-value=\"${value}\" aria-label=\"Remove entry\">
+            `<div class=\"list-item\"><span class=\"list-item-text\" title=\"${value}\">${value}</span><button class=\"icon-btn icon-only list-delete-btn\" type=\"button\" data-value=\"${value}\" aria-label=\"Remove entry\">
               <svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" aria-hidden=\"true\" focusable=\"false\">
                 <path fill=\"currentColor\" d=\"M9.75 3a.75.75 0 00-.75.75V4.5H5.25a.75.75 0 000 1.5h.75l.624 12.06A2.25 2.25 0 008.87 20.25h6.26a2.25 2.25 0 002.246-2.19L18 6h.75a.75.75 0 000-1.5H15v-.75A.75.75 0 0014.25 3h-4.5zM9 8.25a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zm4.5 0a.75.75 0 011.5 0v8.25a.75.75 0 01-1.5 0V8.25zM10.5 4.5h3v.75h-3V4.5z\" />
               </svg>
             </button></div>`
         )
         .join("")
-    : `<p style=\"color: var(--color-muted); font-size: var(--font-small);\">No entries yet.</p>`;
+    : buildListEmptyState();
+
+  maybePrefillListInput();
 };
 
 const renderInterventions = (
@@ -2674,8 +3194,12 @@ const bindEvents = () => {
     });
   });
 
-  overlayToggle?.addEventListener("change", async () => {
-    await setState({ overlayMode: overlayToggle.checked });
+  blockingStyleButtons.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const nextMode = button.dataset.blockingStyle === "overlay";
+      await setState({ overlayMode: nextMode });
+      blockingStyleButtons.forEach((btn) => btn.classList.toggle("active", btn === button));
+    });
   });
 
 
@@ -2974,7 +3498,7 @@ const bindEvents = () => {
 
   strictDurationButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      if (currentStrictActive) {
+      if (currentStrictActive || currentPomodoro?.running) {
         return;
       }
       const minutes = Number(button.dataset.strictMin ?? "0");
@@ -2992,14 +3516,14 @@ const bindEvents = () => {
   });
 
   strictStart?.addEventListener("click", () => {
-    if (currentStrictActive) {
+    if (currentStrictActive || currentPomodoro?.running) {
       return;
     }
     openModal("strictConfirm");
   });
 
   strictConfirm?.addEventListener("click", async () => {
-    if (currentStrictActive) {
+    if (currentStrictActive || currentPomodoro?.running) {
       return;
     }
     const startedAt = Date.now();
@@ -3040,7 +3564,169 @@ const bindEvents = () => {
     });
   });
 
+  youtubeDisclosure?.querySelector<HTMLButtonElement>(".youtube-toggle")?.addEventListener(
+    "click",
+    () => {
+      const open = youtubeDisclosure.classList.toggle("is-open");
+      const toggle = youtubeDisclosure.querySelector<HTMLButtonElement>(".youtube-toggle");
+      toggle?.setAttribute("aria-expanded", String(open));
+    }
+  );
+
+  advancedDisclosure
+    ?.querySelector<HTMLButtonElement>(".advanced-toggle")
+    ?.addEventListener("click", () => {
+      const open = advancedDisclosure.classList.toggle("is-open");
+      const toggle = advancedDisclosure.querySelector<HTMLButtonElement>(".advanced-toggle");
+      toggle?.setAttribute("aria-expanded", String(open));
+      if (open) {
+        void prefillAdvancedInputFromTab();
+      }
+    });
+
+  advancedPatternModeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const mode = button.dataset.mode as AdvancedPatternMode | undefined;
+      if (!mode) {
+        return;
+      }
+      advancedPatternMode = mode;
+      renderAdvancedPatternMode();
+      void prefillAdvancedInputFromTab();
+    });
+  });
+
+  advancedPatternAdd?.addEventListener("click", () => {
+    if (!advancedPatternInput) {
+      return;
+    }
+    const value = normalizeAdvancedValue(advancedPatternInput.value);
+    if (!value) {
+      return;
+    }
+    ensureAdvancedDraft(latestAdvancedText);
+    if (!advancedDraft) {
+      return;
+    }
+    const list = advancedPatternMode === "allow" ? advancedDraft.allow : advancedDraft.block;
+    if (list.includes(value)) {
+      return;
+    }
+    list.push(value);
+    advancedPatternInput.value = "";
+    renderAdvancedDraft();
+    renderAdvancedPatternMode();
+  });
+
+  youtubeModeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const mode = button.dataset.mode as YoutubeExceptionMode | undefined;
+      if (!mode) {
+        return;
+      }
+      youtubeExceptionMode = mode;
+      void getState().then((state) => renderYoutubeExceptions(state.lists));
+    });
+  });
+
+  youtubeExceptionType?.addEventListener("change", () => {
+    void getState().then((state) => renderYoutubeExceptions(state.lists));
+  });
+
+  youtubeExceptionUseTab?.addEventListener("click", () => {
+    void prefillYoutubeExceptionFromTab();
+  });
+
+  youtubeExceptionAdd?.addEventListener("click", async () => {
+    if (!youtubeExceptionInput || !youtubeExceptionType) {
+      return;
+    }
+    const kind = youtubeExceptionType.value as YoutubeExceptionKind;
+    const parsed = extractYoutubeId(kind, youtubeExceptionInput.value);
+    if (!parsed) {
+      return;
+    }
+    const state = await getState();
+    const current = state.lists.youtubeExceptions ?? {
+      allowedVideos: [],
+      blockedVideos: [],
+      allowedPlaylists: [],
+      blockedPlaylists: []
+    };
+    const key = getYoutubeListKey(youtubeExceptionMode, kind);
+    const list = [...current[key]] as string[];
+    if (list.includes(parsed)) {
+      return;
+    }
+    list.push(parsed);
+    youtubeExceptionInput.value = "";
+    const next = { ...current, [key]: list };
+    await setState({ lists: { youtubeExceptions: next } });
+    renderYoutubeExceptions({ ...state.lists, youtubeExceptions: next });
+  });
+
+  youtubeExceptionItems?.addEventListener("click", async (event) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest<HTMLButtonElement>("[data-youtube-kind]");
+    if (!button) {
+      return;
+    }
+    const kind = button.dataset.youtubeKind as YoutubeExceptionKind | undefined;
+    const value = button.dataset.youtubeValue;
+    if (!kind || !value) {
+      return;
+    }
+    const state = await getState();
+    const current = state.lists.youtubeExceptions ?? {
+      allowedVideos: [],
+      blockedVideos: [],
+      allowedPlaylists: [],
+      blockedPlaylists: []
+    };
+    const key = getYoutubeListKey(youtubeExceptionMode, kind);
+    const list = current[key].filter((entry) => entry !== value);
+    const next = { ...current, [key]: list };
+    await setState({ lists: { youtubeExceptions: next } });
+    renderYoutubeExceptions({ ...state.lists, youtubeExceptions: next });
+  });
+
+  const handleAdvancedInput = (event: Event) => {
+    const input = event.target as HTMLInputElement | null;
+    if (!input) {
+      return;
+    }
+    const row = input.closest<HTMLElement>(".advanced-item");
+    const type = row?.dataset.advType as "allow" | "block" | undefined;
+    const index = Number(row?.dataset.index ?? "-1");
+    if (!type || Number.isNaN(index)) {
+      return;
+    }
+    setAdvancedDraftValue(type, index, input.value);
+  };
+
+  const handleAdvancedRemove = (event: Event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-adv-remove]");
+    if (!button) {
+      return;
+    }
+    const row = button.closest<HTMLElement>(".advanced-item");
+    const type = row?.dataset.advType as "allow" | "block" | undefined;
+    const index = Number(row?.dataset.index ?? "-1");
+    if (!type || Number.isNaN(index)) {
+      return;
+    }
+    removeAdvancedDraftValue(type, index);
+  };
+
+  advancedAllowList?.addEventListener("input", handleAdvancedInput);
+  advancedAllowList?.addEventListener("click", handleAdvancedRemove);
+  advancedBlockList?.addEventListener("input", handleAdvancedInput);
+  advancedBlockList?.addEventListener("click", handleAdvancedRemove);
+
   listAddButton?.addEventListener("click", async () => {
+    if (currentListType === "advanced") {
+      return;
+    }
     let value = listInput?.value.trim();
     if (!value) {
       return;
@@ -3056,8 +3742,8 @@ const bindEvents = () => {
       }
     }
     const state = await getState();
-    const key = getListKey();
-    const list = [...state.lists[key as keyof typeof state.lists]] as string[];
+    const key = getSimpleListKey();
+    const list = [...state.lists[key]] as string[];
     if (list.includes(value)) {
       return;
     }
@@ -3068,19 +3754,45 @@ const bindEvents = () => {
     await setState({ lists: { [key]: list } });
   });
 
+
   listItems?.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
+    const exampleButton = target.closest<HTMLButtonElement>("[data-list-example]");
+    if (exampleButton) {
+      const example = exampleButton.dataset.listExample;
+      if (example && listInput) {
+        listInput.value = example;
+        listInput.focus();
+      }
+      return;
+    }
     const button = target.closest("button");
     const value = button?.getAttribute("data-value");
     if (!value) {
       return;
     }
     pendingListDeleteValue = value;
-    pendingListDeleteKey = getListKey() as ListDeleteKey;
+    pendingListDeleteKey = getSimpleListKey() as ListDeleteKey;
     if (listDeleteValue) {
       listDeleteValue.textContent = value;
     }
     openModal("listDeleteConfirm");
+  });
+
+  advancedSave?.addEventListener("click", async () => {
+    const allowLines = (advancedDraft?.allow ?? [])
+      .map((value) => normalizeAdvancedValue(value))
+      .filter((value) => value.length > 0)
+      .map((value) => `!${value.replace(/^!+/, "")}`);
+    const blockLines = (advancedDraft?.block ?? [])
+      .map((value) => normalizeAdvancedValue(value))
+      .filter((value) => value.length > 0)
+      .map((value) => value.replace(/^!+/, ""));
+    const text = [...allowLines, ...blockLines].join("\n");
+    await setState({ lists: { advancedRulesText: text } });
+    latestAdvancedText = text;
+    advancedDraft = buildAdvancedDraft(text);
+    renderAdvancedDraft();
   });
 
   scheduleAdd?.addEventListener("click", async () => {
@@ -3516,32 +4228,109 @@ const bindEvents = () => {
     URL.revokeObjectURL(url);
   };
 
+  const downloadJson = (filename: string, payload: unknown) => {
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: "application/json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   exportSessionsCsv?.addEventListener("click", async () => {
     const state = await getState();
     const keys = getRangeKeys(currentPomodoroSummaryRange);
-    const keySet = new Set(keys);
     const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
     const rows: Array<Array<string | number | null | undefined>> = [
       ["id", "type", "startedAt", "endedAt", "durationMin", "tag", "focusEnabledDuring", "distractions"]
     ];
-    state.analytics.sessions
-      .filter((session) => keySet.has(getDayKey(new Date(session.startedAt))))
-      .forEach((session) => {
-        const durationMin = Math.round(
-          Math.max(0, session.endedAt - session.startedAt) / 60000
-        );
-        rows.push([
-          session.id,
-          session.type,
-          new Date(session.startedAt).toISOString(),
-          new Date(session.endedAt).toISOString(),
-          durationMin,
-          session.tagId ? tagLookup.get(session.tagId) ?? "" : "",
-          session.focusEnabledDuring ? "true" : "false",
-          session.distractions
-        ]);
-      });
+    getSessionsForKeys(state, keys).forEach((session) => {
+      const durationMin = Math.round(
+        Math.max(0, session.endedAt - session.startedAt) / 60000
+      );
+      rows.push([
+        session.id,
+        session.type,
+        new Date(session.startedAt).toISOString(),
+        new Date(session.endedAt).toISOString(),
+        durationMin,
+        session.tagId ? tagLookup.get(session.tagId) ?? "" : "",
+        session.focusEnabledDuring ? "true" : "false",
+        session.distractions
+      ]);
+    });
     downloadCsv(`focusboss-sessions-${currentPomodoroSummaryRange}.csv`, rows);
+  });
+
+  backupDownload?.addEventListener("click", async () => {
+    const state = await getState();
+    const includeAnalytics = Boolean(backupIncludeAnalytics?.checked);
+    const backup = {
+      version: 1,
+      createdAt: new Date().toISOString(),
+      includeAnalytics,
+      state: sanitizeBackupState(state, includeAnalytics)
+    };
+    downloadJson(`focusboss-backup-${getDayKey(new Date())}.json`, backup);
+    closeModal("backup");
+  });
+
+  restoreApply?.addEventListener("click", async () => {
+    const file = restoreFile?.files?.[0];
+    if (!file) {
+      window.alert("Select a backup file first.");
+      return;
+    }
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(await file.text());
+    } catch {
+      window.alert("Invalid backup file.");
+      return;
+    }
+    const backupState = isPlainObject(parsed) && isPlainObject(parsed.state)
+      ? (parsed.state as StorageSchema)
+      : isPlainObject(parsed)
+        ? (parsed as StorageSchema)
+        : null;
+    if (!backupState) {
+      window.alert("Backup file is missing data.");
+      return;
+    }
+    const includeAnalytics = Boolean(restoreIncludeAnalytics?.checked);
+    const mode =
+      restoreModeButtons.find((button) => button.classList.contains("active"))
+        ?.dataset.restoreMode === "overwrite"
+        ? "overwrite"
+        : "merge";
+    const currentState = await getState();
+    const nextState = buildRestoreState(backupState, includeAnalytics, mode, currentState);
+    await writeFullState(nextState);
+    const refreshed = await getState();
+    syncUiFromState(refreshed);
+    closeModal("restore");
+  });
+
+  restoreFileButton?.addEventListener("click", () => {
+    restoreFile?.click();
+  });
+
+  restoreFile?.addEventListener("change", () => {
+    if (!restoreFileName) {
+      return;
+    }
+    restoreFileName.textContent =
+      restoreFile.files?.[0]?.name ?? "No file selected";
+  });
+
+  restoreModeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      restoreModeButtons.forEach((btn) => btn.classList.toggle("active", btn === button));
+    });
   });
 
   exportUsageCsv?.addEventListener("click", async () => {
@@ -3699,10 +4488,6 @@ const bindEvents = () => {
     hideInterventionDetail();
   });
 
-  advancedSave?.addEventListener("click", async () => {
-    const text = advancedRules?.value ?? "";
-    await setState({ lists: { advancedRulesText: text } });
-  });
 
   themeControl?.addEventListener("click", async (event) => {
     const button = (event.target as HTMLElement).closest("button");
@@ -3733,7 +4518,7 @@ const syncUiFromState = (state: Awaited<ReturnType<typeof getState>>) => {
   }
   currentPomodoroSummaryRange = state.analytics.chartRange;
   currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
-  renderStrictSession(state.strictSession);
+    renderStrictSession(state.strictSession, Boolean(state.pomodoro.running));
   renderStrictOverlay(state.strictSession);
   renderTags(state.tags, state.pomodoro);
   renderPomodoro(state.pomodoro, state.strictSession.active);
@@ -3766,9 +4551,9 @@ const bootstrap = async () => {
     window.clearInterval(pomodoroTicker);
   }
   pomodoroTicker = window.setInterval(() => {
-    if (currentPomodoro) {
-      renderPomodoro(currentPomodoro, currentStrictActive);
-      const running = currentPomodoro.running;
+      if (currentPomodoro) {
+        renderPomodoro(currentPomodoro, currentStrictActive);
+        const running = currentPomodoro.running;
       if (running && !running.paused && Date.now() >= running.endsAt) {
         void requestPomodoroAdvance();
       }

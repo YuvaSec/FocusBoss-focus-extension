@@ -1,5 +1,17 @@
 export type SchemaVersion = 3;
 
+export type AnalyticsSession = {
+  id: string;
+  startedAt: number;
+  endedAt: number;
+  type: "pomodoro" | "strict";
+  tagId?: string | null;
+  focusEnabledDuring: boolean;
+  distractions: number;
+  notes?: string;
+  emotionTag?: "calm" | "frustrated" | "energized" | "distracted";
+};
+
 export type StorageSchema = {
   schemaVersion: SchemaVersion;
   focusEnabled: boolean;
@@ -16,6 +28,12 @@ export type StorageSchema = {
     allowedDomains: string[];
     allowedKeywords: string[];
     advancedRulesText: string;
+    youtubeExceptions: {
+      allowedVideos: string[];
+      blockedVideos: string[];
+      allowedPlaylists: string[];
+      blockedPlaylists: string[];
+    };
   };
   interventions: {
     enabled: {
@@ -136,17 +154,9 @@ export type StorageSchema = {
         distractionsCount?: number;
       }
     >;
-    sessions: Array<{
-      id: string;
-      startedAt: number;
-      endedAt: number;
-      type: "pomodoro" | "strict";
-      tagId?: string | null;
-      focusEnabledDuring: boolean;
-      distractions: number;
-      notes?: string;
-      emotionTag?: "calm" | "frustrated" | "energized" | "distracted";
-    }>;
+    sessions: AnalyticsSession[];
+    sessionsByDay: Record<string, AnalyticsSession[]>;
+    sessionsByMonth: Record<string, AnalyticsSession[]>;
     showWebUsage: boolean;
     chartThemeId: string;
     chartRange: "today" | "week" | "month";
@@ -169,14 +179,20 @@ export const defaultState: StorageSchema = {
     pauseType: null,
     pauseEndAt: null
   },
-  overlayMode: true,
+  overlayMode: false,
   confirmationPrompt: true,
   lists: {
     blockedDomains: [],
     blockedKeywords: [],
     allowedDomains: [],
     allowedKeywords: [],
-    advancedRulesText: ""
+    advancedRulesText: "",
+    youtubeExceptions: {
+      allowedVideos: [],
+      blockedVideos: [],
+      allowedPlaylists: [],
+      blockedPlaylists: []
+    }
   },
   interventions: {
     enabled: {
@@ -238,6 +254,8 @@ export const defaultState: StorageSchema = {
   analytics: {
     byDay: {},
     sessions: [],
+    sessionsByDay: {},
+    sessionsByMonth: {},
     showWebUsage: true,
     chartThemeId: "default",
     chartRange: "week",

@@ -29,6 +29,45 @@ const getDayKey = (date = new Date()): string => {
   return `${year}-${month}-${day}`;
 };
 
+const getMonthKey = (date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
+
+const buildSessionIndexes = (sessions: StorageSchema["analytics"]["sessions"]) => {
+  const byDay: Record<string, StorageSchema["analytics"]["sessions"]> = {};
+  const byMonth: Record<string, StorageSchema["analytics"]["sessions"]> = {};
+  sessions.forEach((session) => {
+    const when = new Date(session.startedAt ?? session.endedAt);
+    const dayKey = getDayKey(when);
+    const monthKey = getMonthKey(when);
+    if (!byDay[dayKey]) {
+      byDay[dayKey] = [];
+    }
+    if (!byMonth[monthKey]) {
+      byMonth[monthKey] = [];
+    }
+    byDay[dayKey].push(session);
+    byMonth[monthKey].push(session);
+  });
+  return { byDay, byMonth };
+};
+
+const addSessionToAnalytics = (
+  analytics: StorageSchema["analytics"],
+  session: StorageSchema["analytics"]["sessions"][number]
+) => {
+  const dayKey = getDayKey(new Date(session.startedAt ?? session.endedAt));
+  const monthKey = getMonthKey(new Date(session.startedAt ?? session.endedAt));
+  const sessions = [...analytics.sessions, session];
+  const sessionsByDay = { ...analytics.sessionsByDay };
+  const sessionsByMonth = { ...analytics.sessionsByMonth };
+  sessionsByDay[dayKey] = [...(sessionsByDay[dayKey] ?? []), session];
+  sessionsByMonth[monthKey] = [...(sessionsByMonth[monthKey] ?? []), session];
+  return { sessions, sessionsByDay, sessionsByMonth };
+};
+
 const parseDayKey = (key: string): number | null => {
   const [yearStr, monthStr, dayStr] = key.split("-");
   const year = Number(yearStr);
@@ -61,16 +100,24 @@ const pruneAnalytics = async (state: StorageSchema) => {
   const nextSessions = state.analytics.sessions.filter(
     (session) => session.endedAt >= cutoffMs
   );
+  const nextIndexes = buildSessionIndexes(nextSessions);
 
   const byDayChanged =
     Object.keys(nextByDay).length !== Object.keys(state.analytics.byDay).length;
   const sessionsChanged = nextSessions.length !== state.analytics.sessions.length;
+  const indexChanged =
+    Object.keys(nextIndexes.byDay).length !==
+      Object.keys(state.analytics.sessionsByDay ?? {}).length ||
+    Object.keys(nextIndexes.byMonth).length !==
+      Object.keys(state.analytics.sessionsByMonth ?? {}).length;
 
-  if (byDayChanged || sessionsChanged) {
+  if (byDayChanged || sessionsChanged || indexChanged) {
     await setState({
       analytics: {
         byDay: nextByDay,
-        sessions: nextSessions
+        sessions: nextSessions,
+        sessionsByDay: nextIndexes.byDay,
+        sessionsByMonth: nextIndexes.byMonth
       }
     });
   }
@@ -115,6 +162,10 @@ const playOffscreenSound = async (sound: "work" | "break" | "complete" | "stop")
 };
 
 type DnrRule = chrome.declarativeNetRequest.Rule;
+type BlockedNavEntry = { url: string; at: number };
+
+const blockedNavByTab = new Map<number, BlockedNavEntry>();
+const BLOCKED_NAV_TTL_MS = 5 * 60 * 1000;
 
 const escapeRegex = (value: string): string => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -122,6 +173,14 @@ const escapeRegex = (value: string): string => {
 
 const normalizeDomain = (value: string): string => {
   return normalizeHost(value.trim());
+};
+
+const expandYoutubeDomains = (domains: string[]) => {
+  const set = new Set(domains);
+  if (set.has("youtube.com")) {
+    set.add("m.youtube.com");
+  }
+  return Array.from(set);
 };
 
 const wildcardToRegex = (pattern: string): RegExp => {
@@ -162,6 +221,21 @@ const buildAdvancedRegex = (pattern: string) => {
   return `(?:www\\.)?${inner}`;
 };
 
+const buildYoutubeVideoRegex = (videoId: string) => {
+  const safeId = escapeRegex(videoId);
+  const youtubeWatch = `(?:www\\.)?youtube\\.com/watch\\?(?:[^#]*[?&])?v=${safeId}(?:[&#].*)?`;
+  const youtubeShort = `(?:www\\.)?youtu\\.be/${safeId}(?:[?#].*)?`;
+  return `^(?:https?://)(?:${youtubeWatch}|${youtubeShort})$`;
+};
+
+const buildYoutubePlaylistRegex = (playlistId: string) => {
+  const safeId = escapeRegex(playlistId);
+  const playlistPage = `(?:www\\.)?youtube\\.com/playlist\\?(?:[^#]*[?&])?list=${safeId}(?:[&#].*)?`;
+  const watchWithList = `(?:www\\.)?youtube\\.com/watch\\?(?:[^#]*[?&])?list=${safeId}(?:[&#].*)?`;
+  const shortWithList = `(?:www\\.)?youtu\\.be/[^?&#]+\\?(?:[^#]*[?&])?list=${safeId}(?:[&#].*)?`;
+  return `^(?:https?://)(?:${playlistPage}|${watchWithList}|${shortWithList})$`;
+};
+
 const buildAllowRule = (id: number, regexFilter: string): DnrRule => {
   return {
     id,
@@ -175,13 +249,13 @@ const buildAllowRule = (id: number, regexFilter: string): DnrRule => {
   };
 };
 
-const buildRedirectRule = (id: number, regexFilter: string, target: string): DnrRule => {
+const buildRedirectRule = (id: number, regexFilter: string): DnrRule => {
   return {
     id,
     priority: 1,
     action: {
       type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
-      redirect: { regexSubstitution: target }
+      redirect: { extensionPath: "tab.html" }
     },
     condition: {
       regexFilter,
@@ -189,6 +263,19 @@ const buildRedirectRule = (id: number, regexFilter: string, target: string): Dnr
       resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME]
     }
   };
+};
+
+const MAX_REGEX_FILTER_CHARS = 1500;
+
+const pushRule = (rules: DnrRule[], rule: DnrRule) => {
+  const regexFilter = rule.condition?.regexFilter ?? "";
+  if (regexFilter.length > MAX_REGEX_FILTER_CHARS) {
+    console.warn(
+      `[FocusBoss] Skipping DNR rule ${rule.id} (regexFilter length ${regexFilter.length} > ${MAX_REGEX_FILTER_CHARS}).`
+    );
+    return;
+  }
+  rules.push(rule);
 };
 
 const buildDnrRules = (state: StorageSchema): DnrRule[] => {
@@ -200,22 +287,39 @@ const buildDnrRules = (state: StorageSchema): DnrRule[] => {
 
   const rules: DnrRule[] = [];
   let id = 1;
-  const extensionTarget = `chrome-extension://${chrome.runtime.id}/tab.html#$1`;
   const lists = state.lists;
   const advanced = parseAdvancedRules(lists.advancedRulesText ?? "");
 
-  const allowDomains = (lists.allowedDomains ?? [])
-    .map(normalizeDomain)
-    .filter((value) => value.length > 0);
+  const allowDomains = expandYoutubeDomains(
+    (lists.allowedDomains ?? [])
+      .map(normalizeDomain)
+      .filter((value) => value.length > 0)
+  );
   const allowKeywords = (lists.allowedKeywords ?? [])
     .map((value) => value.trim())
     .filter((value) => value.length > 0);
-  const blockDomains = (lists.blockedDomains ?? [])
-    .map(normalizeDomain)
-    .filter((value) => value.length > 0);
+  const blockDomains = expandYoutubeDomains(
+    (lists.blockedDomains ?? [])
+      .map(normalizeDomain)
+      .filter((value) => value.length > 0)
+  );
   const blockKeywords = (lists.blockedKeywords ?? [])
     .map((value) => value.trim())
     .filter((value) => value.length > 0);
+  const youtubeExceptions = lists.youtubeExceptions ?? {
+    allowedVideos: [],
+    blockedVideos: [],
+    allowedPlaylists: [],
+    blockedPlaylists: []
+  };
+  const allowedVideos = (youtubeExceptions.allowedVideos ?? []).filter((value) => value.length > 0);
+  const blockedVideos = (youtubeExceptions.blockedVideos ?? []).filter((value) => value.length > 0);
+  const allowedPlaylists = (youtubeExceptions.allowedPlaylists ?? []).filter(
+    (value) => value.length > 0
+  );
+  const blockedPlaylists = (youtubeExceptions.blockedPlaylists ?? []).filter(
+    (value) => value.length > 0
+  );
 
   const tempAllowHosts = state.strictSession.active
     ? []
@@ -225,39 +329,51 @@ const buildDnrRules = (state: StorageSchema): DnrRule[] => {
         .filter((value) => value.length > 0);
 
   for (const domain of allowDomains) {
-    rules.push(buildAllowRule(id++, buildFullUrlRegex(buildDomainRegex(domain))));
+    pushRule(rules, buildAllowRule(id++, buildFullUrlRegex(buildDomainRegex(domain))));
   }
   for (const keyword of allowKeywords) {
-    rules.push(buildAllowRule(id++, buildFullUrlRegex(buildKeywordRegex(keyword))));
+    pushRule(rules, buildAllowRule(id++, buildFullUrlRegex(buildKeywordRegex(keyword))));
   }
   for (const host of tempAllowHosts) {
-    rules.push(buildAllowRule(id++, buildFullUrlRegex(buildDomainRegex(host))));
+    pushRule(rules, buildAllowRule(id++, buildFullUrlRegex(buildDomainRegex(host))));
   }
+  for (const videoId of allowedVideos) {
+    pushRule(rules, buildAllowRule(id++, buildYoutubeVideoRegex(videoId)));
+  }
+  for (const playlistId of allowedPlaylists) {
+    pushRule(rules, buildAllowRule(id++, buildYoutubePlaylistRegex(playlistId)));
+  }
+
   for (const rule of advanced) {
     if (rule.isExclude) {
-      rules.push(buildAllowRule(id++, buildFullUrlRegex(buildAdvancedRegex(rule.raw))));
+      pushRule(rules, buildAllowRule(id++, buildFullUrlRegex(buildAdvancedRegex(rule.raw))));
     }
   }
 
   for (const rule of advanced) {
     if (!rule.isExclude) {
-      rules.push(
-        buildRedirectRule(
-          id++,
-          `(${buildFullUrlRegex(buildAdvancedRegex(rule.raw))})`,
-          extensionTarget
-        )
+      pushRule(
+        rules,
+        buildRedirectRule(id++, `(${buildFullUrlRegex(buildAdvancedRegex(rule.raw))})`)
       );
     }
   }
+  for (const videoId of blockedVideos) {
+    pushRule(rules, buildRedirectRule(id++, buildYoutubeVideoRegex(videoId)));
+  }
+  for (const playlistId of blockedPlaylists) {
+    pushRule(rules, buildRedirectRule(id++, buildYoutubePlaylistRegex(playlistId)));
+  }
   for (const domain of blockDomains) {
-    rules.push(
-      buildRedirectRule(id++, `(${buildFullUrlRegex(buildDomainRegex(domain))})`, extensionTarget)
+    pushRule(
+      rules,
+      buildRedirectRule(id++, `(${buildFullUrlRegex(buildDomainRegex(domain))})`)
     );
   }
   for (const keyword of blockKeywords) {
-    rules.push(
-      buildRedirectRule(id++, `(${buildFullUrlRegex(buildKeywordRegex(keyword))})`, extensionTarget)
+    pushRule(
+      rules,
+      buildRedirectRule(id++, `(${buildFullUrlRegex(buildKeywordRegex(keyword))})`)
     );
   }
 
@@ -270,8 +386,22 @@ const applyDnrRules = async (state: StorageSchema) => {
   }
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const removeRuleIds = existing.map((rule) => rule.id);
+  if (removeRuleIds.length > 0) {
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds });
+  }
   const addRules = buildDnrRules(state);
-  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
+  try {
+    await chrome.declarativeNetRequest.updateDynamicRules({ addRules });
+  } catch (error) {
+    console.warn("[FocusBoss] DNR bulk update failed. Retrying rules individually.", error);
+    for (const rule of addRules) {
+      try {
+        await chrome.declarativeNetRequest.updateDynamicRules({ addRules: [rule] });
+      } catch (ruleError) {
+        console.warn(`[FocusBoss] Skipping DNR rule ${rule.id}.`, ruleError);
+      }
+    }
+  }
 };
 
 const injectContentScript = (tabId: number) => {
@@ -311,6 +441,25 @@ const isBlockedByRules = (url: string, state: Awaited<ReturnType<typeof getState
   }
   const result = evaluateRules(url, state.lists);
   return !result.allowed;
+};
+
+const shouldRecordBlockedNav = (state: StorageSchema): boolean => {
+  const pause = state.pause ?? { isPaused: false };
+  return state.focusEnabled && !pause.isPaused && !state.overlayMode;
+};
+
+const recordBlockedNav = async (tabId: number, url: string) => {
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    return;
+  }
+  const state = await getState();
+  if (!shouldRecordBlockedNav(state)) {
+    return;
+  }
+  if (!isBlockedByRules(url, state)) {
+    return;
+  }
+  blockedNavByTab.set(tabId, { url, at: Date.now() });
 };
 
 const recordUsage = async (host: string, deltaMs: number, blocked: boolean) => {
@@ -642,7 +791,7 @@ const logPomodoroSession = async (
     focusEnabledDuring: state.focusEnabled,
     distractions: 0
   };
-  const sessions = [...state.analytics.sessions, session];
+  const nextAnalytics = addSessionToAnalytics(state.analytics, session);
   const linkedTagId = session.tagId ?? null;
   let updatedTags = state.tags;
   if (linkedTagId) {
@@ -659,10 +808,23 @@ const logPomodoroSession = async (
     }
   }
   if (updatedTags !== state.tags) {
-    await setState({ analytics: { sessions }, tags: { items: updatedTags.items } });
+    await setState({
+      analytics: {
+        sessions: nextAnalytics.sessions,
+        sessionsByDay: nextAnalytics.sessionsByDay,
+        sessionsByMonth: nextAnalytics.sessionsByMonth
+      },
+      tags: { items: updatedTags.items }
+    });
     return;
   }
-  await setState({ analytics: { sessions } });
+  await setState({
+    analytics: {
+      sessions: nextAnalytics.sessions,
+      sessionsByDay: nextAnalytics.sessionsByDay,
+      sessionsByMonth: nextAnalytics.sessionsByMonth
+    }
+  });
 };
 
 const handlePomodoroPhaseEnd = async () => {
@@ -866,6 +1028,36 @@ chrome.runtime.onMessage.addListener(
 
 chrome.runtime.onMessage.addListener(
   (
+    message: { type?: string; tabId?: number },
+    sender,
+    sendResponse: (response?: { ok: boolean; url?: string }) => void
+  ) => {
+    if (message?.type !== "getBlockedNav") {
+      return;
+    }
+    const tabId =
+      typeof message.tabId === "number" ? message.tabId : sender.tab?.id ?? null;
+    if (typeof tabId !== "number") {
+      sendResponse({ ok: false });
+      return;
+    }
+    const entry = blockedNavByTab.get(tabId);
+    if (!entry) {
+      sendResponse({ ok: false });
+      return;
+    }
+    if (Date.now() - entry.at > BLOCKED_NAV_TTL_MS) {
+      blockedNavByTab.delete(tabId);
+      sendResponse({ ok: false });
+      return;
+    }
+    blockedNavByTab.delete(tabId);
+    sendResponse({ ok: true, url: entry.url });
+  }
+);
+
+chrome.runtime.onMessage.addListener(
+  (
     message: { type?: string; tagId?: string | null },
     sender,
     sendResponse: (response?: { ok: boolean }) => void
@@ -1049,6 +1241,19 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.url) {
+    void recordBlockedNav(tabId, changeInfo.url);
+  }
+});
+
+chrome.webNavigation.onCommitted.addListener((details) => {
+  if (details.frameId !== 0 || !details.url) {
+    return;
+  }
+  void recordBlockedNav(details.tabId, details.url);
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (tabId !== activeTabId) {
     return;
   }
@@ -1058,6 +1263,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => {
+  blockedNavByTab.delete(tabId);
   if (tabId === activeTabId) {
     void setActiveTab(null);
   }

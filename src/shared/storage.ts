@@ -1,4 +1,9 @@
-import { SCHEMA_VERSION, defaultState, type StorageSchema } from "./storageSchema.js";
+import {
+  SCHEMA_VERSION,
+  defaultState,
+  type StorageSchema,
+  type AnalyticsSession
+} from "./storageSchema.js";
 
 const STORAGE_KEY = "focusBossState";
 
@@ -17,6 +22,59 @@ export type DeepPartial<T> = {
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+};
+
+const getDayKey = (date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getMonthKey = (date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
+
+const buildSessionIndexes = (sessions: AnalyticsSession[]) => {
+  const byDay: Record<string, AnalyticsSession[]> = {};
+  const byMonth: Record<string, AnalyticsSession[]> = {};
+  sessions.forEach((session) => {
+    const when = new Date(session.startedAt ?? session.endedAt);
+    const dayKey = getDayKey(when);
+    const monthKey = getMonthKey(when);
+    if (!byDay[dayKey]) {
+      byDay[dayKey] = [];
+    }
+    if (!byMonth[monthKey]) {
+      byMonth[monthKey] = [];
+    }
+    byDay[dayKey].push(session);
+    byMonth[monthKey].push(session);
+  });
+  return { byDay, byMonth };
+};
+
+const flattenSessionIndex = (index: Record<string, AnalyticsSession[]> | undefined) => {
+  if (!index) {
+    return [];
+  }
+  return Object.values(index).flatMap((items) => (Array.isArray(items) ? items : []));
+};
+
+const addSessionToAnalytics = (
+  analytics: StorageSchema["analytics"],
+  session: AnalyticsSession
+) => {
+  const dayKey = getDayKey(new Date(session.startedAt ?? session.endedAt));
+  const monthKey = getMonthKey(new Date(session.startedAt ?? session.endedAt));
+  const sessions = [...analytics.sessions, session];
+  const sessionsByDay = { ...analytics.sessionsByDay };
+  const sessionsByMonth = { ...analytics.sessionsByMonth };
+  sessionsByDay[dayKey] = [...(sessionsByDay[dayKey] ?? []), session];
+  sessionsByMonth[monthKey] = [...(sessionsByMonth[monthKey] ?? []), session];
+  return { sessions, sessionsByDay, sessionsByMonth };
 };
 
 const hasMissingKeys = (defaults: unknown, existing: unknown): boolean => {
@@ -156,12 +214,54 @@ const migrateState = (existing: unknown): StorageResult => {
     }
   }
 
+  const existingSessions = Array.isArray(migratedState.analytics.sessions)
+    ? migratedState.analytics.sessions
+    : [];
+  const existingByDay = isPlainObject(migratedState.analytics.sessionsByDay)
+    ? (migratedState.analytics.sessionsByDay as Record<string, AnalyticsSession[]>)
+    : {};
+  const existingByMonth = isPlainObject(migratedState.analytics.sessionsByMonth)
+    ? (migratedState.analytics.sessionsByMonth as Record<string, AnalyticsSession[]>)
+    : {};
+  const fallbackSessions = flattenSessionIndex(existingByDay);
+  const fallbackMonthSessions = fallbackSessions.length
+    ? []
+    : flattenSessionIndex(existingByMonth);
+  const sessionsSource =
+    existingSessions.length > 0
+      ? existingSessions
+      : fallbackSessions.length > 0
+        ? fallbackSessions
+        : fallbackMonthSessions;
+  const sessionIndexes = buildSessionIndexes(sessionsSource);
+  const sessionsIndexChanged =
+    Object.keys(existingByDay).length !== Object.keys(sessionIndexes.byDay).length ||
+    Object.keys(existingByMonth).length !== Object.keys(sessionIndexes.byMonth).length;
+  if (
+    sessionsSource !== existingSessions ||
+    sessionsIndexChanged ||
+    Object.keys(existingByDay).length === 0 ||
+    Object.keys(existingByMonth).length === 0
+  ) {
+    migratedState = {
+      ...migratedState,
+      analytics: {
+        ...migratedState.analytics,
+        sessions: sessionsSource,
+        sessionsByDay: sessionIndexes.byDay,
+        sessionsByMonth: sessionIndexes.byMonth
+      }
+    };
+  }
+
   const needsWrite =
     !isPlainObject(existing) ||
     schemaVersion !== SCHEMA_VERSION ||
     hasMissingKeys(defaultState, existing) ||
     hasLegacyPause ||
-    tagsNeedDefaults;
+    tagsNeedDefaults ||
+    sessionsSource !== existingSessions ||
+    sessionsIndexChanged;
 
   return {
     state: { ...migratedState, schemaVersion: SCHEMA_VERSION },
@@ -211,26 +311,26 @@ export const ensureState = async (): Promise<StorageSchema> => {
   const prevFocusEnabled = nextState.strictSession.prevFocusEnabled;
   const shouldRestoreFocus = typeof prevFocusEnabled === "boolean";
   const restoredFocusEnabled = shouldRestoreFocus ? prevFocusEnabled : nextState.focusEnabled;
-  const strictSessionLogged =
+  const strictSessionEntry =
     strictExpired && strictEndedAt !== null
-      ? [
-          ...nextState.analytics.sessions,
-          {
-            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-            startedAt: strictStartedAt ?? strictEndedAt,
-            endedAt: strictEndedAt,
-            type: "strict" as const,
-            focusEnabledDuring: true,
-            distractions: 0
-          }
-        ]
+      ? {
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          startedAt: strictStartedAt ?? strictEndedAt,
+          endedAt: strictEndedAt,
+          type: "strict" as const,
+          focusEnabledDuring: true,
+          distractions: 0
+        }
       : null;
+  const strictAnalytics = strictSessionEntry
+    ? addSessionToAnalytics(nextState.analytics, strictSessionEntry)
+    : null;
   const strictCleared = strictExpired
     ? {
         ...nextState,
         focusEnabled: restoredFocusEnabled,
-        analytics: strictSessionLogged
-          ? { ...nextState.analytics, sessions: strictSessionLogged }
+        analytics: strictAnalytics
+          ? { ...nextState.analytics, ...strictAnalytics }
           : nextState.analytics,
         strictSession: {
           active: false,
