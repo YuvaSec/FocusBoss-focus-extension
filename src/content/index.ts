@@ -23,6 +23,7 @@ if (!isExtensionContextValid()) {
 type StorageState = {
   focusEnabled: boolean;
   focusSessionStartedAt?: number;
+  focusSessionSoundedAt?: number;
   focusSessionSource?: "manual" | "schedule";
   overlayMode: boolean;
   lists: {
@@ -290,6 +291,7 @@ const getState = async (): Promise<StorageState | null> => {
 type StoragePatch = {
   focusEnabled?: boolean;
   focusSessionStartedAt?: number;
+  focusSessionSoundedAt?: number;
   overlayMode?: boolean;
   lists?: StorageState["lists"];
   pomodoro?: Partial<StorageState["pomodoro"]>;
@@ -1918,6 +1920,7 @@ const initFocusUltraMiniWidget = async () => {
   let timeEl: HTMLSpanElement | null = null;
   let isDragging = false;
   let wasVisible = false;
+  let showDelayTimer: number | null = null;
 
   const requestStartSound = (state: StorageState) => {
     if (!state.pomodoro?.sounds) {
@@ -2036,6 +2039,10 @@ const initFocusUltraMiniWidget = async () => {
       if (root?.isConnected) {
         root.remove();
       }
+      if (showDelayTimer !== null) {
+        window.clearTimeout(showDelayTimer);
+        showDelayTimer = null;
+      }
       wasVisible = false;
       return;
     }
@@ -2044,10 +2051,35 @@ const initFocusUltraMiniWidget = async () => {
       focusStartedAt = Date.now();
       await setState({ focusSessionStartedAt: focusStartedAt });
     }
-    ensureRoot();
-    if (!wasVisible) {
-      requestStartSound(state);
-      wasVisible = true;
+    if (!root?.isConnected && showDelayTimer === null) {
+      showDelayTimer = window.setTimeout(() => {
+        showDelayTimer = null;
+        if (!latestState) {
+          return;
+        }
+        const canShow =
+          latestState.focusEnabled &&
+          !latestState.pomodoro.running &&
+          !latestState.strictSession?.active;
+        if (!canShow) {
+          return;
+        }
+        ensureRoot();
+        if (!wasVisible) {
+          const startedAt =
+            typeof latestState.focusSessionStartedAt === "number"
+              ? latestState.focusSessionStartedAt
+              : focusStartedAt;
+          if (startedAt && latestState.focusSessionSoundedAt !== startedAt) {
+            requestStartSound(latestState);
+            void setState({ focusSessionSoundedAt: startedAt });
+          }
+          wasVisible = true;
+        }
+      }, 400);
+    }
+    if (!root?.isConnected) {
+      return;
     }
     const startedAt = focusStartedAt ?? Date.now();
     const elapsedMs = Math.max(0, Date.now() - startedAt);
