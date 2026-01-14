@@ -22,6 +22,8 @@ if (!isExtensionContextValid()) {
 
 type StorageState = {
   focusEnabled: boolean;
+  focusSessionStartedAt?: number;
+  focusSessionSource?: "manual" | "schedule";
   overlayMode: boolean;
   lists: {
     blockedDomains: string[];
@@ -42,6 +44,7 @@ type StorageState = {
     cycles: number;
     autoBlockDuringWork: boolean;
     blockDuringBreak: boolean;
+    sounds?: boolean;
     lastTagId: string | null;
     lastCompletion?: {
       mode: "completed" | "interrupted";
@@ -59,6 +62,7 @@ type StorageState = {
       remainingMs?: number;
       linkedTagId?: string | null;
       prevFocusEnabled?: boolean;
+      pauseStartedAt?: number;
     };
   };
   tags: {
@@ -73,6 +77,7 @@ type StorageState = {
   };
   pause?: {
     isPaused: boolean;
+    pauseStartedAt?: number;
   };
   strictSession?: {
     active: boolean;
@@ -89,6 +94,8 @@ type WidgetPrefs = {
   seen?: boolean;
   minimized?: boolean;
   ultraMinimized?: boolean;
+  strictUltraY?: number;
+  focusUltraY?: number;
   ultraSide?: "left" | "right";
   ultraY?: number;
 };
@@ -282,6 +289,7 @@ const getState = async (): Promise<StorageState | null> => {
 
 type StoragePatch = {
   focusEnabled?: boolean;
+  focusSessionStartedAt?: number;
   overlayMode?: boolean;
   lists?: StorageState["lists"];
   pomodoro?: Partial<StorageState["pomodoro"]>;
@@ -1462,15 +1470,22 @@ const initPomodoroWidget = async () => {
         const endsAt = Date.now() + remaining;
         await setState({
           pomodoro: {
-            running: { ...running, paused: false, endsAt, remainingMs: undefined }
+            running: {
+              ...running,
+              paused: false,
+              endsAt,
+              remainingMs: undefined,
+              pauseStartedAt: undefined
+            }
           }
         });
         return;
       }
       const remaining = Math.max(0, running.endsAt - Date.now());
+      const pausedAt = Date.now();
       await setState({
         pomodoro: {
-          running: { ...running, paused: true, remainingMs: remaining }
+          running: { ...running, paused: true, remainingMs: remaining, pauseStartedAt: pausedAt }
         }
       });
       return;
@@ -1717,6 +1732,358 @@ const initPomodoroWidget = async () => {
   }, 1000);
 };
 
+const initStrictUltraMiniWidget = async () => {
+  if (!isExtensionContextValid()) {
+    return;
+  }
+  let latestState = await getState();
+  if (!latestState) {
+    return;
+  }
+  const prefs = await getWidgetPrefs();
+  let ultraY = typeof prefs.strictUltraY === "number" ? prefs.strictUltraY : 140;
+  let root: HTMLDivElement | null = null;
+  let timeEl: HTMLSpanElement | null = null;
+  let isDragging = false;
+  let wasVisible = false;
+
+  const requestStartSound = (state: StorageState) => {
+    if (!state.pomodoro?.sounds) {
+      return;
+    }
+    chrome.runtime.sendMessage({ type: "requestPlaySound", sound: "strictStart" });
+  };
+
+  const applyPosition = () => {
+    if (!root) {
+      return;
+    }
+    const maxY = window.innerHeight - root.offsetHeight - 8;
+    ultraY = clamp(ultraY, 8, Math.max(8, maxY));
+    root.style.top = `${ultraY}px`;
+    root.style.right = "0px";
+  };
+
+  const ensureRoot = () => {
+    if (root?.isConnected) {
+      return;
+    }
+    root = document.createElement("div");
+    root.id = "focusboss-strict-ultra";
+    root.dataset.fbActive = "true";
+    root.style.position = "fixed";
+    root.style.right = "0px";
+    root.style.top = `${ultraY}px`;
+    root.style.zIndex = "2147483646";
+    root.style.pointerEvents = "auto";
+    root.style.userSelect = "none";
+    const shadow = root.attachShadow({ mode: "open" });
+    shadow.innerHTML = `
+      <style>
+        :host { all: initial; font-family: "Poppins", "Segoe UI", system-ui, sans-serif; }
+        * { box-sizing: border-box; }
+        .strict-ultra {
+          width: 100px;
+          height: 44px;
+          border-radius: 999px;
+          background:
+            radial-gradient(120% 120% at 20% 15%, rgba(90, 180, 255, 0.45), rgba(0,0,0,0) 55%),
+            #0a0f17;
+          box-shadow: 0 14px 28px rgba(0,0,0,0.38), 0 0 18px rgba(90, 180, 255, 0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 8px 12px;
+          color: #d7efff;
+          position: relative;
+          cursor: grab;
+        }
+        .strict-ultra-time {
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+        }
+        .strict-ultra-notch {
+          width: 4px;
+          height: 14px;
+          border-radius: 999px;
+          background: rgba(90, 180, 255, 0.35);
+          position: absolute;
+          right: 12px;
+        }
+      </style>
+      <div class="strict-ultra" aria-label="Strict timer">
+        <span class="strict-ultra-time">00:00</span>
+        <span class="strict-ultra-notch" aria-hidden="true"></span>
+      </div>
+    `;
+    timeEl = shadow.querySelector(".strict-ultra-time");
+    const bar = shadow.querySelector(".strict-ultra") as HTMLDivElement;
+    bar.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      isDragging = true;
+      root!.style.transition = "none";
+      const startY = event.clientY;
+      const originY = ultraY;
+      bar.setPointerCapture(event.pointerId);
+      const onMove = (moveEvent: PointerEvent) => {
+        const deltaY = moveEvent.clientY - startY;
+        ultraY = originY + deltaY;
+        applyPosition();
+      };
+      const onUp = async () => {
+        bar.releasePointerCapture(event.pointerId);
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+        isDragging = false;
+        root!.style.transition = "top 200ms ease";
+        await saveWidgetPrefs({ strictUltraY: ultraY });
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+    });
+    window.addEventListener("resize", applyPosition);
+    document.documentElement.appendChild(root);
+    applyPosition();
+  };
+
+  const updateFromState = (state: StorageState) => {
+    latestState = state;
+    const strictActive = Boolean(state.strictSession?.active);
+    if (!strictActive) {
+      if (root?.isConnected) {
+        root.remove();
+      }
+      wasVisible = false;
+      return;
+    }
+    ensureRoot();
+    if (!wasVisible) {
+      requestStartSound(state);
+      wasVisible = true;
+    }
+    const endsAt = typeof state.strictSession?.endsAt === "number" ? state.strictSession.endsAt : Date.now();
+    const remainingMs = Math.max(0, endsAt - Date.now());
+    if (timeEl) {
+      timeEl.textContent = formatTimer(remainingMs);
+    }
+    if (remainingMs <= 0 && root?.isConnected) {
+      root.remove();
+      wasVisible = false;
+    }
+    if (!isDragging) {
+      applyPosition();
+    }
+  };
+
+  updateFromState(latestState);
+  subscribeState((state) => updateFromState(state));
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "sync" && areaName !== "local") {
+      return;
+    }
+    const change = changes[WIDGET_STORAGE_KEY];
+    if (!change?.newValue) {
+      return;
+    }
+    const nextPrefs = change.newValue as WidgetPrefs;
+    if (typeof nextPrefs.strictUltraY === "number") {
+      ultraY = nextPrefs.strictUltraY;
+      applyPosition();
+    }
+  });
+  window.setInterval(() => {
+    if (latestState) {
+      updateFromState(latestState);
+    }
+  }, 1000);
+};
+
+const initFocusUltraMiniWidget = async () => {
+  if (!isExtensionContextValid()) {
+    return;
+  }
+  let latestState = await getState();
+  if (!latestState) {
+    return;
+  }
+  const prefs = await getWidgetPrefs();
+  let ultraY = typeof prefs.focusUltraY === "number" ? prefs.focusUltraY : 200;
+  let focusStartedAt: number | null =
+    typeof latestState.focusSessionStartedAt === "number"
+      ? latestState.focusSessionStartedAt
+      : null;
+  let root: HTMLDivElement | null = null;
+  let timeEl: HTMLSpanElement | null = null;
+  let isDragging = false;
+  let wasVisible = false;
+
+  const requestStartSound = (state: StorageState) => {
+    if (!state.pomodoro?.sounds) {
+      return;
+    }
+    chrome.runtime.sendMessage({ type: "requestPlaySound", sound: "strictStart" });
+  };
+
+  const applyPosition = () => {
+    if (!root) {
+      return;
+    }
+    const maxY = window.innerHeight - root.offsetHeight - 8;
+    ultraY = clamp(ultraY, 8, Math.max(8, maxY));
+    root.style.top = `${ultraY}px`;
+    root.style.right = "0px";
+  };
+
+  const ensureRoot = () => {
+    if (root?.isConnected) {
+      return;
+    }
+    root = document.createElement("div");
+    root.id = "focusboss-focus-ultra";
+    root.dataset.fbActive = "true";
+    root.style.position = "fixed";
+    root.style.right = "0px";
+    root.style.top = `${ultraY}px`;
+    root.style.zIndex = "2147483646";
+    root.style.pointerEvents = "auto";
+    root.style.userSelect = "none";
+    const shadow = root.attachShadow({ mode: "open" });
+    shadow.innerHTML = `
+      <style>
+        :host { all: initial; font-family: "Poppins", "Segoe UI", system-ui, sans-serif; }
+        * { box-sizing: border-box; }
+        .focus-ultra {
+          width: 100px;
+          height: 44px;
+          border-radius: 999px;
+          background:
+            radial-gradient(120% 120% at 20% 15%, rgba(255, 209, 90, 0.5), rgba(0,0,0,0) 55%),
+            #14120a;
+          box-shadow: 0 14px 28px rgba(0,0,0,0.38), 0 0 18px rgba(255, 209, 90, 0.22);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 8px 12px;
+          color: #fff2c2;
+          position: relative;
+          cursor: grab;
+        }
+        .focus-ultra-time {
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+        }
+        .focus-ultra-notch {
+          width: 4px;
+          height: 14px;
+          border-radius: 999px;
+          background: rgba(255, 209, 90, 0.35);
+          position: absolute;
+          right: 12px;
+        }
+      </style>
+      <div class="focus-ultra" aria-label="Focus timer">
+        <span class="focus-ultra-time">00:00</span>
+        <span class="focus-ultra-notch" aria-hidden="true"></span>
+      </div>
+    `;
+    timeEl = shadow.querySelector(".focus-ultra-time");
+    const bar = shadow.querySelector(".focus-ultra") as HTMLDivElement;
+    bar.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      isDragging = true;
+      root!.style.transition = "none";
+      const startY = event.clientY;
+      const originY = ultraY;
+      bar.setPointerCapture(event.pointerId);
+      const onMove = (moveEvent: PointerEvent) => {
+        const deltaY = moveEvent.clientY - startY;
+        ultraY = originY + deltaY;
+        applyPosition();
+      };
+      const onUp = async () => {
+        bar.releasePointerCapture(event.pointerId);
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+        isDragging = false;
+        root!.style.transition = "top 200ms ease";
+        await saveWidgetPrefs({ focusUltraY: ultraY });
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+    });
+    window.addEventListener("resize", applyPosition);
+    document.documentElement.appendChild(root);
+    applyPosition();
+  };
+
+  const updateFromState = async (state: StorageState) => {
+    latestState = state;
+    const focusEnabled = Boolean(state.focusEnabled);
+    const pomodoroRunning = Boolean(state.pomodoro.running);
+    const strictActive = Boolean(state.strictSession?.active);
+
+    if (typeof state.focusSessionStartedAt === "number") {
+      focusStartedAt = state.focusSessionStartedAt;
+    } else if (!focusEnabled) {
+      focusStartedAt = null;
+    }
+
+    if (!focusEnabled || pomodoroRunning || strictActive) {
+      if (root?.isConnected) {
+        root.remove();
+      }
+      wasVisible = false;
+      return;
+    }
+
+    if (focusStartedAt === null) {
+      focusStartedAt = Date.now();
+      await setState({ focusSessionStartedAt: focusStartedAt });
+    }
+    ensureRoot();
+    if (!wasVisible) {
+      requestStartSound(state);
+      wasVisible = true;
+    }
+    const startedAt = focusStartedAt ?? Date.now();
+    const elapsedMs = Math.max(0, Date.now() - startedAt);
+    if (timeEl) {
+      timeEl.textContent = formatTimer(elapsedMs);
+    }
+    if (!isDragging) {
+      applyPosition();
+    }
+  };
+
+  await updateFromState(latestState);
+  subscribeState((state) => {
+    void updateFromState(state);
+  });
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "sync" && areaName !== "local") {
+      return;
+    }
+    const change = changes[WIDGET_STORAGE_KEY];
+    if (!change?.newValue) {
+      return;
+    }
+    const nextPrefs = change.newValue as WidgetPrefs;
+    if (typeof nextPrefs.focusUltraY === "number") {
+      ultraY = nextPrefs.focusUltraY;
+      applyPosition();
+    }
+  });
+  window.setInterval(() => {
+    if (latestState) {
+      void updateFromState(latestState);
+    }
+  }, 1000);
+};
+
 const injectOverlay = () => {
   if (document.getElementById("focusboss-overlay")) {
     return;
@@ -1818,6 +2185,8 @@ const evaluate = async () => {
 
 void evaluate();
 void initPomodoroWidget();
+void initStrictUltraMiniWidget();
+void initFocusUltraMiniWidget();
 const startSpaWatcher = () => {
   let lastHref = location.href;
   const maybeRun = () => {

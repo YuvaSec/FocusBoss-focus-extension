@@ -1,10 +1,11 @@
-type SoundName = "work" | "break" | "complete" | "stop";
+type SoundName = "work" | "break" | "complete" | "stop" | "strictStart";
 
 const SOUND_FILES: Record<SoundName, string> = {
   work: "sounds/start.mp3",
   break: "sounds/break.mp3",
   complete: "sounds/completed.mp3",
-  stop: "sounds/stop.mp3"
+  stop: "sounds/stop.mp3",
+  strictStart: "sounds/strict_focus_start.mp3"
 };
 
 const audioCache: Partial<Record<SoundName, HTMLAudioElement>> = {};

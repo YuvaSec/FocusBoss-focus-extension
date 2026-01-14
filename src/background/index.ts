@@ -1,5 +1,5 @@
 import type { Message } from "../shared/messages.js";
-import type { StorageSchema } from "../shared/storageSchema.js";
+import type { StorageSchema, AnalyticsSession } from "../shared/storageSchema.js";
 import { ensureState, getState, setState } from "../shared/storage.js";
 import { evaluateRules } from "../shared/rules.js";
 
@@ -153,7 +153,9 @@ const ensureOffscreenDocument = async () => {
   });
 };
 
-const playOffscreenSound = async (sound: "work" | "break" | "complete" | "stop") => {
+const playOffscreenSound = async (
+  sound: "work" | "break" | "complete" | "stop" | "strictStart"
+) => {
   if (!chrome.offscreen) {
     return;
   }
@@ -255,7 +257,7 @@ const buildRedirectRule = (id: number, regexFilter: string): DnrRule => {
     priority: 1,
     action: {
       type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
-      redirect: { extensionPath: "tab.html" }
+      redirect: { extensionPath: "/tab.html" }
     },
     condition: {
       regexFilter,
@@ -701,7 +703,21 @@ const applyScheduleState = async () => {
   const active = state.schedule.entries.some(
     (entry) => entry.enabled && isScheduleEntryActive(entry, new Date())
   );
-  await setState({ focusEnabled: active });
+  if (active) {
+    const patch: Partial<StorageSchema> = { focusEnabled: true };
+    if (typeof state.focusSessionStartedAt !== "number") {
+      patch.focusSessionStartedAt = Date.now();
+      patch.focusSessionSource = "schedule";
+    }
+    await setState(patch);
+    return;
+  }
+  const clearSource = state.focusSessionSource === "schedule";
+  await setState({
+    focusEnabled: false,
+    focusSessionStartedAt: clearSource ? undefined : state.focusSessionStartedAt,
+    focusSessionSource: clearSource ? undefined : state.focusSessionSource
+  });
 };
 
 const schedulePauseAlarm = async () => {
@@ -716,7 +732,9 @@ const schedulePauseAlarm = async () => {
 
   const now = Date.now();
   if (until <= now) {
-    await setState({ pause: { isPaused: false, pauseType: null, pauseEndAt: null } });
+    await setState({
+      pause: { isPaused: false, pauseType: null, pauseEndAt: null, pauseStartedAt: undefined }
+    });
     return;
   }
 
@@ -919,6 +937,20 @@ chrome.runtime.onMessage.addListener((message: Message<"ping">) => {
 });
 
 chrome.runtime.onMessage.addListener(
+  (
+    message: { type?: string; sound?: "work" | "break" | "complete" | "stop" | "strictStart" },
+    sender,
+    sendResponse: (response?: { ok: boolean }) => void
+  ) => {
+    if (message?.type !== "requestPlaySound" || !message.sound) {
+      return;
+    }
+    void playOffscreenSound(message.sound).then(() => sendResponse({ ok: true }));
+    return true;
+  }
+);
+
+chrome.runtime.onMessage.addListener(
   (message: { type?: string }, sender, sendResponse: (response?: { ok: boolean }) => void) => {
     if (message?.type !== "pomodoroTick") {
       return;
@@ -1114,6 +1146,98 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     const oldState = changes.focusBossState.oldValue as StorageSchema | undefined;
     const newState = changes.focusBossState.newValue as StorageSchema | undefined;
     if (newState) {
+      const sessionsToAdd: AnalyticsSession[] = [];
+      if (oldState) {
+        if (
+          oldState.focusEnabled &&
+          !newState.focusEnabled &&
+          typeof oldState.focusSessionStartedAt === "number"
+        ) {
+          sessionsToAdd.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            startedAt: oldState.focusSessionStartedAt,
+            endedAt: Date.now(),
+            type: "focus",
+            source: oldState.focusSessionSource ?? "manual",
+            focusEnabledDuring: true,
+            distractions: 0
+          });
+        }
+
+        if (
+          oldState.pause.isPaused &&
+          !newState.pause.isPaused &&
+          typeof oldState.pause.pauseStartedAt === "number"
+        ) {
+          sessionsToAdd.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            startedAt: oldState.pause.pauseStartedAt,
+            endedAt: Date.now(),
+            type: "pause",
+            source: "manual",
+            focusEnabledDuring: oldState.focusEnabled,
+            distractions: 0
+          });
+        }
+
+        const oldRunning = oldState.pomodoro.running ?? null;
+        const newRunning = newState.pomodoro.running ?? null;
+        if (
+          oldRunning?.paused &&
+          !newRunning?.paused &&
+          typeof oldRunning.pauseStartedAt === "number"
+        ) {
+          sessionsToAdd.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            startedAt: oldRunning.pauseStartedAt,
+            endedAt: Date.now(),
+            type: "pause",
+            source: "pomodoro",
+            focusEnabledDuring: oldState.focusEnabled,
+            distractions: 0
+          });
+        }
+        if (
+          oldRunning?.paused &&
+          !newRunning &&
+          typeof oldRunning.pauseStartedAt === "number"
+        ) {
+          sessionsToAdd.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            startedAt: oldRunning.pauseStartedAt,
+            endedAt: Date.now(),
+            type: "pause",
+            source: "pomodoro",
+            focusEnabledDuring: oldState.focusEnabled,
+            distractions: 0
+          });
+        }
+
+        const lastCompletion = newState.pomodoro.lastCompletion;
+        const prevCompletion = oldState.pomodoro.lastCompletion;
+        if (lastCompletion?.endedAt && lastCompletion.endedAt !== prevCompletion?.endedAt) {
+          const durationMs = Math.max(0, (lastCompletion.minutes ?? 0) * 60 * 1000);
+          sessionsToAdd.push({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            startedAt: lastCompletion.endedAt - durationMs,
+            endedAt: lastCompletion.endedAt,
+            type: "pomodoro",
+            tagId: lastCompletion.tagId ?? null,
+            outcome: lastCompletion.mode,
+            focusEnabledDuring: true,
+            distractions: 0
+          });
+        }
+      }
+
+      if (sessionsToAdd.length > 0) {
+        let nextAnalytics = newState.analytics;
+        sessionsToAdd.forEach((session) => {
+          nextAnalytics = { ...nextAnalytics, ...addSessionToAnalytics(nextAnalytics, session) };
+        });
+        void setState({ analytics: nextAnalytics });
+      }
+
       void applyDnrRules(newState);
       ensureContentScriptInjected("all");
       const soundsEnabled = Boolean(newState.pomodoro.sounds);
@@ -1185,6 +1309,13 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       if (!newState?.strictSession?.active) {
         void applyScheduleState();
       }
+      if (
+        oldState?.strictSession?.active &&
+        !newState?.strictSession?.active &&
+        newState?.pomodoro?.sounds
+      ) {
+        void playOffscreenSound("break");
+      }
     }
   }
 });
@@ -1194,7 +1325,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     void getState().then((state) => {
       const until = state.pause.pauseEndAt;
       if (state.pause.isPaused && typeof until === "number" && Date.now() >= until) {
-        void setState({ pause: { isPaused: false, pauseType: null, pauseEndAt: null } });
+        void setState({
+          pause: { isPaused: false, pauseType: null, pauseEndAt: null, pauseStartedAt: undefined }
+        });
       }
     });
   }

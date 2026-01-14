@@ -371,9 +371,34 @@ p {margin: 0;color: var(--fb-text-muted);}
 /* ====================================================================================================
       11) Icon buttons,Small icon-only buttons for actions like close/delete.
    ==================================================================================================== */
-.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;border-radius: 999px; border: 0; background: var(--fb-bg); box-shadow: var(--fb-shadow-sm); color: var(--fb-text-muted-light); font-size: 12px; cursor: pointer;}
-.icon-btn:hover { color: var(--fb-text); box-shadow: var(--fb-neo-lg); }
-.icon-btn.icon-only { width: 28px; height: 28px; font-size: 14px; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--fb-bg); color: var(--fb-text-muted-light); font-size: 11px; font-weight: 600; line-height: 1; cursor: pointer; transition: color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, transform 0.12s ease; }
+.icon-btn:hover { color: var(--fb-text); box-shadow: var(--fb-neo-sm); transform: translateY(-1px); }
+/*.icon-btn.icon-only { width: 18px; height: 18px; border: 1px solid var(--fb-border); background: var(--fb-surface-2); color: var(--fb-text-muted-light); font-family: "Georgia", "Times New Roman", serif; font-style: italic; font-weight: 500; font-size: 10px; box-shadow: var(--fb-glass2-inset); }*/
+/*.icon-btn.icon-only:hover { border-color: var(--fb-accent); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); color: var(--fb-text); }*/
+.icon-btn.info-icon { width: 18px; height: 18px; border: 1px solid var(--fb-border); background: var(--fb-surface-2); color: var(--fb-text-muted-light); font-family: "Georgia", "Times New Roman", serif; font-style: italic; font-weight: 500; font-size: 10px; box-shadow: var(--fb-glass2-inset); }
+.icon-btn.info-icon:hover { border-color: var(--fb-accent); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); color: var(--fb-text); }
+
+/* ====================================================================================================
+   11.1) Toasts
+   ==================================================================================================== */
+.toast-region { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 9998; display: grid; gap: 8px; pointer-events: none; }
+.toast { padding: 10px 14px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-surface-2); color: var(--fb-text); box-shadow: var(--fb-neo-sm); font-size: 12px; font-weight: 600; letter-spacing: 0.01em; opacity: 0; transform: translateY(14px) scale(0.94); }
+.toast.is-visible { animation: toast-bounce-in 420ms cubic-bezier(0.2, 0.9, 0.25, 1.2) forwards; }
+.toast.is-exiting { animation: toast-bounce-out 320ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards; }
+
+@keyframes toast-bounce-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.94); }
+  55% { opacity: 1; transform: translateY(-6px) scale(1.02); }
+  75% { transform: translateY(2px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-bounce-out {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  35% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  100% { opacity: 0; transform: translateY(14px) scale(0.96); }
+}
 
 /* ====================================================================================================
    12) Lists and list items
@@ -387,8 +412,9 @@ p {margin: 0;color: var(--fb-text-muted);}
 .list-empty-title { margin: 0; font-size: var(--font-small); font-weight: 600; color: var(--fb-text); }
 .list-empty-hint { margin: 0; font-size: 12px; color: var(--fb-text-muted); }
 .list-empty-actions { display: flex; flex-wrap: wrap; gap: 6px; }
-.list-delete-btn { border-radius: 12px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
+.list-delete-btn { width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
 .list-delete-btn:hover { border-color: var(--red); color: var(--red); box-shadow: var(--tag-delete-hover-shadow); }
+.list-delete-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .list-title { font-weight: 600; }
 .list-sub { color: var(--fb-text-muted); }
 
@@ -443,6 +469,17 @@ p {margin: 0;color: var(--fb-text-muted);}
 body.modal-open { overflow: hidden; }
 .modal-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .strict-desc { font-size: 14px; color: var(--fb-text-muted); }
+.metric-info { display: grid; gap: 14px; }
+.metric-info-header { display: grid; gap: 6px; }
+.metric-info-kicker { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fb-text-muted); margin: 0; }
+.metric-info-title { margin: 0; }
+.metric-info-sub { margin: 0; color: var(--fb-text-muted); font-size: 13px; }
+.metric-info-grid { display: grid; gap: 10px; }
+.metric-info-card { padding: 12px; border-radius: 14px; border: 1px solid var(--fb-border); background: var(--fb-bg); display: grid; gap: 6px; }
+.metric-info-label { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fb-text-muted); }
+.metric-info-text { margin: 0; color: var(--fb-text); }
+.metric-info-math { font-weight: 600; font-size: 13px; }
+.metric-info-note { margin: 0; color: var(--fb-text-muted); font-size: 12px; }
 
 /* ====================================================================================================
    14) Strict session overlay
@@ -543,7 +580,7 @@ body.modal-open { overflow: hidden; }
 .tag-color-picker input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 50%; }
 .tag-color-picker input[type="color"]::-moz-color-swatch { border: 0; border-radius: 50%; }
 
-.tag-delete-btn { position: absolute; top: 12px; right: 12px; border-radius: 999px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; padding: 0; width: 28px; height: 28px; display: grid; place-items: center; box-shadow: var(--fb-neo-sm); }
+.tag-delete-btn { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; box-shadow: var(--fb-neo-sm); }
 .tag-delete-btn:hover { border-color: var(--red); color: var(--red); box-shadow: var(--tag-delete-hover-shadow); }
 .tag-delete-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -660,7 +697,7 @@ body.modal-open { overflow: hidden; }
 .schedule-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fb-text); }
 .time-pill { flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; border: 0; background: var(--fb-accent-stale);color: var(--fb-bg); font-size: 10px; white-space: nowrap; box-shadow: var(--fb-neo-sm); }
 .day-pill { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: var(--r-segment); font-size: 10px; border: 0; color: var(--fb-text-muted); background: var(--fb-accent-muted); box-shadow: var(--fb-neo-sm); }
-.schedule-actions .icon-btn[data-delete-schedule] { border-radius: 12px; border: 1px solid var(--schedule-delete-border); background: var(--schedule-delete-bg); color: var(--schedule-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
+.schedule-actions .icon-btn[data-delete-schedule] { width: 20px; height: 20px; padding: 0; border-radius: 12px; border: 1px solid var(--schedule-delete-border); background: var(--schedule-delete-bg); color: var(--schedule-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
 .schedule-actions .icon-btn[data-delete-schedule]:hover { border-color: var(--red); color: var(--red); box-shadow: var(--schedule-delete-hover-shadow); }
 
 /* ====================================================================================================
@@ -682,6 +719,10 @@ body.modal-open { overflow: hidden; }
 .stats-summary-controls .segmented { background: var(--fb-surface-2); }
 .stats-hero-card { padding: 16px; background: var(--fb-surface-2); }
 .stats-hero-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.stats-hero-grid .pomodoro-full-time { grid-column: span 2; }
+.focus-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.focus-summary-grid .focus-summary-first-pause { grid-column: span 2; }
+.focus-summary-grid .focus-summary-total { grid-column: span 2; }
 .stats-hero-card .metric-card { background: var(--fb-surface-2); border: 1px solid var(--fb-border); }
 .stats-subview { transition: transform 240ms ease, opacity 240ms ease; opacity: 0; pointer-events: none; transform: translateX(12px); position: absolute; inset: 0; }
 .stats-subview.active { opacity: 1; pointer-events: auto; transform: translateX(0); position: relative; }

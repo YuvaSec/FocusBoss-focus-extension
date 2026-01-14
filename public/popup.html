@@ -16,7 +16,7 @@
           <div class="status status-pill" data-status="off">
             <span id="statusPillText">Loading</span>
           </div>
-          <button id="statusInfo" class="icon-btn icon-only" type="button" data-open-modal="statusInfo" aria-label="Status details">?</button>
+          <button id="statusInfo" class="icon-btn icon-only info-icon" type="button" data-open-modal="statusInfo" aria-label="Status details">i</button>
         </div>
       </header>
 
@@ -274,7 +274,15 @@
 
           <div class="card tags-card" style="margin-top: 12px;">
             <div class="row tags-header">
-              <h3>Tags</h3>
+              <div class="row" style="gap: 8px;">
+                <h3>Tags</h3>
+                <button
+                  class="icon-btn icon-only info-icon"
+                  type="button"
+                  data-open-modal="tagsInfo"
+                  aria-label="Tags info"
+                >i</button>
+              </div>
               <button id="tagAdd" class="tag-add" type="button" aria-label="Add tag">
                 Add Tag
               </button>
@@ -309,19 +317,128 @@
           <div class="stats-stack">
             <div id="statsSummaryView" class="stats-subview active">
               <div class="segmented" id="statsSegmentToggle">
-                <button data-segment="pomodoro" class="active">Pomodoro</button>
+                <button data-segment="focus" class="active">Focus</button>
+                <button data-segment="pomodoro">Pomodoro</button>
                 <button data-segment="usage">Web Usage</button>
               </div>
 
-              <div id="statsPomodoroSegment" class="stats-segment active">
+              <div id="statsPomodoroSegment" class="stats-segment">
+                <div class="card stats-hero-card" style="margin-top: 12px;">
+                  <div class="stats-summary-header" style="margin-bottom: 10px;">
+                    <div>
+                      <h2>Pomodoro Summary</h2>
+                      <p id="statsSummaryDate" class="list-sub">Today</p>
+                    </div>
+                  </div>
+                  <div class="segmented stats-range-control" id="statsPomodoroRange" style="margin-bottom: 10px;">
+                    <button data-range="today">Today</button>
+                    <button data-range="week">Week</button>
+                    <button data-range="month">Month</button>
+                  </div>
+                  <div class="stats-hero-grid ">
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Pomo' reliability
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="pomodoroReliabilityInfo"
+                          aria-label="Pomodoro reliability info"
+                        >i</button>
+                      </p>
+                      <div id="metricPomodoroReliability" class="metric-value">0%</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Pause burden
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="pomodoroPauseBurdenInfo"
+                          aria-label="Pause burden info"
+                        >i</button>
+                      </p>
+                      <div id="metricPomodoroPauseBurden" class="metric-value">0%</div>
+                    </div>
+                    <div class="metric-card pomodoro-full-time">
+                      <p class="list-sub">
+                        Total pomodoro time
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="pomodoroTotalTimeInfo"
+                          aria-label="Total pomodoro time info"
+                        >i</button>
+                      </p>
+                      <div id="metricPomodoroTime" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card focus-full-time">
+                      <p class="list-sub">
+                        Focus time
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="pomodoroFocusTimeInfo"
+                          aria-label="Focus time info"
+                        >i</button>
+                      </p>
+                      <div id="metricFocus" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Break time (est.)
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="pomodoroBreakTimeInfo"
+                          aria-label="Break time info"
+                        >i</button>
+                      </p>
+                      <div id="metricBreak" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Tags completed
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="pomodoroTagsCompletedInfo"
+                          aria-label="Tags completed info"
+                        >i</button>
+                      </p>
+                      <div id="metricTags" class="metric-value">0</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Tags interrupted
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="pomodoroTagsInterruptedInfo"
+                          aria-label="Tags interrupted info"
+                        >i</button>
+                      </p>
+                      <div id="metricTagsInterrupted" class="metric-value">0</div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="card stats-trend-card" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
                   <div class="row" style="justify-content: space-between; gap: 10px;">
-                    <h3>Focus Trend</h3>
+                    <div class="row" style="gap: 8px;">
+                      <h3>Pomodoro Trend</h3>
+                      <button
+                        class="icon-btn icon-only info-icon"
+                        type="button"
+                        data-open-modal="pomodoroTrendInfo"
+                        aria-label="Pomodoro trend info"
+                      >i</button>
+                    </div>
                     <span class="stats-card-link">View details <span class="secondary-icon nudge-icon" aria-hidden="true">›</span></span>
                   </div>
                   <div class="stats-split stats-trend-split">
                     <div>
-                      <p class="list-sub">Today's Focus</p>
+                      <p class="list-sub">Today's Tags</p>
                       <div id="statsSummaryToday" class="metric-value">0m</div>
                       <p id="statsSummaryTodayChange" class="list-sub">0% vs yesterday</p>
                     </div>
@@ -331,16 +448,24 @@
                       <p id="statsSummaryWeekChange" class="list-sub">0% vs last week</p>
                     </div>
                   </div>
-                <div class="stats-summary-avg">
-                  <p class="list-sub">Daily Avg</p>
-                  <div id="statsSummaryAvg" class="metric-value">0m</div>
-                </div>
-                <div id="statsSummaryChart" style="min-height: 180px;"></div>
+                  <div class="stats-summary-avg">
+                    <p class="list-sub">Daily Avg</p>
+                    <div id="statsSummaryAvg" class="metric-value">0m</div>
+                  </div>
+                  <div id="statsSummaryChart" style="min-height: 180px;"></div>
               </div>
 
                 <div class="card" style="margin-top: 12px;">
                   <div class="row">
-                    <h3>Tags</h3>
+                    <div class="row" style="gap: 8px;">
+                      <h3>Tags</h3>
+                      <button
+                        class="icon-btn icon-only info-icon"
+                        type="button"
+                        data-open-modal="tagsInfo"
+                        aria-label="Tags info"
+                      >i</button>
+                    </div>
                     <button id="statsShowAll" class="btn btn-small">
                       Show all <span class="secondary-icon nudge-icon" aria-hidden="true">›</span>
                     </button>
@@ -348,37 +473,7 @@
                   <div id="statsSummaryTags" class="stats-tag-grid" style="margin-top: 10px;"></div>
                 </div>
 
-                <div class="card stats-hero-card" style="margin-top: 12px;">
-                  <div class="stats-summary-header" style="margin-bottom: 10px;">
-                    <div>
-                      <h2>Summary</h2>
-                      <p id="statsSummaryDate" class="list-sub">Today</p>
-                    </div>
-                  </div>
-                  <div class="segmented stats-range-control" id="statsPomodoroRange" style="margin-bottom: 10px;">
-                    <button data-range="today">Today</button>
-                    <button data-range="week">Week</button>
-                    <button data-range="month">Month</button>
-                  </div>
-                  <div class="stats-hero-grid">
-                    <div class="metric-card">
-                      <p class="list-sub">Focus time</p>
-                      <div id="metricFocus" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Break time (est.)</p>
-                      <div id="metricBreak" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Tags completed</p>
-                      <div id="metricTags" class="metric-value">0</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Distraction time</p>
-                      <div id="metricDistraction" class="metric-value">0m</div>
-                    </div>
-                  </div>
-                </div>
+
 
                 <div class="card stats-export-card" style="margin-top: 12px;">
                   <div class="row">
@@ -392,10 +487,197 @@
                 </div>
               </div>
 
+              <div id="statsFocusSegment" class="stats-segment active">
+                <div class="card stats-hero-card" style="margin-top: 12px;">
+                  <div class="stats-summary-header" style="margin-bottom: 10px;">
+                    <div>
+                      <h2>Focus Summary</h2>
+                      <p id="statsFocusDate" class="list-sub">Today</p>
+                    </div>
+                  </div>
+                  <div class="segmented stats-range-control" id="statsFocusSummaryRange" style="margin-bottom: 10px;">
+                    <button data-range="today">Today</button>
+                    <button data-range="week">Week</button>
+                    <button data-range="month">Month</button>
+                  </div>
+                  <div class="focus-summary-grid">
+                    <div class="metric-card focus-summary-reliability">
+                      <p class="list-sub">
+                        Focus reliability
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="focusReliabilityInfo"
+                          aria-label="Focus reliability info"
+                        >i</button>
+                      </p>
+                      <div id="statsFocusReliability" class="metric-value">0%</div>
+                    </div>
+                    <div class="metric-card focus-summary-total">
+                      <p class="list-sub">
+                        Total focus time
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="focusTotalTimeInfo"
+                          aria-label="Total focus time info"
+                        >i</button>
+                      </p>
+                      <div id="statsFocusTotalTime" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Manual focus
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="focusManualTimeInfo"
+                          aria-label="Manual focus info"
+                        >i</button>
+                      </p>
+                      <div id="statsFocusManualTime" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Manual sessions</p>
+                      <div id="statsFocusManualCount" class="metric-value">0</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Strict time
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="focusStrictTimeInfo"
+                          aria-label="Strict time info"
+                        >i</button>
+                      </p>
+                      <div id="statsFocusStrictTime" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Strict sessions</p>
+                      <div id="statsFocusStrictCount" class="metric-value">0</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Pause time
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="focusPauseTimeInfo"
+                          aria-label="Pause time info"
+                        >i</button>
+                      </p>
+                      <div id="statsFocusPauseTime" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">Total pauses</p>
+                      <div id="statsFocusPauseCount" class="metric-value">0</div>
+                    </div>
+                    <div class="metric-card focus-summary-first-pause">
+                      <p class="list-sub">
+                        Time to first pause
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="focusFirstPauseInfo"
+                          aria-label="Time to first pause info"
+                        >i</button>
+                      </p>
+                      <div id="statsFocusFirstPause" class="metric-value">--</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card stats-export-card" style="margin-top: 12px;">
+                  <div class="row">
+                    <h3>Export</h3>
+                  </div>
+                  <div class="stats-export-grid" style="margin-top: 10px;">
+                    <button id="exportFocusCsv" class="btn btn-small">
+                      Export focus CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                    </button>
+                    <button id="exportFocusJson" class="btn btn-small">
+                      Export focus JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div id="statsUsageSegment" class="stats-segment">
+                <div class="card stats-hero-card" style="margin-top: 12px;">
+                  <div class="stats-summary-header" style="margin-bottom: 10px;">
+                    <div>
+                      <h2>Web Usage Summary</h2>
+                      <p id="statsUsageDate" class="list-sub">Today</p>
+                    </div>
+                  </div>
+                  <div class="segmented stats-range-control" id="statsUsageSummaryRange" style="margin-bottom: 10px;">
+                    <button data-range="today">Today</button>
+                    <button data-range="week">Week</button>
+                    <button data-range="month">Month</button>
+                  </div>
+                  <div class="stats-hero-grid">
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Blocked sites
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="usageBlockedInfo"
+                          aria-label="Blocked sites info"
+                        >i</button>
+                      </p>
+                      <div id="usageBlocked" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Allowed sites
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="usageAllowedInfo"
+                          aria-label="Allowed sites info"
+                        >i</button>
+                      </p>
+                      <div id="usageAllowed" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Other sites
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="usageOtherInfo"
+                          aria-label="Other sites info"
+                        >i</button>
+                      </p>
+                      <div id="usageOther" class="metric-value">0m</div>
+                    </div>
+                    <div class="metric-card">
+                      <p class="list-sub">
+                        Total web time
+                        <button
+                          class="icon-btn icon-only info-icon"
+                          type="button"
+                          data-open-modal="usageTotalInfo"
+                          aria-label="Total web time info"
+                        >i</button>
+                      </p>
+                      <div id="usageTotal" class="metric-value">0m</div>
+                    </div>
+                  </div>
+                </div>
                 <div id="statsUsageTrendCard" class="card stats-trend-card stats-usage-trend" style="margin-top: 12px; overflow: hidden;" role="button" tabindex="0">
                   <div class="row" style="justify-content: space-between; gap: 10px;">
-                    <h3>Web Usage Trend</h3>
+                    <div class="row" style="gap: 8px;">
+                      <h3>Web Usage Trend</h3>
+                      <button
+                        class="icon-btn icon-only info-icon"
+                        type="button"
+                        data-open-modal="usageTrendInfo"
+                        aria-label="Web usage trend info"
+                      >i</button>
+                    </div>
                     <span class="stats-card-link">View details <span class="secondary-icon nudge-icon" aria-hidden="true">›</span></span>
                   </div>
                   <div class="stats-split stats-trend-split">
@@ -419,7 +701,15 @@
 
                 <div class="card stats-usage-ring" style="margin-top: 12px;">
                   <div class="row">
-                    <h3>Top Sites</h3>
+                    <div class="row" style="gap: 8px;">
+                      <h3>Top Sites</h3>
+                      <button
+                        class="icon-btn icon-only info-icon"
+                        type="button"
+                        data-open-modal="usageTopSitesInfo"
+                        aria-label="Top sites info"
+                      >i</button>
+                    </div>
                   </div>
                   <div class="stats-usage-controls" style="margin-top: 8px;">
                     <div class="segmented stats-usage-range" id="statsUsageRange">
@@ -442,41 +732,18 @@
                   </button>
                 </div>
 
-                <div class="card stats-hero-card" style="margin-top: 12px;">
-                  <div class="stats-summary-header" style="margin-bottom: 10px;">
-                    <div>
-                      <h2>Summary</h2>
-                      <p id="statsUsageDate" class="list-sub">Today</p>
-                    </div>
-                  </div>
-                  <div class="segmented stats-range-control" id="statsUsageSummaryRange" style="margin-bottom: 10px;">
-                    <button data-range="today">Today</button>
-                    <button data-range="week">Week</button>
-                    <button data-range="month">Month</button>
-                  </div>
-                  <div class="stats-hero-grid">
-                    <div class="metric-card">
-                      <p class="list-sub">Total web time</p>
-                      <div id="usageTotal" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Blocked sites</p>
-                      <div id="usageBlocked" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Allowed sites</p>
-                      <div id="usageAllowed" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Other sites</p>
-                      <div id="usageOther" class="metric-value">0m</div>
-                    </div>
-                  </div>
-                </div>
 
                 <div class="card" style="margin-top: 12px;">
                   <div class="row">
-                    <h3>Heatmap</h3>
+                    <div class="row" style="gap: 8px;">
+                      <h3>Heatmap</h3>
+                      <button
+                        class="icon-btn icon-only info-icon"
+                        type="button"
+                        data-open-modal="usageHeatmapInfo"
+                        aria-label="Heatmap info"
+                      >i</button>
+                    </div>
                   </div>
                   <div id="statsUsageHeatmap" class="heatmap" style="margin-top: 10px;"></div>
                 </div>
@@ -509,7 +776,7 @@
                   <button id="statsDateNext" type="button" aria-label="Next">›</button>
                 </div>
               </div>
-              <h2 class="stats-title">Focus Trend</h2>
+              <h2 class="stats-title">Pomodoro Trend</h2>
               <div class="segmented four stats-range-toggle" id="statsTrendRange">
                 <button data-range="day">D</button>
                 <button data-range="week" class="active">W</button>
@@ -533,7 +800,15 @@
               </div>
               <div class="card" style="margin-top: 12px;">
                 <div class="row">
-                  <h3>Tags</h3>
+                  <div class="row" style="gap: 8px;">
+                    <h3>Tags</h3>
+                    <button
+                      class="icon-btn icon-only info-icon"
+                      type="button"
+                      data-open-modal="tagsInfo"
+                      aria-label="Tags info"
+                    >i</button>
+                  </div>
                 </div>
                 <div id="statsTrendTags" class="stats-tag-grid" style="margin-top: 10px;"></div>
               </div>
@@ -628,7 +903,7 @@
               <div>
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <p>Blocking style</p>
-                  <button class="icon-btn" data-open-modal="blockingInfo" aria-label="Blocking style info">?</button>
+                  <button class="icon-btn info-icon" data-open-modal="blockingInfo" aria-label="Blocking style info">i</button>
                 </div>
               </div>
             </div>
@@ -724,6 +999,8 @@
 
         </section>
       </main>
+
+      <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
         <div id="strictOverlay" class="strict-overlay hidden" aria-hidden="true">
           <button id="strictOverlayClose" class="icon-btn icon-only strict-overlay-close" type="button" aria-label="Close">
@@ -832,9 +1109,9 @@
       <div class="modal-card">
         <button id="tagDelete" class="tag-delete-btn hidden" type="button" aria-label="Delete tag">
           <svg class="tag-delete-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M3 6h18" />
-            <path d="M8 6V4h8v2" />
-            <path d="M6 6l1 14h10l1-14" />
+            <path d="M4 7h16" />
+            <path d="M9 7V5h6v2" />
+            <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
             <path d="M10 11v6" />
             <path d="M14 11v6" />
           </svg>
@@ -1031,6 +1308,666 @@
         <div id="statusInfoBody" style="margin-top: 12px;"></div>
         <div class="modal-actions" style="margin-top: 14px;">
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusReliabilityInfoModal" class="modal hidden" data-modal="focusReliabilityInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Focus reliability</h3>
+            <p class="metric-info-sub">Shows how consistently you stay in focus without pauses.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it means</p>
+              <p class="metric-info-text">
+                Higher is better. 100% means you completed focus time with no pauses.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is calculated</p>
+              <p class="metric-info-text metric-info-math">
+                (focus time - pause time) / (focus time + pause time)
+              </p>
+              <p class="metric-info-note">Pauses include manual and timed pauses during focus.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusTotalTimeInfoModal" class="modal hidden" data-modal="focusTotalTimeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Total focus time</h3>
+            <p class="metric-info-sub">The total time you spent in focus sessions for the selected range.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Manual focus sessions and strict sessions are counted toward this total.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it excludes</p>
+              <p class="metric-info-text">
+                Paused time is not counted as focus time.
+              </p>
+              <p class="metric-info-note">Use the range selector to compare day, week, or month totals.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusManualTimeInfoModal" class="modal hidden" data-modal="focusManualTimeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Manual focus</h3>
+            <p class="metric-info-sub">Time spent in focus sessions you started and stopped manually.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Any focus session started without a strict timer.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it excludes</p>
+              <p class="metric-info-text">
+                Strict focus time is tracked separately in the “Strict time” metric.
+              </p>
+              <p class="metric-info-note">Paused time is not counted as manual focus time.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusStrictTimeInfoModal" class="modal hidden" data-modal="focusStrictTimeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Strict time</h3>
+            <p class="metric-info-sub">Time spent in strict focus sessions with a fixed timer.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Strict sessions where focus stays on until the timer completes.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it excludes</p>
+              <p class="metric-info-text">
+                Manual focus sessions are tracked separately in “Manual focus.”
+              </p>
+              <p class="metric-info-note">Paused time is not counted as strict focus time.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusPauseTimeInfoModal" class="modal hidden" data-modal="focusPauseTimeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Pause time</h3>
+            <p class="metric-info-sub">Total time focus was paused during the selected range.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Manual pauses and timed pauses while focus is enabled.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Why it matters</p>
+              <p class="metric-info-text">
+                Higher pause time lowers Focus reliability and indicates more interruptions.
+              </p>
+              <p class="metric-info-note">Pause time is not counted as focus time.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusFirstPauseInfoModal" class="modal hidden" data-modal="focusFirstPauseInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Time to first pause</h3>
+            <p class="metric-info-sub">How long you stayed in focus before the first pause.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Measured from the start of each focus session to the first pause in that session.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is shown</p>
+              <p class="metric-info-text">
+                The summary uses the earliest pause across sessions in the selected range.
+              </p>
+              <p class="metric-info-note">If no pauses occurred, the metric stays blank.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroReliabilityInfoModal" class="modal hidden" data-modal="pomodoroReliabilityInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro summary metric</p>
+            <h3 class="metric-info-title">Pomodoro reliability</h3>
+            <p class="metric-info-sub">How consistently you complete pomodoro cycles.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Completed pomodoros divided by total pomodoro sessions started.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is calculated</p>
+              <p class="metric-info-text metric-info-math">
+                completed pomodoros / total pomodoros
+              </p>
+              <p class="metric-info-note">Interrupted sessions reduce this score.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroPauseBurdenInfoModal" class="modal hidden" data-modal="pomodoroPauseBurdenInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro summary metric</p>
+            <h3 class="metric-info-title">Pause burden</h3>
+            <p class="metric-info-sub">How much of pomodoro time was spent paused.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Pause time divided by total pomodoro time plus pause time.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is calculated</p>
+              <p class="metric-info-text metric-info-math">
+                pause time / (pomodoro time + pause time)
+              </p>
+              <p class="metric-info-note">Lower is better for smoother sessions.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroTotalTimeInfoModal" class="modal hidden" data-modal="pomodoroTotalTimeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro summary metric</p>
+            <h3 class="metric-info-title">Total pomodoro time</h3>
+            <p class="metric-info-sub">Total time recorded across pomodoro sessions in the range.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Work and break periods from all pomodoro sessions.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it excludes</p>
+              <p class="metric-info-text">
+                Time outside pomodoro sessions and time while focus is off.
+              </p>
+              <p class="metric-info-note">Pause time is tracked separately in pause burden.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroFocusTimeInfoModal" class="modal hidden" data-modal="pomodoroFocusTimeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro summary metric</p>
+            <h3 class="metric-info-title">Focus time</h3>
+            <p class="metric-info-sub">Total work time inside pomodoro sessions.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Work intervals from all pomodoro sessions.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it excludes</p>
+              <p class="metric-info-text">
+                Break intervals and time outside pomodoro sessions.
+              </p>
+              <p class="metric-info-note">Use Total pomodoro time for work + break totals.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroBreakTimeInfoModal" class="modal hidden" data-modal="pomodoroBreakTimeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro summary metric</p>
+            <h3 class="metric-info-title">Break time (est.)</h3>
+            <p class="metric-info-sub">Estimated rest time based on your pomodoro settings.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is calculated</p>
+              <p class="metric-info-text">
+                Estimated from your configured break minutes per cycle and session count.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Why it is estimated</p>
+              <p class="metric-info-text">
+                Break duration is inferred from settings, not directly tracked per session.
+              </p>
+              <p class="metric-info-note">Actual breaks may vary if sessions are interrupted.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroTagsCompletedInfoModal" class="modal hidden" data-modal="pomodoroTagsCompletedInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro summary metric</p>
+            <h3 class="metric-info-title">Tags completed</h3>
+            <p class="metric-info-sub">Number of pomodoro tags marked as completed.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Pomodoro sessions that finish with a completed outcome.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Why it matters</p>
+              <p class="metric-info-text">
+                Tracks how often you finish planned pomodoro work without interruption.
+              </p>
+              <p class="metric-info-note">Interrupted sessions are counted separately.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroTagsInterruptedInfoModal" class="modal hidden" data-modal="pomodoroTagsInterruptedInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro summary metric</p>
+            <h3 class="metric-info-title">Tags interrupted</h3>
+            <p class="metric-info-sub">Number of pomodoro sessions that ended early.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Sessions marked as interrupted or detected as ending before the full cycle.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Why it matters</p>
+              <p class="metric-info-text">
+                Helps spot patterns that break your pomodoro flow.
+              </p>
+              <p class="metric-info-note">Lower is better for reliable cycles.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="usageBlockedInfoModal" class="modal hidden" data-modal="usageBlockedInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Web usage metric</p>
+            <h3 class="metric-info-title">Blocked sites</h3>
+            <p class="metric-info-sub">Time spent on sites that are currently blocked.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Total time on domains in your blocked lists.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is used</p>
+              <p class="metric-info-text">
+                Helps quantify distraction time compared to allowed and other sites.
+              </p>
+              <p class="metric-info-note">The range selector changes the totals shown here.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="usageAllowedInfoModal" class="modal hidden" data-modal="usageAllowedInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Web usage metric</p>
+            <h3 class="metric-info-title">Allowed sites</h3>
+            <p class="metric-info-sub">Time spent on sites explicitly marked as allowed.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Total time on domains in your allowed lists.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Why it matters</p>
+              <p class="metric-info-text">
+                Highlights productive or trusted sites you use during focus.
+              </p>
+              <p class="metric-info-note">Compare with blocked and other time for balance.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="usageOtherInfoModal" class="modal hidden" data-modal="usageOtherInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Web usage metric</p>
+            <h3 class="metric-info-title">Other sites</h3>
+            <p class="metric-info-sub">Time spent on sites that are neither blocked nor allowed.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                All tracked browsing time not in your blocked or allowed lists.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Why it matters</p>
+              <p class="metric-info-text">
+                Highlights unclassified browsing so you can decide to allow or block.
+              </p>
+              <p class="metric-info-note">Add sites to lists to reduce this bucket.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="usageTotalInfoModal" class="modal hidden" data-modal="usageTotalInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Web usage metric</p>
+            <h3 class="metric-info-title">Total web time</h3>
+            <p class="metric-info-sub">All tracked browsing time across every site.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Blocked, allowed, and other browsing time combined.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is used</p>
+              <p class="metric-info-text">
+                Provides the baseline for the usage breakdown and trends.
+              </p>
+              <p class="metric-info-note">Use the range selector to compare totals.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="usageHeatmapInfoModal" class="modal hidden" data-modal="usageHeatmapInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Web usage visualization</p>
+            <h3 class="metric-info-title">Heatmap</h3>
+            <p class="metric-info-sub">Shows hourly browsing intensity for the last week.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">How to read it</p>
+              <p class="metric-info-text">
+                Each cell is an hour (0-23). Brighter cells mean more browsing time.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Color meaning</p>
+              <p class="metric-info-text">
+                Cells shift toward red when more time is blocked, and green when more time is allowed.
+              </p>
+              <p class="metric-info-note">This view always uses the last 7 days.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="usageTopSitesInfoModal" class="modal hidden" data-modal="usageTopSitesInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Web usage visualization</p>
+            <h3 class="metric-info-title">Top Sites</h3>
+            <p class="metric-info-sub">Breakdown of your most visited domains for the selected range.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">How to read it</p>
+              <p class="metric-info-text">
+                Each slice represents a site. Larger slices mean more time spent.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Controls</p>
+              <p class="metric-info-text">
+                Use the range and filter toggles to narrow the list to all, blocked, or allowed sites.
+              </p>
+              <p class="metric-info-note">Totals are based on tracked browsing time only.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="usageTrendInfoModal" class="modal hidden" data-modal="usageTrendInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Web usage visualization</p>
+            <h3 class="metric-info-title">Web Usage Trend</h3>
+            <p class="metric-info-sub">Tracks how your browsing changes across days, weeks, or months.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it shows</p>
+              <p class="metric-info-text">
+                Total browsing time for the selected filter (all, blocked, or allowed).
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How to use it</p>
+              <p class="metric-info-text">
+                Click to open the detailed trend view and change the time range.
+              </p>
+              <p class="metric-info-note">Daily averages and comparisons update with the range.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="pomodoroTrendInfoModal" class="modal hidden" data-modal="pomodoroTrendInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro visualization</p>
+            <h3 class="metric-info-title">Pomodoro Trend</h3>
+            <p class="metric-info-sub">Tracks how your completed pomodoros change over time.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it shows</p>
+              <p class="metric-info-text">
+                Completed pomodoro tags for today and this week, plus the daily average.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How to use it</p>
+              <p class="metric-info-text">
+                Click to open the detailed trend view and switch time ranges.
+              </p>
+              <p class="metric-info-note">Comparisons update against the previous period.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="tagsInfoModal" class="modal hidden" data-modal="tagsInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Pomodoro tags</p>
+            <h3 class="metric-info-title">Tags</h3>
+            <p class="metric-info-sub">Organize pomodoro sessions by goals or tasks.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it works</p>
+              <p class="metric-info-text">
+                Choose a tag before starting a pomodoro to group sessions.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">Why it matters</p>
+              <p class="metric-info-text">
+                Helps track progress by project and see completion trends.
+              </p>
+              <p class="metric-info-note">Use “Show all” to view every tag in the range.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
         </div>
       </div>
     </div>

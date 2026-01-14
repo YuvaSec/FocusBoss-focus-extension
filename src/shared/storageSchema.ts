@@ -4,8 +4,10 @@ export type AnalyticsSession = {
   id: string;
   startedAt: number;
   endedAt: number;
-  type: "pomodoro" | "strict";
+  type: "pomodoro" | "strict" | "focus" | "pause";
   tagId?: string | null;
+  source?: "manual" | "schedule" | "pomodoro";
+  outcome?: "completed" | "interrupted";
   focusEnabledDuring: boolean;
   distractions: number;
   notes?: string;
@@ -15,10 +17,13 @@ export type AnalyticsSession = {
 export type StorageSchema = {
   schemaVersion: SchemaVersion;
   focusEnabled: boolean;
+  focusSessionStartedAt?: number;
+  focusSessionSource?: "manual" | "schedule";
   pause: {
     isPaused: boolean;
     pauseType: "1h" | "eod" | "manual" | null;
     pauseEndAt: number | null;
+    pauseStartedAt?: number;
   };
   overlayMode: boolean;
   confirmationPrompt: boolean;
@@ -105,6 +110,7 @@ export type StorageSchema = {
       remainingMs?: number;
       linkedTagId?: string | null;
       prevFocusEnabled?: boolean;
+      pauseStartedAt?: number;
     } | null;
   };
   tags: {
@@ -174,10 +180,13 @@ export const SCHEMA_VERSION: SchemaVersion = 3;
 export const defaultState: StorageSchema = {
   schemaVersion: SCHEMA_VERSION,
   focusEnabled: false,
+  focusSessionStartedAt: undefined,
+  focusSessionSource: undefined,
   pause: {
     isPaused: false,
     pauseType: null,
-    pauseEndAt: null
+    pauseEndAt: null,
+    pauseStartedAt: undefined
   },
   overlayMode: false,
   confirmationPrompt: true,
