@@ -299,6 +299,8 @@ p {margin: 0;color: var(--fb-text-muted);}
 .row {display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);}
 .row + .row {margin-top: var(--space-2);}
 .list-input-row .text-input { flex: 1; min-width: 0; }
+.title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.title-info { display: inline-flex; align-items: center; gap: 6px; color: var(--fb-text-muted); }
 
 /* ====================================================================================================
       8) Inputs and form controls, Text fields, selects, toggles, and segmented controls.
@@ -621,20 +623,50 @@ body.modal-open { overflow: hidden; }
 .pomodoro-config-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fb-text-muted); }
 .pomodoro-config-value { font-size: 16px; font-weight: 600; color: var(--pomodoro-foreground); }
 
+.view[data-view="timer"] > .card:first-of-type { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 150px); grid-template-areas: "header header" "timer config" "toggles toggles"; gap: 12px; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-header { grid-area: header; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-timer { grid-area: timer; margin-top: 0 !important; align-self: center; display: grid; place-items: center; }
+.view[data-view="timer"] > .card:first-of-type .neo-timer { margin: 0; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-timer .neo-timer { width: 200px; height: 200px; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-timer .neo-timer-inner { inset: 16px; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-timer .neo-timer-track,
+.view[data-view="timer"] > .card:first-of-type .pomodoro-timer .neo-timer-progress { stroke-width: 16; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-timer .neo-timer-value { font-size: 34px; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-timer .neo-timer-track { stroke-width: 16; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-config-row { grid-area: config; grid-template-columns: 1fr; margin-top: 0 !important; align-self: center; justify-self: end; width: min(100px, 100%); gap: 6px; min-height: 200px; align-content: center; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-config-col { padding: 6px 0; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-config-label { font-size: 10px; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-config-value { font-size: 13px; }
+.view[data-view="timer"] > .card:first-of-type .pomodoro-toggle-grid { grid-area: toggles; grid-template-columns: repeat(auto-fit, 1fr); margin-top: 0 !important; }
+
 /* =========================
    17) Neumorphic timer (reusable)
    ========================= */
 .neo-timer { position: relative; width: 240px; height: 240px; margin: 0 auto; }
+.neo-timer.neo-timer-compact { width: 200px; height: 200px; }
+
 .neo-timer-outer { position: absolute; inset: 0; border-radius: 50%; background: var(--pomodoro-bg); box-shadow: var(--pomodoro-shadow); }
+
 .neo-timer-inner { position: absolute; inset: 20px; border-radius: 50%; background: var(--pomodoro-bg); box-shadow: var(--pomodoro-shadow-inset); }
+.neo-timer.neo-timer-compact .neo-timer-inner { inset: 16px; }
+
 .neo-timer-svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+
 .neo-timer-track { fill: none; stroke: var(--pomodoro-muted); stroke-width: 12; stroke-linecap: round; }
+.neo-timer.neo-timer-compact .neo-timer-track { stroke-width: 16; }
+
 .neo-timer-progress { fill: none; stroke: var(--pomodoro-accent); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.3s ease-out; filter: var(--timer-progress-shadow); }
+.neo-timer.neo-timer-compact .neo-timer-progress { stroke-width: 16; }
+
 .neo-timer-time { position: absolute; inset: 0; pointer-events: none; }
+
 .neo-timer-value { font-size: 40px; font-weight: 600; letter-spacing: -1px; color: var(--pomodoro-foreground); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.neo-timer.neo-timer-compact .neo-timer-value { font-size: 34px; }
+
 .neo-timer-label { margin-top: 8px; font-size: 12px; color: var(--pomodoro-muted-foreground); }
 .neo-timer-meta { position: absolute; inset: 0; }
 .neo-timer-meta .timer-pill { position: absolute; left: 50%; transform: translateX(-50%); }
+
 #pomodoroPhasePill { top: 50%; transform: translate(-50%, -66px); }
 #pomodoroCyclePill { top: 50%; transform: translate(-50%, 34px); }
 .timer-pill { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text); box-shadow: var(--fb-neo-sm); white-space: nowrap; }
@@ -643,6 +675,16 @@ body.modal-open { overflow: hidden; }
 
 .pomodoro-timer { --neo-timer-bg: var(--pomodoro-bg); --neo-timer-foreground: var(--pomodoro-foreground); --neo-timer-muted: var(--pomodoro-muted); --neo-timer-muted-foreground: var(--pomodoro-muted-foreground); --neo-timer-accent: var(--pomodoro-accent); --neo-timer-shadow: var(--pomodoro-shadow); --neo-timer-shadow-inset: var(--pomodoro-shadow-inset); }
 .strict-timer { --neo-timer-bg: var(--strict-overlay-bg); --neo-timer-foreground: var(--strict-overlay-text); --neo-timer-muted: var(--strict-ring-track); --neo-timer-muted-foreground: var(--strict-overlay-muted); --neo-timer-accent: var(--strict-ring-progress); --neo-timer-shadow: var(--fb-shadow-lg); --neo-timer-shadow-inset: var(--fb-shadow-inset); }
+
+.support-card { display: grid; gap: 12px; }
+.support-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fb-text-muted); }
+.support-message { font-size: 13px; line-height: 1.6; color: var(--fb-text); }
+.support-divider { height: 1px; background: linear-gradient(to right, transparent, var(--fb-border), transparent); }
+.support-footer { display: flex; flex-wrap: wrap; gap: 8px; }
+.support-button { border: 1px solid var(--fb-border); border-radius: 999px; padding: 7px 14px; font-size: 12px; font-weight: 600; color: var(--fb-text); background: var(--fb-surface-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; box-shadow: var(--fb-neo-sm); transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease; }
+.support-button:hover { transform: translateY(-1px); box-shadow: var(--fb-neo-lg); border-color: var(--fb-accent); }
+.support-button-primary { background: var(--fb-accent-muted); }
+.support-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--fb-accent); box-shadow: var(--fb-shadow-sm); }
 
 /* ====================================================================================================
    18) Interventions (friction modes)
@@ -804,6 +846,9 @@ body.modal-open { overflow: hidden; }
 .tag-show-all:hover,
 #statsShowAll:hover,
 .stats-export-card .btn:hover { color: var(--fb-text); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); }
+.stats-export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+.stats-export-card .btn { width: 100%; }
+
 
 .trend-label { font-size: 10px; color: var(--fb-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 32px; }
 

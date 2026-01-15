@@ -132,9 +132,15 @@ const shouldCount = (url?: string | null): boolean => {
   return Boolean(url && url.startsWith("http"));
 };
 
-const getTab = (tabId: number): Promise<chrome.tabs.Tab> => {
+const getTab = (tabId: number): Promise<chrome.tabs.Tab | null> => {
   return new Promise((resolve) => {
-    chrome.tabs.get(tabId, (tab) => resolve(tab));
+    chrome.tabs.get(tabId, (tab) => {
+      if (chrome.runtime.lastError) {
+        resolve(null);
+        return;
+      }
+      resolve(tab ?? null);
+    });
   });
 };
 
@@ -518,7 +524,7 @@ const flushActive = async (reason: string) => {
   if (activeTabId) {
     try {
       const tab = await getTab(activeTabId);
-      url = tab.url;
+      url = tab?.url ?? null;
     } catch {
       url = null;
     }
@@ -542,7 +548,7 @@ const setActiveTab = async (tabId: number | null) => {
   }
 
   const tab = await getTab(tabId);
-  if (!shouldCount(tab.url ?? null)) {
+  if (!tab || !shouldCount(tab.url ?? null)) {
     await flushActive("non-http");
     activeTabId = tabId;
     activeHost = null;

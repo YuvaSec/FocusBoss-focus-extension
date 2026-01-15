@@ -2385,7 +2385,7 @@ const renderStats = (state: StorageSchema) => {
   });
 
   if (statsSummaryView || statsTrendView || statsUsageTrendView || statsTagView) {
-    setStatsSubview(currentStatsSubview);
+    setStatsSubview(currentStatsSubview, { scroll: "none" });
   }
   setStatsSegment(currentStatsSegment);
   const pomodoroRangeLabel =

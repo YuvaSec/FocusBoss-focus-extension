@@ -2882,7 +2882,7 @@ html[data-theme="light"] .timeline-bar {
   --pomodoro-foreground: #1a1a1a;
   --pomodoro-muted: var(--neo-bg-alt);
   --pomodoro-muted-foreground: #6c7382;
-  --pomodoro-accent: hsl(48, 100%, 55%);
+  --pomodoro-accent: hsl(48, 100%, 50%);
   --pomodoro-shadow: var(--neo-shadow);
   --pomodoro-shadow-inset: var(--neo-shadow-inset);
   --pomodoro-shadow-sm: var(--neo-shadow-sm);

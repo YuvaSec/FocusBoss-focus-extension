@@ -24,7 +24,17 @@
         <section class="card view" data-view="home">
           <div class="row">
             <div>
-              <h2>Focus Mode</h2>
+              <div class="title-row">
+                <h2>Focus Mode</h2>
+                <div class="title-info">
+                  <button
+                    class="icon-btn icon-only info-icon"
+                    type="button"
+                    data-open-modal="focusModeInfo"
+                    aria-label="Focus Mode info"
+                  >i</button>
+                </div>
+              </div>
               <p>Keep distractions out.</p>
             </div>
             <label class="toggle">
@@ -67,7 +77,17 @@
           <div class="card">
             <div class="row">
               <div>
-                <h2>Strict Mode</h2>
+                <div class="title-row">
+                  <h2>Strict Mode</h2>
+                  <div class="title-info">
+                    <button
+                      class="icon-btn icon-only info-icon"
+                      type="button"
+                      data-open-modal="strictModeInfo"
+                      aria-label="Strict Mode info"
+                    >i</button>
+                  </div>
+                </div>
                 <p id="strictStatus" class="list-sub">No strict session running.</p>
               </div>
               <button id="strictStart" class="btn btn-small">Start</button>
@@ -225,7 +245,7 @@
                 </button>
               </div>
             </div>
-            <div class="neo-timer pomodoro-timer" style="margin-top: 12px;">
+            <div class="neo-timer neo-timer-compact pomodoro-timer" style="margin-top: 12px;">
               <div class="neo-timer-outer"></div>
               <div class="neo-timer-inner"></div>
               <svg class="neo-timer-svg" viewBox="0 0 240 240" aria-hidden="true">
@@ -489,10 +509,10 @@
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
                     <button id="exportSessionsCsv" class="btn btn-small">
-                      Export pomodoro summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Pomodoro summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                     <button id="exportPomodoroJson" class="btn btn-small">
-                      Export pomodoro summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Pomodoro summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                   </div>
                 </div>
@@ -646,10 +666,10 @@
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
                     <button id="exportFocusCsv" class="btn btn-small">
-                      Export focus summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Focus summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                     <button id="exportFocusJson" class="btn btn-small">
-                      Export focus summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Focus summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                   </div>
                 </div>
@@ -774,14 +794,14 @@
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
                     <button id="exportUsageCsv" class="btn btn-small">
-                      Export usage summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Usage summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                     <button id="exportUsageJson" class="btn btn-small">
-                      Export usage summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Usage summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
-                    <button id="exportBlockedCsv" class="btn btn-small">
-                      Export blocked CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
-                    </button>
+<!--                    <button id="exportBlockedCsv" class="btn btn-small">-->
+<!--                      Blocked CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>-->
+<!--                    </button>-->
                   </div>
                 </div>
               </div>
@@ -1000,19 +1020,29 @@
             </div>
           </div>
 
-          <div class="card" style="margin-top: 12px;">
-            <div class="row">
-              <div>
-                <h3>Links</h3>
-                <p class="list-sub">Get updates and leave feedback.</p>
-              </div>
+          <div class="card support-card" style="margin-top: 12px;">
+            <div class="support-label">A small note</div>
+            <div class="support-message">
+              Your support helps me keep shaping this with care. Thank you for even considering it.
             </div>
-            <div class="list-items" style="margin-top: 10px;">
-              <a id="reviewLink" class="settings-link" aria-disabled="true">Review (coming soon)</a>
-              <a id="githubLink" class="settings-link" href="https://github.com/YuvaSec" target="_blank" rel="noreferrer">GitHub</a>
-              <a id="discordLink" class="settings-link" href="https://discord.gg/wY5YF99JCj" target="_blank" rel="noreferrer">Discord</a>
+            <div class="support-divider"></div>
+            <div class="support-footer">
+              <a
+                class="support-button"
+                href="https://discord.gg/wY5YF99JCj"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span class="support-dot" aria-hidden="true"></span>
+                <span>Join Discord</span>
+              </a>
+              <a class="support-button support-button-primary" href="#">
+                <span class="support-dot" aria-hidden="true"></span>
+                <span>Support the project</span>
+              </a>
             </div>
           </div>
+
 
           <div class="settings-footer">
             <div id="versionLabel" class="list-sub">Version</div>
@@ -1058,7 +1088,14 @@
             <path d="M21 22H3" />
           </svg>
         </button>
-        <button class="nav-btn" data-target="lists" data-i="1" aria-label="Lists">
+        <button class="nav-btn" data-target="timer" data-i="1" aria-label="Pomodoro">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 2h4" />
+            <path d="M12 14v-4" />
+            <circle cx="12" cy="14" r="8" />
+          </svg>
+        </button>
+        <button class="nav-btn" data-target="lists" data-i="2" aria-label="Lists">
           <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M8 6h13" />
             <path d="M8 12h13" />
@@ -1066,13 +1103,6 @@
             <path d="M3 6h.01" />
             <path d="M3 12h.01" />
             <path d="M3 18h.01" />
-          </svg>
-        </button>
-        <button class="nav-btn" data-target="timer" data-i="2" aria-label="Timer">
-          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M10 2h4" />
-            <path d="M12 14v-4" />
-            <circle cx="12" cy="14" r="8" />
           </svg>
         </button>
         <button class="nav-btn" data-target="stats" data-i="3" aria-label="Stats">
@@ -1334,6 +1364,66 @@
         <div id="statusInfoBody" style="margin-top: 12px;"></div>
         <div class="modal-actions" style="margin-top: 14px;">
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="focusModeInfoModal" class="modal hidden" data-modal="focusModeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus mode</p>
+            <h3 class="metric-info-title">Focus Mode</h3>
+            <p class="metric-info-sub">Turn on Focus Mode to apply your blocking rules.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it does</p>
+              <p class="metric-info-text">
+                Blocks sites and keywords in your blocked list while Focus Mode is on.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How to use it</p>
+              <p class="metric-info-text">
+                Toggle Focus Mode on or off, or use the “Turn off until” chips for a timed pause.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="strictModeInfoModal" class="modal hidden" data-modal="strictModeInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus mode</p>
+            <h3 class="metric-info-title">Strict Mode</h3>
+            <p class="metric-info-sub">Locks focus for a set duration.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it does</p>
+              <p class="metric-info-text">
+                Prevents turning Focus Mode off until the strict timer ends.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How to use it</p>
+              <p class="metric-info-text">
+                Pick a duration and press Start to begin a strict session.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
         </div>
       </div>
     </div>
