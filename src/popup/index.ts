@@ -174,9 +174,11 @@ const statsSessions = document.getElementById("statsSessions");
 const timeMachineDays = document.getElementById("timeMachineDays");
 const timeMachineDetails = document.getElementById("timeMachineDetails");
 const exportSessionsCsv = document.getElementById("exportSessionsCsv") as HTMLButtonElement | null;
+const exportPomodoroJson = document.getElementById("exportPomodoroJson") as HTMLButtonElement | null;
 const exportFocusCsv = document.getElementById("exportFocusCsv") as HTMLButtonElement | null;
 const exportFocusJson = document.getElementById("exportFocusJson") as HTMLButtonElement | null;
 const exportUsageCsv = document.getElementById("exportUsageCsv") as HTMLButtonElement | null;
+const exportUsageJson = document.getElementById("exportUsageJson") as HTMLButtonElement | null;
 const exportBlockedCsv = document.getElementById("exportBlockedCsv") as HTMLButtonElement | null;
 const scheduleAdd = document.getElementById("scheduleAdd");
 const scheduleList = document.getElementById("scheduleList");
@@ -193,6 +195,7 @@ const backupDownload = document.getElementById("backupDownload") as HTMLButtonEl
 const restoreFile = document.getElementById("restoreFile") as HTMLInputElement | null;
 const restoreFileButton = document.getElementById("restoreFileButton") as HTMLButtonElement | null;
 const restoreFileName = document.getElementById("restoreFileName");
+const restoreFileMeta = document.getElementById("restoreFileMeta");
 const restoreIncludeAnalytics = document.getElementById(
   "restoreIncludeAnalytics"
 ) as HTMLInputElement | null;
@@ -1352,6 +1355,14 @@ const formatTimeLabel = (timestamp: number): string => {
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 };
 
+const minutesFromMs = (ms: number): number => {
+  return Math.round(ms / 60000);
+};
+
+const minutesFromMsPrecise = (ms: number): number => {
+  return Math.round((ms / 60000) * 100) / 100;
+};
+
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 };
@@ -1418,17 +1429,31 @@ const buildSessionIndexes = (sessions: StorageSchema["analytics"]["sessions"]) =
   return { byDay, byMonth };
 };
 
+const normalizeAnalytics = (analytics: StorageSchema["analytics"]) => {
+  const sessions = Array.isArray(analytics.sessions) ? analytics.sessions : [];
+  const sessionsByDay =
+    isPlainObject(analytics.sessionsByDay) ? analytics.sessionsByDay : {};
+  const flattenedSessions =
+    sessions.length > 0
+      ? sessions
+      : Object.values(sessionsByDay).flatMap((items) =>
+          Array.isArray(items) ? items : []
+        );
+  const indexes = buildSessionIndexes(flattenedSessions);
+  return {
+    ...analytics,
+    byDay: isPlainObject(analytics.byDay) ? analytics.byDay : {},
+    sessions: flattenedSessions,
+    sessionsByDay: indexes.byDay,
+    sessionsByMonth: indexes.byMonth
+  };
+};
+
 const sanitizeBackupState = (state: StorageSchema, includeAnalytics: boolean) => {
-  const analytics = state.analytics;
+  const analytics =
+    isPlainObject(state.analytics) ? state.analytics : defaultState.analytics;
   const nextAnalytics = includeAnalytics
-    ? (() => {
-        const indexes = buildSessionIndexes(analytics.sessions ?? []);
-        return {
-          ...analytics,
-          sessionsByDay: indexes.byDay,
-          sessionsByMonth: indexes.byMonth
-        };
-      })()
+    ? normalizeAnalytics(analytics)
     : {
         ...analytics,
         byDay: {},
@@ -1457,6 +1482,22 @@ const sanitizeBackupState = (state: StorageSchema, includeAnalytics: boolean) =>
     },
     analytics: nextAnalytics
   };
+};
+
+const hasAnalyticsData = (analytics: StorageSchema["analytics"] | undefined) => {
+  if (!analytics) {
+    return false;
+  }
+  if (Array.isArray(analytics.sessions) && analytics.sessions.length > 0) {
+    return true;
+  }
+  if (
+    isPlainObject(analytics.sessionsByDay) &&
+    Object.keys(analytics.sessionsByDay).length > 0
+  ) {
+    return true;
+  }
+  return isPlainObject(analytics.byDay) && Object.keys(analytics.byDay).length > 0;
 };
 
 const writeFullState = async (state: StorageSchema) => {
@@ -1552,6 +1593,169 @@ const buildUsageTotals = (state: StorageSchema, keys: string[]) => {
   });
   const otherMs = Math.max(0, totalMs - allowedMs - blockedMs);
   return { totalMs, blockedMs, allowedMs, otherMs };
+};
+
+const buildFocusSummaryMetricsForKeys = (
+  state: StorageSchema,
+  keys: string[]
+) => {
+  const sessions = getSessionsForKeys(state, keys);
+  const focusSessions = sessions.filter((session) => session.type === "focus");
+  const strictSessions = sessions.filter((session) => session.type === "strict");
+  const pomodoroSessions = sessions.filter((session) => session.type === "pomodoro");
+  const pauseSessions = sessions.filter((session) => session.type === "pause");
+  const sumDuration = (items: typeof sessions) =>
+    items.reduce((sum, session) => sum + Math.max(0, session.endedAt - session.startedAt), 0);
+  const totalFocusMs = sumDuration(focusSessions) + sumDuration(strictSessions);
+  const manualFocusMs = sumDuration(focusSessions);
+  const pauseMs = sumDuration(pauseSessions);
+  const strictMs = sumDuration(strictSessions);
+  const pomodoroMs = sumDuration(pomodoroSessions);
+  const pomodoroCount = pomodoroSessions.length;
+  const denom = totalFocusMs + pauseMs;
+  const reliability = denom > 0 ? clamp((totalFocusMs - pauseMs) / denom, 0, 1) : 0;
+  const focusWindows = [...focusSessions, ...strictSessions, ...pomodoroSessions];
+  const firstPauseDeltas: number[] = [];
+  focusWindows.forEach((session) => {
+    const firstPause = pauseSessions
+      .filter(
+        (pause) => pause.startedAt >= session.startedAt && pause.startedAt <= session.endedAt
+      )
+      .sort((a, b) => a.startedAt - b.startedAt)[0];
+    if (firstPause) {
+      firstPauseDeltas.push(Math.max(0, firstPause.startedAt - session.startedAt));
+    }
+  });
+  const avgFirstPause =
+    firstPauseDeltas.length > 0
+      ? Math.round(firstPauseDeltas.reduce((sum, value) => sum + value, 0) / firstPauseDeltas.length)
+      : null;
+  const scheduleIntervals = buildScheduleIntervals(state.schedule, keys);
+  const scheduleTotalMs = scheduleIntervals.reduce(
+    (sum, interval) => sum + Math.max(0, interval.end - interval.start),
+    0
+  );
+  const focusDuringScheduleMs = scheduleIntervals.length
+    ? [...focusSessions, ...strictSessions].reduce((sum, session) => {
+        const sessionStart = session.startedAt;
+        const sessionEnd = session.endedAt;
+        if (sessionEnd <= sessionStart) {
+          return sum;
+        }
+        const overlap = scheduleIntervals.reduce((acc, interval) => {
+          const start = Math.max(sessionStart, interval.start);
+          const end = Math.min(sessionEnd, interval.end);
+          return acc + Math.max(0, end - start);
+        }, 0);
+        return sum + overlap;
+      }, 0)
+    : 0;
+  const scheduleReliability =
+    scheduleTotalMs > 0 ? clamp(focusDuringScheduleMs / scheduleTotalMs, 0, 1) : null;
+  const streakSessions = sessions
+    .filter((session) =>
+      ["focus", "strict", "pomodoro", "pause"].includes(session.type)
+    )
+    .map((session) => ({
+      start: session.startedAt,
+      end: Math.max(session.startedAt, session.endedAt)
+    }))
+    .filter((session) => session.end > session.start)
+    .sort((a, b) => a.start - b.start);
+  let longestStreakMs = 0;
+  if (streakSessions.length > 0) {
+    let currentStart = streakSessions[0].start;
+    let currentEnd = streakSessions[0].end;
+    for (let i = 1; i < streakSessions.length; i += 1) {
+      const next = streakSessions[i];
+      if (next.start <= currentEnd) {
+        currentEnd = Math.max(currentEnd, next.end);
+      } else {
+        longestStreakMs = Math.max(longestStreakMs, currentEnd - currentStart);
+        currentStart = next.start;
+        currentEnd = next.end;
+      }
+    }
+    longestStreakMs = Math.max(longestStreakMs, currentEnd - currentStart);
+  }
+  return {
+    keys,
+    totalFocusMs,
+    manualFocusMs,
+    manualCount: focusSessions.length,
+    strictMs,
+    strictCount: strictSessions.length,
+    pauseMs,
+    pauseCount: pauseSessions.length,
+    pomodoroMs,
+    pomodoroCount,
+    reliability,
+    scheduleReliability,
+    longestStreakMs,
+    avgFirstPause
+  };
+};
+
+const buildFocusSummaryMetrics = (
+  state: StorageSchema,
+  range: "today" | "week" | "month"
+) => buildFocusSummaryMetricsForKeys(state, getRangeKeys(range));
+
+const buildPomodoroSummaryMetrics = (state: StorageSchema, keys: string[]) => {
+  const sessionsInRange = getSessionsForKeys(state, keys);
+  const pomodoroSessions = sessionsInRange.filter((session) => session.type === "pomodoro");
+  const workMsEst = pomodoroSessions.length * state.pomodoro.workMin * 60 * 1000;
+  const breakMsEst = pomodoroSessions.length * state.pomodoro.breakMin * 60 * 1000;
+  const pomodoroMs = workMsEst + breakMsEst;
+  const pauseMs = sessionsInRange
+    .filter((session) => session.type === "pause" && session.source === "pomodoro")
+    .reduce((acc, session) => acc + Math.max(0, session.endedAt - session.startedAt), 0);
+  const completions = pomodoroSessions.filter(
+    (session) => session.outcome === "completed" || session.outcome === "interrupted"
+  );
+  const expectedFullMs =
+    (state.pomodoro.cycles > 0 ? state.pomodoro.cycles : 1) *
+    (state.pomodoro.workMin + state.pomodoro.breakMin) *
+    60 *
+    1000;
+  const isInterrupted = (session: StorageSchema["analytics"]["sessions"][number]) => {
+    if (session.outcome === "interrupted") {
+      return true;
+    }
+    if (session.outcome === "completed") {
+      return false;
+    }
+    const duration = Math.max(0, session.endedAt - session.startedAt);
+    return duration + 1000 < expectedFullMs;
+  };
+  const interruptedCount =
+    completions.length > 0
+      ? completions.filter((session) => session.outcome === "interrupted").length
+      : pomodoroSessions.filter(isInterrupted).length;
+  const completedCount =
+    completions.length > 0
+      ? completions.filter((session) => session.outcome === "completed").length
+      : pomodoroSessions.length - interruptedCount;
+  const reliability =
+    pomodoroSessions.length > 0 ? completedCount / pomodoroSessions.length : 0;
+  const pauseBurden = pomodoroMs + pauseMs > 0 ? pauseMs / (pomodoroMs + pauseMs) : 0;
+  const tagsCompleted =
+    completions.length > 0
+      ? completions.filter((session) => session.outcome === "completed").length
+      : pomodoroSessions.filter((session) => !isInterrupted(session)).length;
+  const tagsInterrupted =
+    completions.length > 0
+      ? completions.filter((session) => session.outcome === "interrupted").length
+      : pomodoroSessions.filter(isInterrupted).length;
+  return {
+    pomodoroMs,
+    workMsEst,
+    breakMsEst,
+    reliability,
+    pauseBurden,
+    tagsCompleted,
+    tagsInterrupted
+  };
 };
 
 const buildUsageTrendBuckets = (
@@ -1928,70 +2132,20 @@ const getRangeKeys = (range: "today" | "week" | "month") => {
 
 
 const renderMetrics = (state: StorageSchema, keys: string[]) => {
-  const sessionsInRange = getSessionsForKeys(state, keys);
-  const keySet = new Set(keys);
-  const pomodoroSessions = sessionsInRange.filter((session) => session.type === "pomodoro");
-  const workMsEst = pomodoroSessions.length * state.pomodoro.workMin * 60 * 1000;
-  const breakMsEst = pomodoroSessions.length * state.pomodoro.breakMin * 60 * 1000;
-  const pomodoroMs = workMsEst + breakMsEst;
-  const pauseMs = sessionsInRange
-    .filter((session) => session.type === "pause" && session.source === "pomodoro")
-    .reduce((acc, session) => acc + Math.max(0, session.endedAt - session.startedAt), 0);
-  const completions = pomodoroSessions.filter(
-    (session) => session.outcome === "completed" || session.outcome === "interrupted"
-  );
-  const expectedFullMs =
-    (state.pomodoro.cycles > 0 ? state.pomodoro.cycles : 1) *
-    (state.pomodoro.workMin + state.pomodoro.breakMin) *
-    60 *
-    1000;
-  const isInterrupted = (session: StorageSchema["analytics"]["sessions"][number]) => {
-    if (session.outcome === "interrupted") {
-      return true;
-    }
-    if (session.outcome === "completed") {
-      return false;
-    }
-    const duration = Math.max(0, session.endedAt - session.startedAt);
-    return duration + 1000 < expectedFullMs;
-  };
-  const interruptedCount =
-    completions.length > 0
-      ? completions.filter((session) => session.outcome === "interrupted").length
-      : pomodoroSessions.filter(isInterrupted).length;
-  const completedCount =
-    completions.length > 0
-      ? completions.filter((session) => session.outcome === "completed").length
-      : pomodoroSessions.length - interruptedCount;
-  const reliability =
-    pomodoroSessions.length > 0 ? completedCount / pomodoroSessions.length : 0;
-  const pauseBurden = pomodoroMs + pauseMs > 0 ? pauseMs / (pomodoroMs + pauseMs) : 0;
-  const tagsCompleted =
-    completions.length > 0
-      ? completions.filter((session) => session.outcome === "completed").length
-      : pomodoroSessions.filter((session) => !isInterrupted(session)).length;
-  const tagsInterrupted =
-    completions.length > 0
-      ? completions.filter((session) => session.outcome === "interrupted").length
-      : pomodoroSessions.filter(isInterrupted).length;
-  const distractionMs = keys.reduce(
-    (acc, key) => acc + (state.analytics.byDay[key]?.blockedMs ?? 0),
-    0
-  );
+    const summary = buildPomodoroSummaryMetrics(state, keys);
 
-  if (metricFocus) metricFocus.textContent = formatDuration(workMsEst);
-  if (metricBreak) metricBreak.textContent = formatDuration(breakMsEst);
-  if (metricTags) metricTags.textContent = String(tagsCompleted);
-  if (metricTagsInterrupted) metricTagsInterrupted.textContent = String(tagsInterrupted);
-  if (metricDistraction) metricDistraction.textContent = formatDuration(distractionMs);
-  if (metricPomodoroTime) metricPomodoroTime.textContent = formatDuration(pomodoroMs);
-  if (metricPomodoroReliability) {
-    metricPomodoroReliability.textContent = `${Math.round(reliability * 100)}%`;
-  }
-  if (metricPomodoroPauseBurden) {
-    metricPomodoroPauseBurden.textContent = `${Math.round(pauseBurden * 100)}%`;
-  }
-};
+    if (metricFocus) metricFocus.textContent = formatDuration(summary.workMsEst);
+    if (metricBreak) metricBreak.textContent = formatDuration(summary.breakMsEst);
+    if (metricTags) metricTags.textContent = String(summary.tagsCompleted);
+    if (metricTagsInterrupted) metricTagsInterrupted.textContent = String(summary.tagsInterrupted);
+    if (metricPomodoroTime) metricPomodoroTime.textContent = formatDuration(summary.pomodoroMs);
+    if (metricPomodoroReliability) {
+      metricPomodoroReliability.textContent = `${Math.round(summary.reliability * 100)}%`;
+    }
+    if (metricPomodoroPauseBurden) {
+      metricPomodoroPauseBurden.textContent = `${Math.round(summary.pauseBurden * 100)}%`;
+    }
+  };
 
 const renderSessions = (state: StorageSchema, keys: string[]) => {
   if (!statsSessions) {
@@ -2169,110 +2323,31 @@ const renderTimeMachine = (state: StorageSchema) => {
 };
 
 const renderFocusSummary = (state: StorageSchema) => {
-  const keys = getRangeKeys(currentFocusSummaryRange);
-  const sessions = getSessionsForKeys(state, keys);
-  const focusSessions = sessions.filter((session) => session.type === "focus");
-  const strictSessions = sessions.filter((session) => session.type === "strict");
-  const pomodoroSessions = sessions.filter((session) => session.type === "pomodoro");
-  const pauseSessions = sessions.filter((session) => session.type === "pause");
-  const sumDuration = (items: typeof sessions) =>
-    items.reduce((sum, session) => sum + Math.max(0, session.endedAt - session.startedAt), 0);
+  const summary = buildFocusSummaryMetrics(state, currentFocusSummaryRange);
 
-  const totalFocusMs = sumDuration(focusSessions) + sumDuration(strictSessions);
-  const manualFocusMs = sumDuration(focusSessions);
-  const pauseMs = sumDuration(pauseSessions);
-  const strictMs = sumDuration(strictSessions);
-  const pomodoroMs = sumDuration(pomodoroSessions);
-  const denom = totalFocusMs + pauseMs;
-  const reliability = denom > 0 ? clamp((totalFocusMs - pauseMs) / denom, 0, 1) : 0;
-  const focusWindows = [...focusSessions, ...strictSessions, ...pomodoroSessions];
-  const firstPauseDeltas: number[] = [];
-  focusWindows.forEach((session) => {
-    const firstPause = pauseSessions
-      .filter(
-        (pause) => pause.startedAt >= session.startedAt && pause.startedAt <= session.endedAt
-      )
-      .sort((a, b) => a.startedAt - b.startedAt)[0];
-    if (firstPause) {
-      firstPauseDeltas.push(Math.max(0, firstPause.startedAt - session.startedAt));
-    }
-  });
-  const avgFirstPause =
-    firstPauseDeltas.length > 0
-      ? Math.round(firstPauseDeltas.reduce((sum, value) => sum + value, 0) / firstPauseDeltas.length)
-      : null;
-  const scheduleIntervals = buildScheduleIntervals(state.schedule, keys);
-  const scheduleTotalMs = scheduleIntervals.reduce(
-    (sum, interval) => sum + Math.max(0, interval.end - interval.start),
-    0
-  );
-  const focusDuringScheduleMs = scheduleIntervals.length
-    ? [...focusSessions, ...strictSessions].reduce((sum, session) => {
-        const sessionStart = session.startedAt;
-        const sessionEnd = session.endedAt;
-        if (sessionEnd <= sessionStart) {
-          return sum;
-        }
-        const overlap = scheduleIntervals.reduce((acc, interval) => {
-          const start = Math.max(sessionStart, interval.start);
-          const end = Math.min(sessionEnd, interval.end);
-          return acc + Math.max(0, end - start);
-        }, 0);
-        return sum + overlap;
-      }, 0)
-    : 0;
-  const scheduleReliability =
-    scheduleTotalMs > 0 ? clamp(focusDuringScheduleMs / scheduleTotalMs, 0, 1) : null;
-  const streakSessions = sessions
-    .filter((session) =>
-      ["focus", "strict", "pomodoro", "pause"].includes(session.type)
-    )
-    .map((session) => ({
-      start: session.startedAt,
-      end: Math.max(session.startedAt, session.endedAt)
-    }))
-    .filter((session) => session.end > session.start)
-    .sort((a, b) => a.start - b.start);
-  let longestStreakMs = 0;
-  if (streakSessions.length > 0) {
-    let currentStart = streakSessions[0].start;
-    let currentEnd = streakSessions[0].end;
-    for (let i = 1; i < streakSessions.length; i += 1) {
-      const next = streakSessions[i];
-      if (next.start <= currentEnd) {
-        currentEnd = Math.max(currentEnd, next.end);
-      } else {
-        longestStreakMs = Math.max(longestStreakMs, currentEnd - currentStart);
-        currentStart = next.start;
-        currentEnd = next.end;
-      }
-    }
-    longestStreakMs = Math.max(longestStreakMs, currentEnd - currentStart);
-  }
-
-  if (statsFocusTotalTime) statsFocusTotalTime.textContent = formatDuration(totalFocusMs);
-  if (statsFocusManualTime) statsFocusManualTime.textContent = formatDuration(manualFocusMs);
-  if (statsFocusManualCount) statsFocusManualCount.textContent = String(focusSessions.length);
-  if (statsFocusPauseTime) statsFocusPauseTime.textContent = formatDuration(pauseMs);
-  if (statsFocusPauseCount) statsFocusPauseCount.textContent = String(pauseSessions.length);
-  if (statsFocusStrictTime) statsFocusStrictTime.textContent = formatDuration(strictMs);
-  if (statsFocusStrictCount) statsFocusStrictCount.textContent = String(strictSessions.length);
-  if (statsFocusPomodoroTime) statsFocusPomodoroTime.textContent = formatDuration(pomodoroMs);
-  if (statsFocusPomodoroCount) statsFocusPomodoroCount.textContent = String(pomodoroSessions.length);
+  if (statsFocusTotalTime) statsFocusTotalTime.textContent = formatDuration(summary.totalFocusMs);
+  if (statsFocusManualTime) statsFocusManualTime.textContent = formatDuration(summary.manualFocusMs);
+  if (statsFocusManualCount) statsFocusManualCount.textContent = String(summary.manualCount);
+  if (statsFocusPauseTime) statsFocusPauseTime.textContent = formatDuration(summary.pauseMs);
+  if (statsFocusPauseCount) statsFocusPauseCount.textContent = String(summary.pauseCount);
+  if (statsFocusStrictTime) statsFocusStrictTime.textContent = formatDuration(summary.strictMs);
+  if (statsFocusStrictCount) statsFocusStrictCount.textContent = String(summary.strictCount);
+  if (statsFocusPomodoroTime) statsFocusPomodoroTime.textContent = formatDuration(summary.pomodoroMs);
+  if (statsFocusPomodoroCount) statsFocusPomodoroCount.textContent = String(summary.pomodoroCount);
   if (statsFocusReliability) {
-    statsFocusReliability.textContent = `${Math.round(reliability * 100)}%`;
+    statsFocusReliability.textContent = `${Math.round(summary.reliability * 100)}%`;
   }
   if (statsFocusScheduleReliability) {
     statsFocusScheduleReliability.textContent =
-      scheduleReliability === null ? "--" : `${Math.round(scheduleReliability * 100)}%`;
+      summary.scheduleReliability === null ? "--" : `${Math.round(summary.scheduleReliability * 100)}%`;
   }
   if (statsFocusLongestStreak) {
     statsFocusLongestStreak.textContent =
-      longestStreakMs > 0 ? formatDuration(longestStreakMs) : "--";
+      summary.longestStreakMs > 0 ? formatDuration(summary.longestStreakMs) : "--";
   }
   if (statsFocusFirstPause) {
     statsFocusFirstPause.textContent =
-      avgFirstPause === null ? "--" : formatDuration(avgFirstPause);
+      summary.avgFirstPause === null ? "--" : formatDuration(summary.avgFirstPause);
   }
 
   if (statsFocusDate) {
@@ -4390,85 +4465,190 @@ const bindEvents = () => {
 
   exportSessionsCsv?.addEventListener("click", async () => {
     const state = await getState();
-    const keys = getRangeKeys(currentPomodoroSummaryRange);
-    const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
+    const rangeKeys = getRangeKeys(currentPomodoroSummaryRange);
+    const keys = rangeKeys.slice().reverse();
     const rows: Array<Array<string | number | null | undefined>> = [
       [
-        "id",
-        "type",
-        "startedAt",
-        "endedAt",
-        "durationMin",
-        "tag",
-        "focusEnabledDuring",
-        "distractions"
+        "Day",
+        "Pomodoro reliability (%)",
+        "Pause burden (%)",
+        "Tags completed",
+        "Tags interrupted",
+        "Total pomodoro time (min)",
+        "Focus time (min)",
+        "Break time (min)"
       ]
     ];
-    getSessionsForKeys(state, keys).forEach((session) => {
-      const durationMin = Math.round(
-        Math.max(0, session.endedAt - session.startedAt) / 60000
-      );
+    keys.forEach((key) => {
+      const summary = buildPomodoroSummaryMetrics(state, [key]);
       rows.push([
-        session.id,
-        session.type,
-        new Date(session.startedAt).toISOString(),
-        new Date(session.endedAt).toISOString(),
-        durationMin,
-        session.tagId ? tagLookup.get(session.tagId) ?? "" : "",
-        session.focusEnabledDuring ? "true" : "false",
-        session.distractions
+        key,
+        Math.round(summary.reliability * 100),
+        Math.round(summary.pauseBurden * 100),
+        summary.tagsCompleted,
+        summary.tagsInterrupted,
+        minutesFromMs(summary.pomodoroMs),
+        minutesFromMs(summary.workMsEst),
+        minutesFromMs(summary.breakMsEst)
       ]);
     });
-    downloadCsv(`focusboss-sessions-${currentPomodoroSummaryRange}.csv`, rows);
+    if (currentPomodoroSummaryRange !== "today") {
+      const summary = buildPomodoroSummaryMetrics(state, rangeKeys);
+      rows.push([
+        "Total",
+        Math.round(summary.reliability * 100),
+        Math.round(summary.pauseBurden * 100),
+        summary.tagsCompleted,
+        summary.tagsInterrupted,
+        minutesFromMs(summary.pomodoroMs),
+        minutesFromMs(summary.workMsEst),
+        minutesFromMs(summary.breakMsEst)
+      ]);
+    }
+    downloadCsv(`focusboss-pomodoro-summary-${currentPomodoroSummaryRange}.csv`, rows);
+  });
+
+  exportPomodoroJson?.addEventListener("click", async () => {
+    const state = await getState();
+    const rangeKeys = getRangeKeys(currentPomodoroSummaryRange);
+    const summary = buildPomodoroSummaryMetrics(state, rangeKeys);
+    const days = rangeKeys.slice().reverse().map((key) => {
+      const daySummary = buildPomodoroSummaryMetrics(state, [key]);
+      return {
+        Day: key,
+        "Pomodoro reliability (%)": Math.round(daySummary.reliability * 100),
+        "Pause burden (%)": Math.round(daySummary.pauseBurden * 100),
+        "Tags completed": daySummary.tagsCompleted,
+        "Tags interrupted": daySummary.tagsInterrupted,
+        "Total pomodoro time (ms)": daySummary.pomodoroMs,
+        "Focus time (ms)": daySummary.workMsEst,
+        "Break time (ms)": daySummary.breakMsEst
+      };
+    });
+    const payload = {
+      Range: currentPomodoroSummaryRange,
+      Summary: {
+        "Pomodoro reliability (%)": Math.round(summary.reliability * 100),
+        "Pause burden (%)": Math.round(summary.pauseBurden * 100),
+        "Tags completed": summary.tagsCompleted,
+        "Tags interrupted": summary.tagsInterrupted,
+        "Total pomodoro time (ms)": summary.pomodoroMs,
+        "Focus time (ms)": summary.workMsEst,
+        "Break time (ms)": summary.breakMsEst
+      },
+      Days: days,
+      "Generated at": new Date().toISOString()
+    };
+    downloadJson(`focusboss-pomodoro-summary-${currentPomodoroSummaryRange}.json`, payload);
   });
 
   exportFocusCsv?.addEventListener("click", async () => {
     const state = await getState();
-    const keys = getRangeKeys(currentFocusSummaryRange);
-    const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
+    const rangeKeys = getRangeKeys(currentFocusSummaryRange);
+    const keys = rangeKeys.slice().reverse();
     const rows: Array<Array<string | number | null | undefined>> = [
       [
-        "id",
-        "type",
-        "source",
-        "startedAt",
-        "endedAt",
-        "durationMin",
-        "tag",
-        "focusEnabledDuring"
+        "Day",
+        "Focus reliability (%)",
+        "Schedule reliability (%)",
+        "Longest focus streak (min)",
+        "Total focus time (min)",
+        "Manual focus time (min)",
+        "Manual sessions",
+        "Strict time (min)",
+        "Strict sessions",
+        "Pause time (min)",
+        "Total pauses",
+        "Time to first pause (min)"
       ]
     ];
-    getSessionsForKeys(state, keys)
-      .filter((session) => ["focus", "pause", "strict", "pomodoro"].includes(session.type))
-      .forEach((session) => {
-        const durationMin = Math.round(
-          Math.max(0, session.endedAt - session.startedAt) / 60000
-        );
-        rows.push([
-          session.id,
-          session.type,
-          session.source ?? "",
-          new Date(session.startedAt).toISOString(),
-          new Date(session.endedAt).toISOString(),
-          durationMin,
-          session.tagId ? tagLookup.get(session.tagId) ?? "" : "",
-          session.focusEnabledDuring ? "true" : "false"
-        ]);
-      });
-    downloadCsv(`focusboss-focus-${currentFocusSummaryRange}.csv`, rows);
+    keys.forEach((key) => {
+      const summary = buildFocusSummaryMetricsForKeys(state, [key]);
+      rows.push([
+        key,
+        Math.round(summary.reliability * 100),
+        summary.scheduleReliability === null
+          ? null
+          : Math.round(summary.scheduleReliability * 100),
+        minutesFromMs(summary.longestStreakMs),
+        minutesFromMs(summary.totalFocusMs),
+        minutesFromMs(summary.manualFocusMs),
+        summary.manualCount,
+        minutesFromMs(summary.strictMs),
+        summary.strictCount,
+        minutesFromMs(summary.pauseMs),
+        summary.pauseCount,
+        summary.avgFirstPause === null ? null : minutesFromMsPrecise(summary.avgFirstPause)
+      ]);
+    });
+    if (currentFocusSummaryRange !== "today") {
+      const summary = buildFocusSummaryMetricsForKeys(state, rangeKeys);
+      rows.push([
+        "Total",
+        Math.round(summary.reliability * 100),
+        summary.scheduleReliability === null
+          ? null
+          : Math.round(summary.scheduleReliability * 100),
+        minutesFromMs(summary.longestStreakMs),
+        minutesFromMs(summary.totalFocusMs),
+        minutesFromMs(summary.manualFocusMs),
+        summary.manualCount,
+        minutesFromMs(summary.strictMs),
+        summary.strictCount,
+        minutesFromMs(summary.pauseMs),
+        summary.pauseCount,
+        summary.avgFirstPause === null ? null : minutesFromMsPrecise(summary.avgFirstPause)
+      ]);
+    }
+    downloadCsv(`focusboss-focus-summary-${currentFocusSummaryRange}.csv`, rows);
   });
 
   exportFocusJson?.addEventListener("click", async () => {
     const state = await getState();
-    const keys = getRangeKeys(currentFocusSummaryRange);
-    const tagLookup = new Map(state.tags.items.map((item) => [item.id, item.title]));
-    const payload = getSessionsForKeys(state, keys)
-      .filter((session) => ["focus", "pause", "strict", "pomodoro"].includes(session.type))
-      .map((session) => ({
-        ...session,
-        tagName: session.tagId ? tagLookup.get(session.tagId) ?? "" : ""
-      }));
-    downloadJson(`focusboss-focus-${currentFocusSummaryRange}.json`, payload);
+    const rangeKeys = getRangeKeys(currentFocusSummaryRange);
+    const summary = buildFocusSummaryMetricsForKeys(state, rangeKeys);
+    const days = rangeKeys.slice().reverse().map((key) => {
+      const daySummary = buildFocusSummaryMetricsForKeys(state, [key]);
+      return {
+        Day: key,
+        "Focus reliability (%)": Math.round(daySummary.reliability * 100),
+        "Schedule reliability (%)":
+          daySummary.scheduleReliability === null
+            ? null
+            : Math.round(daySummary.scheduleReliability * 100),
+        "Longest focus streak (ms)": daySummary.longestStreakMs,
+        "Total focus time (ms)": daySummary.totalFocusMs,
+        "Manual focus time (ms)": daySummary.manualFocusMs,
+        "Manual sessions": daySummary.manualCount,
+        "Strict time (ms)": daySummary.strictMs,
+        "Strict sessions": daySummary.strictCount,
+        "Pause time (ms)": daySummary.pauseMs,
+        "Total pauses": daySummary.pauseCount,
+        "Time to first pause (ms)": daySummary.avgFirstPause
+      };
+    });
+    const payload = {
+      Range: currentFocusSummaryRange,
+      Summary: {
+        "Focus reliability (%)": Math.round(summary.reliability * 100),
+        "Schedule reliability (%)":
+          summary.scheduleReliability === null
+            ? null
+            : Math.round(summary.scheduleReliability * 100),
+        "Longest focus streak (ms)": summary.longestStreakMs,
+        "Total focus time (ms)": summary.totalFocusMs,
+        "Manual focus time (ms)": summary.manualFocusMs,
+        "Manual sessions": summary.manualCount,
+        "Strict time (ms)": summary.strictMs,
+        "Strict sessions": summary.strictCount,
+        "Pause time (ms)": summary.pauseMs,
+        "Total pauses": summary.pauseCount,
+        "Time to first pause (ms)": summary.avgFirstPause
+      },
+      Days: days,
+      "Generated at": new Date().toISOString()
+    };
+    downloadJson(`focusboss-focus-summary-${currentFocusSummaryRange}.json`, payload);
   });
 
   backupDownload?.addEventListener("click", async () => {
@@ -4476,6 +4656,7 @@ const bindEvents = () => {
     const includeAnalytics = Boolean(backupIncludeAnalytics?.checked);
     const backup = {
       version: 1,
+      schemaVersion: SCHEMA_VERSION,
       createdAt: new Date().toISOString(),
       includeAnalytics,
       state: sanitizeBackupState(state, includeAnalytics)
@@ -4506,7 +4687,15 @@ const bindEvents = () => {
       window.alert("Backup file is missing data.");
       return;
     }
-    const includeAnalytics = Boolean(restoreIncludeAnalytics?.checked);
+    const backupIncludesAnalytics =
+      isPlainObject(parsed) && typeof parsed.includeAnalytics === "boolean"
+        ? parsed.includeAnalytics
+        : hasAnalyticsData(backupState.analytics);
+    const wantsAnalytics = Boolean(restoreIncludeAnalytics?.checked);
+    if (wantsAnalytics && !backupIncludesAnalytics) {
+      window.alert("This backup does not include analytics data.");
+    }
+    const includeAnalytics = wantsAnalytics && backupIncludesAnalytics;
     const mode =
       restoreModeButtons.find((button) => button.classList.contains("active"))
         ?.dataset.restoreMode === "overwrite"
@@ -4530,6 +4719,40 @@ const bindEvents = () => {
     }
     restoreFileName.textContent =
       restoreFile.files?.[0]?.name ?? "No file selected";
+    if (restoreFileMeta) {
+      restoreFileMeta.textContent = "Backup schema: -- · Created: --";
+    }
+    const file = restoreFile.files?.[0];
+    if (!file || !restoreFileMeta) {
+      return;
+    }
+    file
+      .text()
+      .then((text) => {
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          restoreFileMeta.textContent = "Backup schema: -- · Created: --";
+          return;
+        }
+        if (!isPlainObject(parsed)) {
+          restoreFileMeta.textContent = "Backup schema: -- · Created: --";
+          return;
+        }
+        const schema =
+          typeof parsed.schemaVersion === "number"
+            ? `v${parsed.schemaVersion}`
+            : "--";
+        const created =
+          typeof parsed.createdAt === "string" && parsed.createdAt
+            ? new Date(parsed.createdAt).toLocaleString()
+            : "--";
+        restoreFileMeta.textContent = `Backup schema: ${schema} · Created: ${created}`;
+      })
+      .catch(() => {
+        restoreFileMeta.textContent = "Backup schema: -- · Created: --";
+      });
   });
 
   restoreModeButtons.forEach((button) => {
@@ -4540,21 +4763,100 @@ const bindEvents = () => {
 
   exportUsageCsv?.addEventListener("click", async () => {
     const state = await getState();
-    const keys = getRangeKeys(currentUsageSummaryRange);
+    const rangeKeys = getRangeKeys(currentUsageSummaryRange);
+    const keys = rangeKeys.slice().reverse();
     const rows: Array<Array<string | number | null | undefined>> = [
-      ["day", "domain", "totalMs", "blockedMs"]
+      [
+        "Day",
+        "Total web time (min)",
+        "Blocked time (min)",
+        "Allowed time (min)",
+        "Other time (min)",
+        "Blocked change vs yesterday (%)",
+        "Blocked change vs last week (%)"
+      ]
     ];
     keys.forEach((key) => {
-      const day = state.analytics.byDay[key];
-      if (!day) {
-        return;
-      }
-      const blockedByDomain = day.byDomainBlocked ?? {};
-      Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
-        rows.push([key, host, value, blockedByDomain[host] ?? 0]);
-      });
+      const totals = buildUsageTotals(state, [key]);
+      const date = parseDayKey(key);
+      const prevDayKey = getDayKey(addDays(date, -1));
+      const prevWeekKey = getDayKey(addDays(date, -7));
+      const prevDayTotals = buildUsageTotals(state, [prevDayKey]);
+      const prevWeekTotals = buildUsageTotals(state, [prevWeekKey]);
+      const changeDayPct =
+        prevDayTotals.blockedMs > 0
+          ? Math.round(((totals.blockedMs - prevDayTotals.blockedMs) / prevDayTotals.blockedMs) * 100)
+          : null;
+      const changeWeekPct =
+        prevWeekTotals.blockedMs > 0
+          ? Math.round(((totals.blockedMs - prevWeekTotals.blockedMs) / prevWeekTotals.blockedMs) * 100)
+          : null;
+      rows.push([
+        key,
+        minutesFromMs(totals.totalMs),
+        minutesFromMs(totals.blockedMs),
+        minutesFromMs(totals.allowedMs),
+        minutesFromMs(totals.otherMs),
+        changeDayPct,
+        changeWeekPct
+      ]);
     });
-    downloadCsv(`focusboss-usage-${currentUsageSummaryRange}.csv`, rows);
+    if (currentUsageSummaryRange !== "today") {
+      const totals = buildUsageTotals(state, rangeKeys);
+      rows.push([
+        "Total",
+        minutesFromMs(totals.totalMs),
+        minutesFromMs(totals.blockedMs),
+        minutesFromMs(totals.allowedMs),
+        minutesFromMs(totals.otherMs),
+        null,
+        null
+      ]);
+    }
+    downloadCsv(`focusboss-usage-summary-${currentUsageSummaryRange}.csv`, rows);
+  });
+
+  exportUsageJson?.addEventListener("click", async () => {
+    const state = await getState();
+    const rangeKeys = getRangeKeys(currentUsageSummaryRange);
+    const summaryTotals = buildUsageTotals(state, rangeKeys);
+    const days = rangeKeys.slice().reverse().map((key) => {
+      const totals = buildUsageTotals(state, [key]);
+      const date = parseDayKey(key);
+      const prevDayKey = getDayKey(addDays(date, -1));
+      const prevWeekKey = getDayKey(addDays(date, -7));
+      const prevDayTotals = buildUsageTotals(state, [prevDayKey]);
+      const prevWeekTotals = buildUsageTotals(state, [prevWeekKey]);
+      const changeDayPct =
+        prevDayTotals.blockedMs > 0
+          ? Math.round(((totals.blockedMs - prevDayTotals.blockedMs) / prevDayTotals.blockedMs) * 100)
+          : null;
+      const changeWeekPct =
+        prevWeekTotals.blockedMs > 0
+          ? Math.round(((totals.blockedMs - prevWeekTotals.blockedMs) / prevWeekTotals.blockedMs) * 100)
+          : null;
+      return {
+        Day: key,
+        "Total web time (ms)": totals.totalMs,
+        "Blocked time (ms)": totals.blockedMs,
+        "Allowed time (ms)": totals.allowedMs,
+        "Other time (ms)": totals.otherMs,
+        "Blocked change vs yesterday (%)": changeDayPct,
+        "Blocked change vs last week (%)": changeWeekPct
+      };
+    });
+    const payload = {
+      Range: currentUsageSummaryRange,
+      Summary: {
+        "Total web time (ms)": summaryTotals.totalMs,
+        "Blocked time (ms)": summaryTotals.blockedMs,
+        "Allowed time (ms)": summaryTotals.allowedMs,
+        "Other time (ms)": summaryTotals.otherMs
+      },
+      Days: days,
+      "Generated at": new Date().toISOString()
+    };
+    downloadJson(`focusboss-usage-summary-${currentUsageSummaryRange}.json`, payload);
   });
 
   exportBlockedCsv?.addEventListener("click", async () => {

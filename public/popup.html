@@ -489,7 +489,10 @@
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
                     <button id="exportSessionsCsv" class="btn btn-small">
-                      Export sessions CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Export pomodoro summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                    </button>
+                    <button id="exportPomodoroJson" class="btn btn-small">
+                      Export pomodoro summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                   </div>
                 </div>
@@ -643,10 +646,10 @@
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
                     <button id="exportFocusCsv" class="btn btn-small">
-                      Export focus CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Export focus summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                     <button id="exportFocusJson" class="btn btn-small">
-                      Export focus JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Export focus summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                   </div>
                 </div>
@@ -771,7 +774,10 @@
                   </div>
                   <div class="stats-export-grid" style="margin-top: 10px;">
                     <button id="exportUsageCsv" class="btn btn-small">
-                      Export usage CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                      Export usage summary CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
+                    </button>
+                    <button id="exportUsageJson" class="btn btn-small">
+                      Export usage summary JSON <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
                     </button>
                     <button id="exportBlockedCsv" class="btn btn-small">
                       Export blocked CSV <span class="secondary-icon nudge-down" aria-hidden="true">⇩</span>
@@ -2026,7 +2032,7 @@
         <p class="list-sub">Download a backup of your FocusBoss settings.</p>
         <div style="display: flex; align-items: center; gap: 6px; margin-top: 12px;">
           <label class="toggle small">
-            <input id="backupIncludeAnalytics" type="checkbox" />
+            <input id="backupIncludeAnalytics" type="checkbox" checked />
             <span></span>
           </label>
           <span class="list-sub">Include analytics</span>
@@ -2049,6 +2055,7 @@
           <button id="restoreFileButton" class="btn btn-small" type="button">Choose file</button>
           <span id="restoreFileName" class="list-sub">No file selected</span>
         </div>
+        <div id="restoreFileMeta" class="list-sub" style="margin-top: 6px;">Backup schema: -- · Created: --</div>
         <div style="margin-top: 12px;">
           <p class="list-sub" style="margin-bottom: 6px;">Restore mode</p>
           <div class="segmented two" id="restoreModeControl">
@@ -2059,7 +2066,7 @@
         </div>
         <div style="display: flex; align-items: center; gap: 6px; margin-top: 12px;">
           <label class="toggle small">
-            <input id="restoreIncludeAnalytics" type="checkbox" />
+            <input id="restoreIncludeAnalytics" type="checkbox" checked />
             <span></span>
           </label>
           <span class="list-sub">Include analytics if present</span>
