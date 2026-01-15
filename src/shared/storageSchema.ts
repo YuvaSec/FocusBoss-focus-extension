@@ -164,7 +164,6 @@ export type StorageSchema = {
     sessionsByDay: Record<string, AnalyticsSession[]>;
     sessionsByMonth: Record<string, AnalyticsSession[]>;
     showWebUsage: boolean;
-    chartThemeId: string;
     chartRange: "today" | "week" | "month";
     chartFilter: "all" | "blocked";
     retentionDays: number;
@@ -266,7 +265,6 @@ export const defaultState: StorageSchema = {
     sessionsByDay: {},
     sessionsByMonth: {},
     showWebUsage: true,
-    chartThemeId: "default",
     chartRange: "week",
     chartFilter: "all",
     retentionDays: 90

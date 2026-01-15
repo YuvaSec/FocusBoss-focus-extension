@@ -47,24 +47,12 @@ const statsUsageSummaryRangeButtons = Array.from(
 const statsFocusSummaryRangeButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("#statsFocusSummaryRange button")
 );
-const statsUsageFilterButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("#statsUsageFilter button")
-);
-const statsUsageRangeButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("#statsUsageRange button")
-);
 const statsTotalValue = document.getElementById("statsTotalValue");
 const statsList = document.getElementById("statsList");
 const domainStatsTitle = document.getElementById("domainStatsTitle");
 const domainStatsBody = document.getElementById("domainStatsBody");
 const statsStacked = document.getElementById("statsStacked");
 const statsHeatmap = document.getElementById("statsHeatmap");
-const statsDonut = document.getElementById("statsDonut");
-const statsLegend = document.getElementById("statsLegend");
-const statsThemeButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("#statsTheme button")
-);
-const statsThemeControl = document.getElementById("statsTheme");
 const statsCardTabs = document.getElementById("statsCardTabs");
 const statsPanels = Array.from(
   document.querySelectorAll<HTMLElement>(".stats-panel")
@@ -96,8 +84,6 @@ const statsUsageWeek = document.getElementById("statsUsageWeek");
 const statsUsageWeekChange = document.getElementById("statsUsageWeekChange");
 const statsUsageAvg = document.getElementById("statsUsageAvg");
 const statsUsageChart = document.getElementById("statsUsageChart");
-const statsUsageRing = document.getElementById("statsUsageRing");
-const statsUsageLegend = document.getElementById("statsUsageLegend");
 const statsUsageHeatmap = document.getElementById("statsUsageHeatmap");
 const statsUsageDate = document.getElementById("statsUsageDate");
 const statsFocusDate = document.getElementById("statsFocusDate");
@@ -669,14 +655,11 @@ let currentInterventionKey: InterventionKey | null = null;
 let currentPomodoroSummaryRange: "today" | "week" | "month" = "today";
 let currentUsageSummaryRange: "today" | "week" | "month" = "today";
 let currentFocusSummaryRange: "today" | "week" | "month" = "today";
-let currentStatsFilter: "all" | "blocked" | "allowed" = "all";
-let currentStatsTheme: "default" | "citrus" | "ocean" | "warm" = "default";
 let currentStatsPanel: "usage" | "domains" = "usage";
 let currentStatsSubview: "summary" | "trend" | "usage-trend" | "tag" = "summary";
 let currentStatsSegment: "pomodoro" | "focus" | "usage" = "focus";
 let currentPomodoroSummaryTab: "quality" | "volume" = "quality";
 let currentFocusSummaryTab: "quality" | "volume" | "interruptions" = "quality";
-let currentUsageRange: "today" | "week" | "month" = "week";
 let currentStatsTagId: string | null = null;
 type TrendRange = "day" | "week" | "month" | "year" | "3m" | "6m";
 
@@ -1497,7 +1480,6 @@ const buildRestoreState = (
     ? sanitized.analytics
     : {
         showWebUsage: sanitized.analytics.showWebUsage,
-        chartThemeId: sanitized.analytics.chartThemeId,
         chartRange: sanitized.analytics.chartRange,
         chartFilter: sanitized.analytics.chartFilter,
         retentionDays: sanitized.analytics.retentionDays
@@ -1944,173 +1926,6 @@ const getRangeKeys = (range: "today" | "week" | "month") => {
   return keys;
 };
 
-const THEME_COLORS: Record<"default" | "citrus" | "ocean" | "warm", string[]> = {
-  default: ["#9CFF3A", "#4BC6FF", "#FF9F40", "#FF5A5F", "#F7B267"],
-  citrus: ["#F9D423", "#FF4E50", "#F7B733", "#FC913A", "#E94E77"],
-  ocean: ["#00C6FF", "#0072FF", "#00F5D4", "#48BFE3", "#5390D9"],
-  warm: ["#FF6B6B", "#FFD93D", "#FF9F1C", "#F25C54", "#F7B267"]
-};
-
-const normalizeThemeId = (value: unknown): "default" | "citrus" | "ocean" | "warm" => {
-  return value === "citrus" || value === "ocean" || value === "warm" ? value : "default";
-};
-
-const renderDonut = (
-  entries: Array<{ label: string; value: number }>,
-  total: number,
-  themeId: "default" | "citrus" | "ocean" | "warm"
-) => {
-  if (!statsDonut || !statsLegend) {
-    return;
-  }
-  const donutSvg = statsDonut.querySelector(".donut-svg") as HTMLElement | null;
-  if (!donutSvg) {
-    return;
-  }
-
-  if (!entries.length || total <= 0) {
-    donutSvg.innerHTML = `
-      <svg viewBox="0 0 42 42" role="img" aria-label="No data">
-        <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
-      </svg>
-    `;
-    statsLegend.innerHTML = `<p class="list-sub">No data yet.</p>`;
-    return;
-  }
-
-  const colors = THEME_COLORS[themeId];
-  const segments = entries.map((entry) => ({
-    ...entry,
-    pct: total ? (entry.value / total) * 100 : 0
-  }));
-  const otherValue = Math.max(
-    0,
-    total - segments.reduce((acc, seg) => acc + seg.value, 0)
-  );
-  if (otherValue > 0) {
-    segments.push({ label: "Other", value: otherValue, pct: (otherValue / total) * 100 });
-  }
-
-  let offset = 0;
-  const circles = segments
-    .map((seg, idx) => {
-      const pct = Math.max(0, Math.min(100, seg.pct));
-      const dash = `${pct} ${100 - pct}`;
-      const color = colors[idx % colors.length];
-      const circle = `
-        <circle
-          cx="21"
-          cy="21"
-          r="15.9155"
-          fill="transparent"
-          stroke="${color}"
-          stroke-width="6"
-          stroke-dasharray="${dash}"
-          stroke-dashoffset="${offset}"
-        ></circle>
-      `;
-      offset -= pct;
-      return circle;
-    })
-    .join("");
-
-  donutSvg.innerHTML = `
-    <svg viewBox="0 0 42 42" role="img" aria-label="Usage breakdown">
-      <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
-      ${circles}
-    </svg>
-  `;
-
-  statsLegend.innerHTML = segments
-    .map((seg, idx) => {
-      const color = colors[idx % colors.length];
-      return `
-        <div class="legend-item">
-          <span class="legend-dot" style="background:${color}"></span>
-          <span class="legend-label">${seg.label}</span>
-          <span class="legend-value">${formatDuration(seg.value)}</span>
-        </div>
-      `;
-    })
-    .join("");
-};
-
-const renderRingChart = (
-  target: HTMLElement | null,
-  legend: HTMLElement | null,
-  entries: Array<{ label: string; value: number }>,
-  total: number,
-  themeId: "default" | "citrus" | "ocean" | "warm"
-) => {
-  if (!target || !legend) {
-    return;
-  }
-  if (!entries.length || total <= 0) {
-    target.innerHTML = `
-      <svg viewBox="0 0 42 42" role="img" aria-label="No data">
-        <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
-      </svg>
-    `;
-    legend.innerHTML = `<p class="list-sub">No data yet.</p>`;
-    return;
-  }
-
-  const colors = THEME_COLORS[themeId];
-  const segments = entries.map((entry) => ({
-    ...entry,
-    pct: total ? (entry.value / total) * 100 : 0
-  }));
-  const otherValue = Math.max(
-    0,
-    total - segments.reduce((acc, seg) => acc + seg.value, 0)
-  );
-  if (otherValue > 0) {
-    segments.push({ label: "Other", value: otherValue, pct: (otherValue / total) * 100 });
-  }
-
-  let offset = 0;
-  const circles = segments
-    .map((seg, idx) => {
-      const pct = Math.max(0, Math.min(100, seg.pct));
-      const dash = `${pct} ${100 - pct}`;
-      const color = colors[idx % colors.length];
-      const circle = `
-        <circle
-          cx="21"
-          cy="21"
-          r="15.9155"
-          fill="transparent"
-          stroke="${color}"
-          stroke-width="6"
-          stroke-dasharray="${dash}"
-          stroke-dashoffset="${offset}"
-        ></circle>
-      `;
-      offset -= pct;
-      return circle;
-    })
-    .join("");
-
-  target.innerHTML = `
-    <svg viewBox="0 0 42 42" role="img" aria-label="Usage breakdown">
-      <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.12)" stroke-width="6"></circle>
-      ${circles}
-    </svg>
-  `;
-
-  legend.innerHTML = segments
-    .map((seg, idx) => {
-      const color = colors[idx % colors.length];
-      return `
-        <div class="legend-item">
-          <span class="legend-dot" style="background:${color}"></span>
-          <span class="legend-label">${seg.label}</span>
-          <span class="legend-value">${formatDuration(seg.value)}</span>
-        </div>
-      `;
-    })
-    .join("");
-};
 
 const renderMetrics = (state: StorageSchema, keys: string[]) => {
   const sessionsInRange = getSessionsForKeys(state, keys);
@@ -2484,15 +2299,6 @@ const renderStats = (state: StorageSchema) => {
   statsFocusSummaryRangeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.range === currentFocusSummaryRange);
   });
-  statsUsageFilterButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.usageFilter === currentStatsFilter);
-  });
-  statsUsageRangeButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.usageRange === currentUsageRange);
-  });
-  statsThemeButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.theme === currentStatsTheme);
-  });
   statsFocusButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.focusMode === currentFocusView);
   });
@@ -2521,9 +2327,6 @@ const renderStats = (state: StorageSchema) => {
   if (statsUsageDate) {
     statsUsageDate.textContent = usageRangeLabel;
   }
-  if (statsThemeControl) {
-    statsThemeControl.classList.toggle("hidden", currentStatsPanel !== "usage");
-  }
   statsPanels.forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.panel === currentStatsPanel);
   });
@@ -2543,9 +2346,7 @@ const renderStats = (state: StorageSchema) => {
   const pomodoroKeys = getRangeKeys(currentPomodoroSummaryRange);
   const usageSummaryKeys = getRangeKeys(currentUsageSummaryRange);
   let totalMs = 0;
-  let blockedMs = 0;
   const byDomain: Record<string, number> = {};
-  const byDomainBlocked: Record<string, number> = {};
 
   usageSummaryKeys.forEach((key) => {
     const day = analytics.byDay[key];
@@ -2553,22 +2354,13 @@ const renderStats = (state: StorageSchema) => {
       return;
     }
     totalMs += day.totalMs ?? 0;
-    blockedMs += day.blockedMs ?? 0;
     Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
       byDomain[host] = (byDomain[host] ?? 0) + value;
     });
-    Object.entries(day.byDomainBlocked ?? {}).forEach(([host, value]) => {
-      byDomainBlocked[host] = (byDomainBlocked[host] ?? 0) + value;
-    });
   });
 
-  const listSource =
-    currentStatsFilter === "blocked"
-      ? byDomainBlocked
-      : currentStatsFilter === "allowed"
-        ? byDomain
-        : byDomain;
-  const listTotal = currentStatsFilter === "blocked" ? blockedMs : totalMs;
+  const listSource = byDomain;
+  const listTotal = totalMs;
 
   if (statsTotalValue) {
     statsTotalValue.textContent = formatDuration(listTotal);
@@ -2578,13 +2370,11 @@ const renderStats = (state: StorageSchema) => {
     const entries = Object.entries(listSource).sort((a, b) => b[1] - a[1]).slice(0, 8);
     if (!entries.length) {
       statsList.innerHTML = `<p style="color: var(--color-muted); font-size: var(--font-small);">No data yet.</p>`;
-      renderDonut([], 0, currentStatsTheme);
     } else {
       const topEntries = Object.entries(listSource)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 4)
         .map(([label, value]) => ({ label, value }));
-      renderDonut(topEntries, listTotal, currentStatsTheme);
       const left = entries.slice(0, 4);
       const right = entries.slice(4, 8);
       const renderEntry = ([host, value]: [string, number]) => {
@@ -2752,43 +2542,6 @@ const renderStats = (state: StorageSchema) => {
     }
   }
 
-  if (statsUsageRing && statsUsageLegend) {
-    const usageKeys = getRangeKeys(currentUsageRange);
-    const totalsByDomain: Record<string, number> = {};
-    usageKeys.forEach((key) => {
-      const day = analytics.byDay[key];
-      if (!day) {
-        return;
-      }
-      if (currentStatsFilter === "blocked") {
-        Object.entries(day.byDomainBlocked ?? {}).forEach(([host, value]) => {
-          totalsByDomain[host] = (totalsByDomain[host] ?? 0) + value;
-        });
-      } else if (currentStatsFilter === "allowed") {
-        const allowedSet = new Set(state.lists.allowedDomains.map((host) => host.toLowerCase()));
-        Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
-          if (allowedSet.has(host.toLowerCase())) {
-            totalsByDomain[host] = (totalsByDomain[host] ?? 0) + value;
-          }
-        });
-      } else {
-        Object.entries(day.byDomain ?? {}).forEach(([host, value]) => {
-          totalsByDomain[host] = (totalsByDomain[host] ?? 0) + value;
-        });
-      }
-    });
-    const entries = Object.entries(totalsByDomain)
-      .map(([label, value]) => ({ label, value }))
-      .sort((a, b) => b.value - a.value);
-    const total = entries.reduce((sum, item) => sum + item.value, 0);
-    renderRingChart(
-      statsUsageRing,
-      statsUsageLegend,
-      entries.slice(0, 6),
-      total,
-      currentStatsTheme
-    );
-  }
 
   const renderTrendView = (
     range: TrendRange,
@@ -4390,30 +4143,6 @@ const bindEvents = () => {
     });
   });
 
-  statsUsageFilterButtons.forEach((button) => {
-    button.addEventListener("click", async () => {
-      const filter = button.dataset.usageFilter as "all" | "blocked" | "allowed" | undefined;
-      if (!filter) {
-        return;
-      }
-      currentStatsFilter = filter;
-      const state = await getState();
-      renderStats(state);
-    });
-  });
-
-  statsUsageRangeButtons.forEach((button) => {
-    button.addEventListener("click", async () => {
-      const range = button.dataset.usageRange as "today" | "week" | "month" | undefined;
-      if (!range) {
-        return;
-      }
-      currentUsageRange = range;
-      const state = await getState();
-      renderStats(state);
-    });
-  });
-
   statsCardTabs?.addEventListener("click", (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-stats-panel]");
     const panel = button?.dataset.statsPanel as "usage" | "domains" | undefined;
@@ -4428,22 +4157,7 @@ const bindEvents = () => {
     statsPanels.forEach((panelEl) => {
       panelEl.classList.toggle("active", panelEl.dataset.panel === panel);
     });
-    if (statsThemeControl) {
-      statsThemeControl.classList.toggle("hidden", panel !== "usage");
-    }
-  });
-
-  statsThemeButtons.forEach((button) => {
-    button.addEventListener("click", async () => {
-      const theme = button.dataset.theme as "default" | "citrus" | "ocean" | "warm" | undefined;
-      if (!theme) {
-        return;
-      }
-      currentStatsTheme = theme;
-      await setState({ analytics: { chartThemeId: theme } });
-      const state = await getState();
-      renderStats(state);
-    });
+    void panel;
   });
 
   statsFocusButtons.forEach((button) => {
@@ -5011,7 +4725,6 @@ const syncUiFromState = (state: Awaited<ReturnType<typeof getState>>) => {
     analyticsRetention.value = String(state.analytics.retentionDays ?? 90);
   }
   currentPomodoroSummaryRange = state.analytics.chartRange;
-  currentStatsTheme = normalizeThemeId(state.analytics.chartThemeId);
     renderStrictSession(state.strictSession, Boolean(state.pomodoro.running));
   renderStrictOverlay(state.strictSession);
   renderTags(state.tags, state.pomodoro);

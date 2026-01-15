@@ -161,6 +161,7 @@ const migrateState = (existing: unknown): StorageResult => {
   let migratedState = { ...baseState };
 
   let hasLegacyPause = false;
+  let removedChartTheme = false;
   if (isPlainObject(existing)) {
     const legacyTempOffUntil = existing.focusTempOffUntil;
     const legacyPreset = isPlainObject(existing.ui) ? existing.ui.tempOffPreset : null;
@@ -182,6 +183,12 @@ const migrateState = (existing: unknown): StorageResult => {
         };
       }
     }
+  }
+  if (isPlainObject(migratedState.analytics) && "chartThemeId" in migratedState.analytics) {
+    const nextAnalytics = { ...migratedState.analytics } as Record<string, unknown>;
+    delete nextAnalytics.chartThemeId;
+    migratedState = { ...migratedState, analytics: nextAnalytics as StorageSchema["analytics"] };
+    removedChartTheme = true;
   }
 
   let tagsNeedDefaults = false;
@@ -259,6 +266,7 @@ const migrateState = (existing: unknown): StorageResult => {
     schemaVersion !== SCHEMA_VERSION ||
     hasMissingKeys(defaultState, existing) ||
     hasLegacyPause ||
+    removedChartTheme ||
     tagsNeedDefaults ||
     sessionsSource !== existingSessions ||
     sessionsIndexChanged;

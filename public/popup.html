@@ -748,39 +748,6 @@
                   <div id="statsUsageChart" style="min-height: 180px;"></div>
                 </div>
 
-                <div class="card stats-usage-ring" style="margin-top: 12px;">
-                  <div class="row">
-                    <div class="row" style="gap: 8px;">
-                      <h3>Top Sites</h3>
-                      <button
-                        class="icon-btn icon-only info-icon"
-                        type="button"
-                        data-open-modal="usageTopSitesInfo"
-                        aria-label="Top sites info"
-                      >i</button>
-                    </div>
-                  </div>
-                  <div class="stats-usage-controls" style="margin-top: 8px;">
-                    <div class="segmented stats-usage-range" id="statsUsageRange">
-                      <button data-usage-range="today">Today</button>
-                      <button data-usage-range="week" class="active">Week</button>
-                      <button data-usage-range="month">Month</button>
-                    </div>
-                    <div class="segmented stats-usage-filter" id="statsUsageFilter">
-                      <button data-usage-filter="all" class="active">All</button>
-                      <button data-usage-filter="blocked">Blocked</button>
-                      <button data-usage-filter="allowed">Allowed</button>
-                    </div>
-                  </div>
-                  <div class="stats-ring-row" style="margin-top: 10px;">
-                    <div id="statsUsageRing" class="stats-ring"></div>
-                    <div id="statsUsageLegend" class="stats-ring-legend"></div>
-                  </div>
-                  <button id="statsUsageShowAll" class="btn btn-small stats-ring-show-all" type="button">
-                    Show all <span class="secondary-icon nudge-icon" aria-hidden="true">›</span>
-                  </button>
-                </div>
-
 
                 <div class="card" style="margin-top: 12px;">
                   <div class="row">
@@ -1952,36 +1919,6 @@
                 Cells shift toward red when more time is blocked, and green when more time is allowed.
               </p>
               <p class="metric-info-note">This view always uses the last 7 days.</p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-actions" style="margin-top: 14px;">
-          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
-        </div>
-      </div>
-    </div>
-    <div id="usageTopSitesInfoModal" class="modal hidden" data-modal="usageTopSitesInfo" aria-hidden="true">
-      <div class="modal-backdrop" data-close-modal="true"></div>
-      <div class="modal-card">
-        <div class="metric-info">
-          <div class="metric-info-header">
-            <p class="metric-info-kicker">Web usage visualization</p>
-            <h3 class="metric-info-title">Top Sites</h3>
-            <p class="metric-info-sub">Breakdown of your most visited domains for the selected range.</p>
-          </div>
-          <div class="metric-info-grid">
-            <div class="metric-info-card">
-              <p class="metric-info-label">How to read it</p>
-              <p class="metric-info-text">
-                Each slice represents a site. Larger slices mean more time spent.
-              </p>
-            </div>
-            <div class="metric-info-card">
-              <p class="metric-info-label">Controls</p>
-              <p class="metric-info-text">
-                Use the range and filter toggles to narrow the list to all, blocked, or allowed sites.
-              </p>
-              <p class="metric-info-note">Totals are based on tracked browsing time only.</p>
             </div>
           </div>
         </div>
