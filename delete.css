@@ -22,11 +22,6 @@
     --font-body: 13px;
     --font-small: 11px;
     --font-ui: "Poppins", Arial, sans-serif;
-
-    --black:rgba(255, 255, 255, 0.02);
-    --black-muted:rgba(255, 255, 255, 0.01);
-    --black-light:rgba(255, 255, 255, 0.08);
-    --black-light-muted:rgba(255, 255, 255, 0.12);
 }
 
 /* ========== THEME (light mode) ========== */
@@ -41,28 +36,19 @@
         --green: #2ee842;
         --green-dark: #1a8f24;
 
-        /*////..OLIVE..////*/
         --fb-bg:#f5f6f2;
         --fb-border:rgba(27,31,20,.07);
 
         --fb-surface:#ffffff;
         --fb-surface-2:#edf0e6;
-        --fb-surface-4: rgba(237, 240, 230, 0.85);
 
         --fb-text:#141a10;
         --fb-text-muted:#4f5a46;
         --fb-text-muted-light:#95a08c;
-        --fb-muted: var(--fb-text-muted);
-        --fb-muted-light: var(--fb-text-muted-light);
 
         --fb-accent:#84cc16;
         --fb-accent-muted:#e7f7cc;
         --fb-accent-stale:#a3b19a;
-
-        --strict-overlay-bg: var(--fb-surface-4);
-        --strict-overlay-text: var(--fb-text);
-        --strict-overlay-muted: var(--fb-text-muted);
-
 
         --fb-status-on: #7fffa0;
         --fb-status-on-bs: inset 3px 3px 6px #54a86a, inset -3px -3px 6px #aaffd6;
@@ -71,34 +57,79 @@
         --fb-status-paused: #ffc77f;
         --fb-status-paused-bs: inset 3px 3px 6px #a88354, inset -3px -3px 6px #ffffaa;
         --fb-status-pomodoro: #ff8080;
-        --fb-status-pomodoro-bs:    inset 3px 3px 6px #a85454, inset -3px -3px 6px #ffacac;
+        --fb-status-pomodoro-bs: inset 3px 3px 6px #a85454, inset -3px -3px 6px #ffacac;
         --fb-status-strict: #7fbdff;
         --fb-status-strict-bs: inset 3px 3px 6px #547da8, inset -3px -3px 6px #aafdff;
-
 
         --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .12), -8px -8px 16px rgba(255, 255, 255, .9);
         --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .10), -4px -4px 8px rgba(255, 255, 255, .9);
         --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .08), inset -4px -4px 8px rgba(255, 255, 255, .9);
         --fb-neo-lg: inset 1px 1px 1px rgba(255, 255, 255, 1), -2px -2px 2px rgba(255, 255, 255, 0.9), -4px -4px 6px rgba(255, 255, 255, 0.9), -8px -8px 16px rgba(255, 255, 255, 0.9), -12px -12px 24px rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.06), 2px 2px 2px rgba(0, 0, 0, 0.08), 4px 4px 6px rgba(0, 0, 0, 0.08), 8px 8px 16px rgba(0, 0, 0, 0.08), 12px 12px 24px rgba(0, 0, 0, 0.08);
         --fb-neo-sm: inset 1px 1px 1px rgba(0, 0, 0, 0.04), -1px -1px 2px rgba(0, 0, 0, 0.06), -2px -2px 4px rgba(0, 0, 0, 0.06), inset -1px -1px 1px rgba(255, 255, 255, 0.6), 1px 1px 2px rgba(255, 255, 255, 0.7), 2px 2px 4px rgba(255, 255, 255, 0.7);
-        --fb-neo-inset: /* tiny inner highlights */ inset 1px 1px 1px rgba(255, 255, 255, 0.20), inset -1px -1px 1px rgba(0, 0, 0, 0.03), /* inner border ring */ inset 0 0 0 1px rgba(245, 245, 248, 1), /* soft outer highlights */ inset -1px -1px 1px 1px rgba(255, 255, 255, 0.20), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.18), -1px -1px 2px 0px rgba(255, 255, 255, 0.18), -2px -2px 4px 0px rgba(255, 255, 255, 0.16), /* soft outer shadows */ inset 1px 1px 1px 1px rgba(0, 0, 0, 0.03), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.03), 1px 1px 2px 0px rgba(0, 0, 0, 0.03), 2px 2px 4px 0px rgba(0, 0, 0, 0.03) ;
+        --fb-neo-inset: inset 1px 1px 1px rgba(255, 255, 255, 0.20), inset -1px -1px 1px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(245, 245, 248, 1), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.20), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.18), -1px -1px 2px 0px rgba(255, 255, 255, 0.18), -2px -2px 4px 0px rgba(255, 255, 255, 0.16), inset 1px 1px 1px 1px rgba(0, 0, 0, 0.03), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.03), 1px 1px 2px 0px rgba(0, 0, 0, 0.03), 2px 2px 4px 0px rgba(0, 0, 0, 0.03) ;
         --fb-glass2-inset: inset 1px 1px 0 rgba(0, 0, 0, 0.05), inset -1px -1px 0 rgba(255, 255, 255, 0.65);
 
         --shadow-card: 0 4px 16px rgba(0, 0, 0, .08);
 
+        --pomodoro-bg: var(--fb-surface-2);
+        --pomodoro-foreground: var(--fb-text);
+        --pomodoro-muted: var(--fb-surface-2);
+        --pomodoro-muted-foreground: var(--fb-text-muted);
+        --pomodoro-accent: var(--fb-accent);
+        --pomodoro-shadow: var(--fb-shadow-lg);
+        --pomodoro-shadow-inset: var(--fb-shadow-inset);
+        --pomodoro-shadow-sm: var(--fb-shadow-sm);
 
+        --strict-overlay-bg: var(--fb-surface-2);
+        --strict-overlay-text: var(--fb-text);
+        --strict-overlay-muted: var(--fb-text-muted);
+        --strict-ring-track: var(--fb-accent-muted);
+        --strict-ring-progress: var(--fb-accent);
 
-        --pomodoro-bg: var(--neo-bg);
-        --pomodoro-foreground: var(--color-text);
-        --pomodoro-muted: var(--neo-bg-alt);
-        --pomodoro-muted-foreground: var(--color-muted);
-        --pomodoro-accent: #9cff3a;
-        --pomodoro-shadow: var(--neo-shadow);
-        --pomodoro-shadow-inset: var(--neo-shadow-inset);
-        --pomodoro-shadow-sm: var(--neo-shadow-sm);
+        --scrollbar-thumb: rgba(120, 120, 120, 0.4);
+        --scrollbar-thumb-hover: rgba(120, 120, 120, 0.6);
+        --scrollbar-thumb-subtle: rgba(140, 140, 140, 0.35);
+        --scrollbar-thumb-subtle-hover: rgba(140, 140, 140, 0.55);
 
+        --black:rgba(255, 255, 255, 0.02);
+        --black-muted:rgba(255, 255, 255, 0.01);
+        --black-light:rgba(255, 255, 255, 0.08);
+        --black-light-muted:rgba(255, 255, 255, 0.12);
+
+        --btn-primary-bg: rgba(156, 255, 58, 0.2);
+        --btn-danger-bg: var(--red-muted);
+        --btn-danger-text: var(--red-dark);
+        --btn-success-bg: var(--green-muted);
+        --btn-success-text: var(--green-dark);
+        --btn-sheen: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
+
+        --toggle-checked-bg: rgba(242, 201, 76, 0.35);
+        --toggle-checked-border: rgba(156, 255, 58, 0.6);
+
+        --tag-delete-border: rgba(80, 80, 80, 0.2);
+        --tag-delete-bg: rgba(80, 80, 80, 0.05);
+        --tag-delete-color: rgba(80, 80, 80, 0.6);
+        --tag-delete-hover-shadow: 0 10px 24px rgba(214, 69, 69, 0.2);
+
+        --schedule-delete-border: rgba(80, 80, 80, 0.2);
+        --schedule-delete-bg: rgba(80, 80, 80, 0.05);
+        --schedule-delete-color: rgba(80, 80, 80, 0.6);
+        --schedule-delete-hover-shadow: 0 10px 24px rgba(214, 69, 69, 0.2);
+        --schedule-days-gap: 6px;
+
+        --chart-allowed: var(--green);
+        --chart-blocked: var(--red);
+        --chart-other: var(--fb-status-strict);
+        --chart-accent-strong: rgba(156, 255, 58, 0.8);
+        --chart-accent-soft: rgba(156, 255, 58, 0.25);
+        --chart-accent-border: rgba(156, 255, 58, 0.4);
+
+        --gate-gradient: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(0, 0, 0, 0.04));
+        --breath-gradient: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
+        --timer-progress-shadow: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
     }
 }
+
 /* ========== THEME (Dark mode) ========== */
 @layer theme {
     html:not([data-theme]), html[data-theme="dark"] {
@@ -117,21 +148,14 @@
 
         --fb-surface: #14191c;
         --fb-surface-2: #101518;
-        --fb-surface-4: rgba(15, 18, 20, 0.85);
 
         --fb-text: #eef2f3;
         --fb-text-muted: #aab4b7;
         --fb-text-muted-light: #778387;
-        --fb-muted: var(--fb-text-muted);
-        --fb-muted-light: var(--fb-text-muted-light);
 
-        --fb-accent: #ffd84d;         /* “radium” but not neon */
-        --fb-accent-muted: #2a2f33;   /* subtle neutral wash (keeps it minimalist) */
+        --fb-accent: #ffd84d;
+        --fb-accent-muted: #2a2f33;
         --fb-accent-stale: #8a97a1;
-
-        --strict-overlay-bg: var(--fb-surface-4);
-        --strict-overlay-text: var(--fb-text);
-        --strict-overlay-muted: var(--fb-text-muted);
 
         --fb-status-on: #005029;
         --fb-status-on-bs: inset 3px 3px 6px #00351b, inset -3px -3px 6px #006b37;
@@ -144,20 +168,74 @@
         --fb-status-strict: #002b53;
         --fb-status-strict-bs: inset 3px 3px 6px #001c37, inset -3px -3px 6px #003a6f;
 
-
         --fb-shadow-lg: 8px 8px 16px rgba(0, 0, 0, .35), -8px -8px 16px rgba(255, 255, 255, .04);
         --fb-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, .35), inset -4px -4px 8px rgba(255, 255, 255, .05);
         --fb-shadow-sm: 4px 4px 8px rgba(0, 0, 0, .30), -4px -4px 8px rgba(255, 255, 255, .04);
         --fb-neo-lg:inset 1px 1px 1px rgba(255, 255, 255, 0.06), -2px -2px 2px rgba(255, 255, 255, 0.08), -4px -4px 6px rgba(255, 255, 255, 0.08), -8px -8px 16px rgba(255, 255, 255, 0.08), -12px -12px 24px rgba(255, 255, 255, 0.08), inset -1px -1px 1px rgba(0, 0, 0, 0.6), 2px 2px 2px rgba(0, 0, 0, 0.7), 4px 4px 6px rgba(0, 0, 0, 0.7), 8px 8px 16px rgba(0, 0, 0, 0.7), 12px 12px 24px rgba(0, 0, 0, 0.7);
         --fb-neo-sm:inset 1px 1px 1px rgba(255, 255, 255, 0.04), -1px -1px 2px rgba(255, 255, 255, 0.06), -2px -2px 4px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.4), 1px 1px 2px rgba(0, 0, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.5);
-        --fb-neo-inset: /* tiny inner highlights */ inset 1px 1px 1px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.40), /* inner border ring */ inset 0 0 0 1px rgba(20, 20, 24, 1), /* soft outer highlights */ inset -1px -1px 1px 1px rgba(255, 255, 255, 0.06), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.05), -1px -1px 2px 0px rgba(255, 255, 255, 0.05), -2px -2px 4px 0px rgba(255, 255, 255, 0.04), /* soft outer shadows */ inset 1px 1px 1px 1px rgba(0, 0, 0, 0.40), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.38), 1px 1px 2px 0px rgba(0, 0, 0, 0.38), 2px 2px 4px 0px rgba(0, 0, 0, 0.36) ;
-        --fb-glass1-inset:inset 1px 1px 0 rgba(0, 0, 0, 0.68), inset -1px -1px 0 rgba(255, 255, 255, 0.12);
+        --fb-neo-inset: inset 1px 1px 1px rgba(255, 255, 255, 0.06), inset -1px -1px 1px rgba(0, 0, 0, 0.40), inset 0 0 0 1px rgba(20, 20, 24, 1), inset -1px -1px 1px 1px rgba(255, 255, 255, 0.06), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.05), -1px -1px 2px 0px rgba(255, 255, 255, 0.05), -2px -2px 4px 0px rgba(255, 255, 255, 0.04), inset 1px 1px 1px 1px rgba(0, 0, 0, 0.40), inset 2px 2px 2px 1px rgba(0, 0, 0, 0.38), 1px 1px 2px 0px rgba(0, 0, 0, 0.38), 2px 2px 4px 0px rgba(0, 0, 0, 0.36) ;
         --fb-glass2-inset: inset 0  1px 0 rgba(255,255,255,.07), inset 1px 0 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.55), inset -1px 0 0 rgba(0,0,0,.48);
 
         --shadow-card: 0 4px 16px rgba(0, 0, 0, .20);
+
+        --pomodoro-bg: var(--fb-surface-2);
+        --pomodoro-foreground: var(--fb-text);
+        --pomodoro-muted: var(--fb-surface-2);
+        --pomodoro-muted-foreground: var(--fb-text-muted);
+        --pomodoro-accent: var(--fb-accent);
+        --pomodoro-shadow: var(--fb-shadow-lg);
+        --pomodoro-shadow-inset: var(--fb-shadow-inset);
+        --pomodoro-shadow-sm: var(--fb-shadow-sm);
+
+        --strict-overlay-bg: var(--fb-surface-2);
+        --strict-overlay-text: var(--fb-text);
+        --strict-overlay-muted: var(--fb-text-muted);
+        --strict-ring-track: var(--fb-accent-muted);
+        --strict-ring-progress: var(--fb-accent);
+
+        --scrollbar-thumb: rgba(120, 120, 120, 0.4);
+        --scrollbar-thumb-hover: rgba(120, 120, 120, 0.6);
+        --scrollbar-thumb-subtle: rgba(140, 140, 140, 0.35);
+        --scrollbar-thumb-subtle-hover: rgba(140, 140, 140, 0.55);
+
+        --black:rgba(255, 255, 255, 0.02);
+        --black-muted:rgba(255, 255, 255, 0.01);
+        --black-light:rgba(255, 255, 255, 0.08);
+        --black-light-muted:rgba(255, 255, 255, 0.12);
+
+        --btn-primary-bg: rgba(156, 255, 58, 0.2);
+        --btn-danger-bg: var(--red-muted);
+        --btn-danger-text: var(--fb-text);
+        --btn-success-bg: var(--green-muted);
+        --btn-success-text: var(--fb-text);
+        --btn-sheen: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
+
+        --toggle-checked-bg: rgba(156, 255, 58, 0.3);
+        --toggle-checked-border: rgba(156, 255, 58, 0.6);
+
+        --tag-delete-border: rgba(120, 120, 120, 0.4);
+        --tag-delete-bg: rgba(120, 120, 120, 0.08);
+        --tag-delete-color: rgba(160, 160, 160, 0.8);
+        --tag-delete-hover-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
+
+        --schedule-delete-border: rgba(120, 120, 120, 0.4);
+        --schedule-delete-bg: rgba(120, 120, 120, 0.08);
+        --schedule-delete-color: rgba(200, 200, 200, 0.7);
+        --schedule-delete-hover-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);
+        --schedule-days-gap: 4px;
+
+        --chart-allowed: var(--green);
+        --chart-blocked: var(--red);
+        --chart-other: var(--fb-status-strict);
+        --chart-accent-strong: rgba(156, 255, 58, 0.8);
+        --chart-accent-soft: rgba(156, 255, 58, 0.25);
+        --chart-accent-border: rgba(156, 255, 58, 0.4);
+
+        --gate-gradient: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(255, 255, 255, 0.04));
+        --breath-gradient: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
+        --timer-progress-shadow: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
     }
 }
-
 
 /* ====================================================================================================
       3) Base reset + typography, Normalizes spacing and sets global text defaults.
@@ -167,57 +245,38 @@ html,body {height: 100%;}
 
 body {margin: 0;background: var(--fb-bg);color: var(--fb-text); font-family: var(--font-ui);font-size: var(--font-body);min-width: 400px;min-height: 550px;overflow: hidden;}
 h1, h2, h3 {margin: 0;font-weight: 600;}
-p {margin: 0;color: var(--fb-muted);}
-
-
-
+p {margin: 0;color: var(--fb-text-muted);}
 
 /* ====================================================================================================
       4) App shell layout: header + main content area Controls overall sizing and scroll behavior.
    ==================================================================================================== */
-/*Header */
 .app {display: flex; flex-direction: column; height: 100%; min-height: 0; width: 100%; overflow: hidden; position: relative;}
-.app-header {padding: var(--space-3) var(--space-3) 10px var(--space-3); display: flex; align-items: center; justify-content: space-between; background: var(--fb-bg);}
+.app-header {padding: var(--space-3); display: flex; align-items: center; justify-content: space-between; background: var(--fb-bg); border-bottom: 1px solid var(--fb-border);}
 .app-title {font-size: var(--font-title);}
 .app-main {flex: 1; padding: var(--space-3); display: grid; gap: var(--space-3);overflow-y: auto; align-content: start; justify-items: center;width: 100%; min-height: 0; background: var(--fb-bg); }
 
-/* Popup sizing: cards stretch to full width in the popup view. */
 .app.popup .app-main {justify-items: stretch;}
 .app.popup .card {max-width: 100%;}
 
-/* Scrollbar styling for the main content area. */
-.app-main::-webkit-scrollbar {width: 0;}
+.app-main::-webkit-scrollbar {width: 6px;}
 .app-main::-webkit-scrollbar-track {background: transparent;}
-.app-main::-webkit-scrollbar-thumb {background: rgba(120, 120, 120, 0.4);border-radius: 999px;}
-.app-main::-webkit-scrollbar-thumb:hover {background: rgba(120, 120, 120, 0.6);}
-
-
-
+.app-main::-webkit-scrollbar-thumb {background: var(--scrollbar-thumb);border-radius: 999px;}
+.app-main::-webkit-scrollbar-thumb:hover {background: var(--scrollbar-thumb-hover);}
 
 /* ====================================================================================================
    5) Navigation bar + icons, Bottom tab bar layout and active state styling.
    ==================================================================================================== */
-.app-nav { border-top: var(--fb-border); background: var(--fb-surface-2); padding: var(--space-2); display: grid;grid-template-columns: repeat(5, 1fr); align-items: center; justify-items: center; width: 100%;}
+.app-nav { border-top: 1px solid var(--fb-border); background: var(--fb-surface-2); padding: var(--space-2); display: grid;grid-template-columns: repeat(5, 1fr); align-items: center; justify-items: center; width: 100%;}
 
-/*Button box*/
-.nav-btn { width: 100%; height: 40px; background: transparent; border: none; color: var(--fb-muted-light); cursor: pointer;display: grid; place-items: center; position: relative; transition: color 200ms ease;}
+.nav-btn { width: 100%; height: 40px; background: transparent; border: none; color: var(--fb-text-muted-light); cursor: pointer;display: grid; place-items: center; position: relative; transition: color 200ms ease;}
 
-/* Active tab background pill behind the icon. */
 .nav-btn::before { content: ""; position: absolute; width: 54px; height: 38px; border-radius: 12px; background: var(--fb-accent-muted);border-color:  var(--fb-border); box-shadow: var(--fb-shadow-sm); opacity: 0; transition: opacity 200ms ease; z-index: 0;}
-.nav-btn.active { color: var(--text); }
+.nav-btn.active { color: var(--fb-text); }
 .nav-btn.active::before { opacity: 1; }
 
-/* Active tab (indicator line) (aligned to nav border). */
-/*.nav-btn.active::after { content: ""; position: absolute; top: -10px; width: 56px; height: 3px; border-radius: 999px;background: var(--fb-accent); }*/
-
-/* Outline nav icons (shared stroke styling). */
 .nav-icon { width: 24px; height: 24px; display: block; opacity: 0.35; z-index: 1;}
 .nav-icon * { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;}
 .nav-btn.active .nav-icon { opacity: 1; }
-
-
-
-
 
 /* ====================================================================================================
       6) Status pill styles Visual language for on/off/paused/strict/pomodoro states.
@@ -226,59 +285,50 @@ p {margin: 0;color: var(--fb-muted);}
 .status {color: var(--fb-text);border-color: var(--fb-border);}
 .status-pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px;}
 
-/*STATUS PILL*/
 .status[data-status="off"] { background: var(--fb-status-off); box-shadow: var(--fb-shadow-inset);}
 .status[data-status="on"] { background: var(--fb-status-on); box-shadow: var(--fb-status-on-bs);}
 .status[data-status="paused"] { background: var(--fb-status-paused);box-shadow: var(--fb-status-paused-bs);}
 .status[data-status="strict"] { background: var(--fb-status-strict);box-shadow: var(--fb-status-strict-bs);}
 .status[data-status="pomodoro"] { background: var(--fb-status-pomodoro);box-shadow: var(--fb-status-pomodoro-bs);}
-.status[data-status="error"] { background: var(--fb-status-error);box-shadow: var(--fb-status-error-bs);}
-
-
-
 
 /* ====================================================================================================
       7) Cards and layout helpers, Reusable surfaces and row alignment utilities.
    ==================================================================================================== */
 .card {background: var(--fb-surface-2);border-radius: var(--r-card);box-shadow:var(--fb-glass2-inset);padding: var(--space-3);max-width: 720px;width: 100%;}
 
-/* Rows: align labels and controls on one line. */
 .row {display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);}
 .row + .row {margin-top: var(--space-2);}
-
-
-
+.list-input-row .text-input { flex: 1; min-width: 0; }
 
 /* ====================================================================================================
       8) Inputs and form controls, Text fields, selects, toggles, and segmented controls.
    ==================================================================================================== */
 .text-input { width: 100%; border-radius: var(--r-control); border: 2px double var(--fb-border); outline: none;
-    padding: var(--space-2); background: var(--fb-surface-2); color: var(--color-text); box-shadow: var(--fb-shadow-inset);
+    padding: var(--space-2); background: var(--fb-surface-2); color: var(--fb-text); box-shadow: var(--fb-shadow-inset);
 }
 
-/* Toggle: custom switch control. */
 .toggle { display: flex; align-items: center; position: relative; width: 64px; height: 34px;box-shadow: var(--fb-neo-inset);border-radius: var(--r-chip); cursor: pointer;}
-.toggle input {opacity: 0;width: 0;height: 0;} /* Below will Disable native box toggle */
-.toggle span { position: absolute; inset: 0;border-radius: var(--r-chip);border: 0; transition: 0.2s ease; box-shadow: var(--fb-neo-inset);} /*Below is inside the toggle */
-.toggle span::after { content: ""; position: absolute; top: 4px; left: 4px;width: 26px; height: 26px; border-radius: 50%; background: var(--fb-accent-stale); transition: 0.2s ease;} /*Below toggle accent button*/
-.toggle input:checked + span { /*background: #cde6f1;*/ background: var(--fb-accent-stale);border-color: rgba(156, 255, 58, 0.6);}
+.toggle input {opacity: 0;width: 0;height: 0;}
+.toggle span { position: absolute; inset: 0;border-radius: var(--r-chip);border: 0; transition: 0.2s ease; box-shadow: var(--fb-neo-inset);}
+.toggle span::before { content: "Off"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; padding: 0 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--fb-text-muted-light); text-transform: uppercase; pointer-events: none;}
+.toggle span::after { content: ""; position: absolute; top: 4px; left: 4px;width: 26px; height: 26px; border-radius: 50%; background: var(--fb-accent-stale); transition: 0.2s ease;}
+.toggle input:checked + span { background: var(--toggle-checked-bg);border-color: var(--toggle-checked-border);}
+.toggle input:checked + span::before { content: "On"; justify-content: flex-start; color: var(--fb-text-muted); }
 .toggle input:checked + span::after { transform: translateX(30px);background: var(--fb-accent); }
 
-/* Compact toggle variant (used in configs). */
 .toggle.small { width: 36px; height: 20px; }
+.toggle.small span::before { display: none; }
 .toggle.small span::after { width: 12px; height: 12px; top: 4px; left: 4px;}
 .toggle.small input:checked + span::after { transform: translateX(16px); }
 
-/*Segmented control: pill buttons for tabs/filters. */
-.segmented { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: var(--r-segment); /*border-radius: var(--r-chip);*/ border: 0; overflow: hidden; background: var(--fb-surface-2); color: var(--color-text); box-shadow: var(--fb-neo-inset);}
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: var(--r-segment); border: 0; overflow: hidden; background: var(--fb-surface-2); color: var(--fb-text); box-shadow: var(--fb-neo-inset);}
 .segmented.four { grid-template-columns: repeat(4, 1fr); }
 .segmented.two { grid-template-columns: repeat(2, 1fr); }
+.segmented.three { grid-template-columns: repeat(3, 1fr); }
 .segmented button { border: 0; background: transparent; color: var(--fb-text-muted-light); padding: var(--space-2); cursor: pointer;}
-.segmented button.active { background: var(--fb-accent-muted); color: var(--fb-text); border-radius: var(--r-segment); /*border-radius: var(--r-chip);*/ box-shadow: var(--fb-neo-inset);}
+.segmented button.active { background: var(--fb-accent-muted); color: var(--fb-text); border-radius: var(--r-segment); box-shadow: var(--fb-neo-inset);}
 #entryTypeRow.segmented { grid-template-columns: repeat(2, 1fr); }
 
-
-/* Stats tabs: segmented control layout + animated panels. */
 .stats-tabs-row { flex-wrap: wrap;}
 .stats-tabs-row > * { min-width: 0;}
 .stats-tabs-row .segmented { width: 100%; }
@@ -286,24 +336,15 @@ p {margin: 0;color: var(--fb-muted);}
 .stats-panel { opacity: 0; transform: translateY(6px); max-height: 0; overflow: hidden; transition: opacity 200ms ease, transform 200ms ease, max-height 200ms ease;}
 .stats-panel.active { opacity: 1; transform: translateY(0);max-height: 480px;}
 
-
-
-
 /* ====================================================================================================
       9) Chips, Small pill buttons for quick choices (durations, tags).
    ==================================================================================================== */
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--r-chip); border: 0; background: var(--fb-bg); color: var(--fb-text-muted-light); font-size: 12px; cursor: pointer; /*noinspection CssUnresolvedCustomProperty*/
-    box-shadow: var(--fb-glass2-inset);}
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--r-chip); border: 0; background: var(--fb-bg); color: var(--fb-text-muted-light); font-size: 12px; cursor: pointer; box-shadow: var(--fb-glass2-inset);}
 .chip.active {background: var(--fb-accent-stale); color: var(--fb-text); box-shadow: var(--fb-glass2-inset);}
 .chip[disabled] { opacity: 0.5; cursor: not-allowed; }
 
-/* Strict mode duration chips: evenly sized grid. */
 #strictDurations { display: grid; grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)); gap: 8px;}
 #strictDurations .chip { justify-content: center; text-align: center;}
-
-
-
-
 
 /* ====================================================================================================
       10) Buttons, Base button styling, sizes, and semantic variants.
@@ -313,138 +354,235 @@ p {margin: 0;color: var(--fb-muted);}
     font-size: var(--font-small); min-width: 64px;box-shadow: var(--fb-neo-sm);
 }
 .btn::after {
-    content: ""; position: absolute; top: 0; left: -150%; /* start far left */ width: 50%; height: 100%;
-    background: linear-gradient(120deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.0) 100%);
+    content: ""; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
+    background: var(--btn-sheen);
     transform: skewX(-20deg);transition: transform 0.6s ease, left 0.6s ease;pointer-events: none;
 }
 .btn:hover {box-shadow: var(--fb-neo-lg); transform: translateY(-1px); background: var(--fb-accent); transition: box-shadow 8000ms ease, transform 500ms ease, background 500ms ease; color: var(--fb-bg)}
-.btn:hover::after {left: 150%; /* sweep across */}
+.btn:hover::after {left: 150%;}
 .btn.btn-small { padding: 8px 14px; min-width: 96px; font-size: 12px;}
 .btn.btn-large { padding: 10px 16px; font-size: 12px; width: 100%; }
-
-/* Primary action button: lightly tinted accent color. */
-.btn.btn-primary {background: rgba(156, 255, 58, 0.2);color: var(--color-text);}
-
-/*Success Button*/
-.btn.btn-success { border-radius: var(--r-segment); color: var(--fb-text); background: var(--green-muted); box-shadow: var(--fb-neo-inset); /*box-shadow: inset 22px 22px 43px rgba(0,0,0,0.1), inset -22px -22px 43px rgba(255,255,255,.1);*/}
-.btn.btn-success:hover { color: var(--fb-bg); background: #35c459; box-shadow: var(--fb-neo-sm);}
-
-/* Danger buttons: used in modals and confirmations. */
-.btn.btn-danger { border-radius: var(--r-segment); color: var(--fb-text); background: var(--red-muted);box-shadow: var(--fb-neo-inset); /*box-shadow: inset 22px 22px 43px rgba(0,0,0,0.1), inset -22px -22px 43px rgba(255,255,255,.1);*/}
-.btn.btn-danger:hover { color: var(--fb-bg); background: red; box-shadow: var(--fb-neo-sm); }
-
-
-
-
-
-
-/* ====================================================================================================
-   12) Lists and list items
-   Used in blocked/allowed lists and schedule entries.
-   ==================================================================================================== */
-.list-items { display: grid; gap: 8px; }
-.list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 10px;
-    border-radius: var(--r-control);
-    border: 0;
-    background: var(--fb-bg);
-    font-size: var(--font-small);
-    overflow: visible;
-    box-shadow: var(--fb-neo-inset);
-}
-.list-item button { border: 0; background: transparent; color: var(--fb-text-muted-light); cursor: pointer; }
-.list-item button:hover { color: var(--red);}
-.list-item button[data-action="done"]:hover {color: var(--green); /* or whatever you want */ }
-.list-item button[data-action="remove"]:hover { color: var(--red); }
-
-
-
-
-/* ====================================================================================================
-   13) Modal system, Overlay, modal card, and actions layout.
-   ==================================================================================================== */
-.modal { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;}
-.modal-backdrop { position: absolute; inset: 0; background: var(--fb-surface-4);backdrop-filter: blur(56px) saturate(180%);}
-.modal-card { position: relative; width: min(92vw, 420px); border-radius: 24px; padding: 18px; background: var(--fb-surface-2); border: 1px solid var(--fb-bg); box-shadow: var(--fb-neo-inset); z-index: 1; }
-.modal.hidden { display: none; }
-body.modal-open { overflow: hidden; }
-.modal-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-
-.strict-desc { font-size: 14px; color: var(--color-muted); }
-
-
-
-
-/* ====================================================================================================
-   14) Strict session overlay, Fullscreen lock screen shown during strict mode.
-   ==================================================================================================== */
-.strict-overlay { position: absolute; inset: 0; z-index: 5000; background: var(--fb-surface-4);backdrop-filter: blur(56px) saturate(180%); display: grid; place-items: center; padding: 24px; color: var(--strict-overlay-text);}
-.strict-overlay.hidden { display: none; }
-.strict-overlay-content { text-align: left; display: grid; gap: 8px; max-width: 320px; width: 100%; }
-.strict-overlay .list-sub { color: var(--fb-text-muted); } /* Subtext */
-.strict-overlay-close { position: absolute; top: 12px; right: 12px; }
-
-
-
+.btn.btn-primary {background: var(--btn-primary-bg);color: var(--fb-text);}
+.btn.btn-success { border-radius: var(--r-segment); color: var(--btn-success-text); background: var(--btn-success-bg); box-shadow: var(--fb-neo-inset);}
+.btn.btn-success:hover { color: var(--fb-bg); background: var(--green); box-shadow: var(--fb-neo-sm);}
+.btn.btn-danger { border-radius: var(--r-segment); color: var(--btn-danger-text); background: var(--btn-danger-bg);box-shadow: var(--fb-neo-inset);}
+.btn.btn-danger:hover { color: var(--fb-bg); background: var(--red); box-shadow: var(--fb-neo-sm); }
 
 /* ====================================================================================================
       11) Icon buttons,Small icon-only buttons for actions like close/delete.
    ==================================================================================================== */
-.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;border-radius: 999px; border: 0; background: var(--fb-bg); box-shadow: var(--fb-shadow-sm); color: var(--fb-text-muted-light); font-size: 12px; cursor: pointer;}
-.icon-btn:hover { color: var(--fb-text); box-shadow: var(--fb-neo-lg); }
-.icon-btn.icon-only { width: 28px; height: 28px; font-size: 14px; }
-
-
-
-
-
-/* ====================================================================================================
-   15) Tasks, Task list, completion states, and range slider.
-   ==================================================================================================== */
-.task-form { display: grid; gap: 10px; }
-.task-range { display: flex; align-items: center; gap: 8px; }
-.task-range input[type="range"] { flex: 1; accent-color: var(--fb-accent); }
-.task-empty {color: var(--fb-text-muted-light);}
-.task-item { gap: 10px; }
-.task-main { display: grid; gap: 4px; min-width: 0; }
-.task-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.task-meta { font-size: 11px; color: var(--fb-text-muted-light);}
-.task-actions { display: inline-flex; align-items: center; gap: 8px; }
-.task-done .task-title { text-decoration: line-through; color: var(--fb-text-muted);}
-
-
-
-
+.icon-btn { display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--fb-bg); color: var(--fb-text-muted-light); font-size: 11px; font-weight: 600; line-height: 1; cursor: pointer; transition: color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, transform 0.12s ease; }
+.icon-btn:hover { color: var(--fb-text); box-shadow: var(--fb-neo-sm); transform: translateY(-1px); }
+/*.icon-btn.icon-only { width: 18px; height: 18px; border: 1px solid var(--fb-border); background: var(--fb-surface-2); color: var(--fb-text-muted-light); font-family: "Georgia", "Times New Roman", serif; font-style: italic; font-weight: 500; font-size: 10px; box-shadow: var(--fb-glass2-inset); }*/
+/*.icon-btn.icon-only:hover { border-color: var(--fb-accent); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); color: var(--fb-text); }*/
+.icon-btn.info-icon { width: 18px; height: 18px; border: 1px solid var(--fb-border); background: var(--fb-surface-2); color: var(--fb-text-muted-light); font-family: "Georgia", "Times New Roman", serif; font-style: italic; font-weight: 500; font-size: 10px; box-shadow: var(--fb-glass2-inset); }
+.icon-btn.info-icon:hover { border-color: var(--fb-accent); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); color: var(--fb-text); }
 
 /* ====================================================================================================
-   18) Schedule UI, Day pills, schedule cards, and delete button behavior.
+   11.1) Toasts
    ==================================================================================================== */
-.schedule-days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 6px; max-width: 120px; width: 100%;}
-.schedule-item { cursor: pointer; }
-.schedule-meta { display: grid; gap: 6px; min-width: 0;}
-.schedule-title { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;}
-.schedule-actions { display: grid; align-items: center; justify-items: end; gap: 10px; }
-.schedule-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.time-pill { flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; border: 0; background: var(--fb-accent-stale);color: var(--fb-bg); font-size: 10px; white-space: nowrap; box-shadow: var(--fb-neo-sm);}
-.day-pill { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: var(--r-segment); font-size: 10px; border: 0;
-    color: var(--fb-text-muted); background: var(--fb-accent-muted); box-shadow: var(--fb-neo-sm); }
+.toast-region { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 9998; display: grid; gap: 8px; pointer-events: none; }
+.toast { padding: 10px 14px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-surface-2); color: var(--fb-text); box-shadow: var(--fb-neo-sm); font-size: 12px; font-weight: 600; letter-spacing: 0.01em; opacity: 0; transform: translateY(14px) scale(0.94); }
+.toast.is-visible { animation: toast-bounce-in 420ms cubic-bezier(0.2, 0.9, 0.25, 1.2) forwards; }
+.toast.is-exiting { animation: toast-bounce-out 320ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards; }
 
-/* Schedule delete button: faint by default, red glow on hover. */
-.schedule-actions .icon-btn[data-delete-schedule] {
-    border-radius: 12px; border: 1px solid rgba(120, 120, 120, 0.4); background: rgba(120, 120, 120, 0.08); color: rgba(200, 200, 200, 0.7); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease;}
-.schedule-actions .icon-btn[data-delete-schedule]:hover {
-    border-color: rgba(255, 90, 90, 0.85); color: rgba(255, 90, 90, 0.9); box-shadow: 0 10px 24px rgba(255, 90, 90, 0.25);}
+@keyframes toast-bounce-in {
+    0% { opacity: 0; transform: translateY(14px) scale(0.94); }
+    55% { opacity: 1; transform: translateY(-6px) scale(1.02); }
+    75% { transform: translateY(2px) scale(0.99); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-/*THIS ONE WILL SET THE PROPERTIES FOR SUBTEXT UNDER HEADING.*/
-.list-sub { /*font-size: var(--font-small);*/ color: var(--fb-text-muted);}
-/*THIS IS TITLE OF SCHEDUAL*/
-.list-title { font-size: 14px; color: var(--fb-text);}
+@keyframes toast-bounce-out {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    35% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+    100% { opacity: 0; transform: translateY(14px) scale(0.96); }
+}
 
+/* ====================================================================================================
+   12) Lists and list items
+   ==================================================================================================== */
+.list-items { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.list-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); font-size: var(--font-small); overflow: hidden; box-shadow: var(--fb-neo-sm); }
+.list-item-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.list-item-text { flex: 1; min-width: 0; max-width: 12ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list-item-badge { font-size: 10px; padding: 2px 6px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); white-space: nowrap; }
+.list-empty { grid-column: 1 / -1; padding: 12px; border-radius: var(--r-control); border: 1px dashed var(--fb-border); background: var(--fb-surface-2); display: grid; gap: 6px; }
+.list-empty-title { margin: 0; font-size: var(--font-small); font-weight: 600; color: var(--fb-text); }
+.list-empty-hint { margin: 0; font-size: 12px; color: var(--fb-text-muted); }
+.list-empty-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.list-delete-btn { width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
+.list-delete-btn:hover { border-color: var(--red); color: var(--red); box-shadow: var(--tag-delete-hover-shadow); }
+.list-delete-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.list-title { font-weight: 600; }
+.list-sub { color: var(--fb-text-muted); }
 
+/* ====================================================================================================
+   YouTube exceptions card
+   ==================================================================================================== */
+.youtube-disclosure { display: grid; gap: 0; margin-bottom: 12px; }
+.youtube-toggle { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; }
+.youtube-toggle:hover { border-color: var(--fb-accent); }
+.youtube-toggle:active { transform: translateY(1px); }
+.youtube-toggle h4 { color: var(--fb-text); }
+.youtube-panel { max-height: 0; opacity: 0; overflow: hidden; transition: opacity 200ms ease, max-height 200ms ease; margin-left: calc(-1 * var(--space-3)); margin-right: calc(-1 * var(--space-3)); padding-left: var(--space-3); padding-right: var(--space-3); }
+.youtube-disclosure.is-open .youtube-panel { max-height: 420px; opacity: 1; margin-top: 10px; padding-top: 12px; padding-bottom: 12px; background: var(--fb-surface-2); }
+.youtube-disclosure.is-open .tag-chevron { transform: rotate(90deg); }
+.youtube-input-row .text-input { flex: 1; min-width: 0; }
+.youtube-input-row .select-input { width: 120px; flex: 0 0 120px; }
+.youtube-input-row .btn { white-space: nowrap; }
+.youtube-helper-row { margin-top: 6px; align-items: center; gap: 8px; }
+.youtube-helper-row .list-sub { margin: 0; font-size: 11px; color: var(--fb-text-muted); }
+.youtube-helper-row .chip { padding: 4px 10px; font-size: 11px; }
+.helper-sep { color: var(--fb-text-muted); font-size: 11px; }
+.youtube-divider { height: 1px; border-top: 1px dashed rgba(140, 150, 150, 0.35); margin-top: 8px; }
+.save-btn { padding: 9px 18px; min-width: 92px; }
+.select-input { appearance: none; cursor: pointer; }
 
+/* ====================================================================================================
+   Advanced rule builder
+   ==================================================================================================== */
+.advanced-disclosure { display: grid; gap: 0; margin-top: 12px; }
+.advanced-toggle { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; }
+.advanced-toggle:hover { border-color: var(--fb-accent); }
+.advanced-toggle:active { transform: translateY(1px); }
+.advanced-toggle h4 { color: var(--fb-text); }
+.advanced-panel { max-height: 0; opacity: 0; overflow: hidden; transition: opacity 200ms ease, max-height 200ms ease; margin-left: calc(-1 * var(--space-3)); margin-right: calc(-1 * var(--space-3)); padding-left: var(--space-3); padding-right: var(--space-3); }
+.advanced-disclosure.is-open .advanced-panel { max-height: 520px; opacity: 1; margin-top: 10px; padding-top: 12px; padding-bottom: 12px; background: var(--fb-surface-2); }
+.advanced-disclosure.is-open .tag-chevron { transform: rotate(90deg); }
+.advanced-list { display: grid; gap: 8px; }
+.advanced-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.advanced-item .text-input { padding: 8px 10px; font-size: 12px; }
+.advanced-input-row .text-input { flex: 1; min-width: 0; }
+.advanced-examples { border: 1px solid var(--fb-border); border-radius: 14px; padding: 10px 12px; background: var(--fb-surface-2); }
+.advanced-examples summary { cursor: pointer; color: var(--fb-text); font-weight: 600; }
+.advanced-example-list { display: grid; gap: 6px; margin-top: 8px; color: var(--fb-text-muted); font-size: 12px; }
+
+/* ====================================================================================================
+   13) Modal system
+   ==================================================================================================== */
+.modal { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;}
+.modal-backdrop { position: absolute; inset: 0; background: var(--fb-surface-2);backdrop-filter: blur(56px) saturate(180%);}
+.modal-card { position: relative; width: min(92vw, 420px); border-radius: 24px; padding: 18px; background: var(--fb-surface-2); border: 1px solid var(--fb-bg); box-shadow: var(--fb-neo-inset); z-index: 1; }
+.modal.hidden { display: none; }
+body.modal-open { overflow: hidden; }
+.modal-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.strict-desc { font-size: 14px; color: var(--fb-text-muted); }
+.metric-info { display: grid; gap: 14px; }
+.metric-info-header { display: grid; gap: 6px; }
+.metric-info-kicker { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fb-text-muted); margin: 0; }
+.metric-info-title { margin: 0; }
+.metric-info-sub { margin: 0; color: var(--fb-text-muted); font-size: 13px; }
+.metric-info-grid { display: grid; gap: 10px; }
+.metric-info-card { padding: 12px; border-radius: 14px; border: 1px solid var(--fb-border); background: var(--fb-bg); display: grid; gap: 6px; }
+.metric-info-label { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fb-text-muted); }
+.metric-info-text { margin: 0; color: var(--fb-text); }
+.metric-info-math { font-weight: 600; font-size: 13px; }
+.metric-info-note { margin: 0; color: var(--fb-text-muted); font-size: 12px; }
+
+/* ====================================================================================================
+   14) Strict session overlay
+   ==================================================================================================== */
+.strict-overlay { position: absolute; inset: 0; z-index: 5000; background: var(--strict-overlay-bg);backdrop-filter: blur(56px) saturate(180%); display: grid; place-items: center; padding: 24px; color: var(--strict-overlay-text);}
+.strict-overlay.hidden { display: none; }
+.strict-overlay-content { text-align: left; display: grid; gap: 8px; max-width: 320px; width: 100%; }
+.strict-overlay .list-sub { color: var(--strict-overlay-muted); }
+.strict-overlay-close { position: absolute; top: 12px; right: 12px; }
+
+/* ====================================================================================================
+   15) Tags
+   ==================================================================================================== */
+.tag-form { display: grid; gap: 10px; }
+.tag-range { display: flex; align-items: center; gap: 8px; }
+.tag-range input[type="range"] { flex: 1; accent-color: var(--fb-accent); }
+.tag-empty { color: var(--fb-text-muted); }
+.tag-item { gap: 10px; }
+.tag-main { display: grid; gap: 4px; min-width: 0; }
+.tag-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag-meta { font-size: 11px; color: var(--fb-text-muted); }
+.tag-actions { display: inline-flex; align-items: center; gap: 8px; }
+.tag-done .tag-title { text-decoration: line-through; color: var(--fb-text-muted); }
+
+.tag-disclosure { display: grid; gap: 0; }
+.tags-card .tags-header { align-items: center; }
+.tag-active-card { margin-top: 12px; padding: 12px; border-radius: var(--r-control); background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); display: grid; gap: 8px; }
+.tag-active-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tag-active-title { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.tag-active-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fb-text-muted); }
+.tag-active-name { font-weight: 600; font-size: 13px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag-color-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--fb-accent); box-shadow: var(--fb-shadow-sm); flex: 0 0 auto; }
+
+.tag-quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tag-quick-card { background: var(--fb-surface-2); border-radius: var(--r-control); padding: 10px; box-shadow: var(--fb-neo-sm); display: grid; gap: 6px; cursor: pointer; min-height: 88px; }
+.tag-quick-card:hover { box-shadow: var(--fb-neo-lg); }
+.tag-quick-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.tag-quick-card .tag-title { font-weight: 600; font-size: 12px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tag-quick-card .tag-desc { margin: 0; font-size: 11px; color: var(--fb-text-muted); }
+.tag-show-all { width: 100%; margin-top: 12px; }
+
+.tag-modal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-height: 360px; overflow: auto; padding-right: 4px; scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb-subtle) transparent; }
+.tag-modal-grid::-webkit-scrollbar { width: 6px; }
+.tag-modal-grid::-webkit-scrollbar-track { background: transparent; }
+.tag-modal-grid::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb-subtle); border-radius: 999px; }
+.tag-modal-grid::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-subtle-hover); }
+
+.tag-header { position: relative; }
+.tag-toggle { border: 0; background: var(--fb-surface-2); color: inherit; width: 100%; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 12px; border-radius: var(--r-control); box-shadow: var(--fb-neo-sm); cursor: pointer; text-align: left; }
+.tag-toggle:focus-visible { outline: 2px solid var(--fb-accent); outline-offset: 2px; }
+.tag-toggle:hover { box-shadow: var(--fb-neo-lg); }
+.tag-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fb-text-muted); }
+.tag-name { font-weight: 600; font-size: 13px; display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag-sub { display: block; font-size: 11px; color: var(--fb-text-muted); }
+.tag-title-block { display: grid; gap: 6px; }
+.tag-title-line { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.tag-toggle .tag-actions { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; gap: 12px; color: var(--fb-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; align-self: stretch; }
+.tag-meta-pills { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.tag-meta-pill { font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); box-shadow: var(--fb-neo-sm); white-space: nowrap; }
+.tag-chevron { color: var(--fb-text-muted); display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: var(--fb-bg); box-shadow: var(--fb-neo-sm); transition: transform 200ms ease; }
+.tag-chevron svg { width: 16px; height: 16px; }
+.tag-add { border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); border-radius: 999px; padding: 4px 10px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--fb-neo-sm); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.tag-add:hover { color: var(--fb-text); box-shadow: var(--fb-neo-lg); }
+.tag-add svg { width: 16px; height: 16px; }
+
+.tag-panel { max-height: 0; opacity: 0; overflow: hidden; margin: 0; padding: 0; border-radius: 12px; transition: max-height 220ms ease, opacity 220ms ease, margin-top 220ms ease, padding-top 220ms ease, padding-bottom 220ms ease; }
+.tag-disclosure.is-open .tag-panel { max-height: 260px; opacity: 1; margin-top: 0; padding: 8px 12px 12px; background: var(--fb-bg); border-radius: 0 0 var(--r-control) var(--r-control); box-shadow: var(--fb-neo-sm); overflow-y: auto; }
+.tag-disclosure.is-open .tag-chevron { transform: rotate(180deg); }
+.tag-disclosure.is-open .tag-toggle { border-radius: var(--r-control) var(--r-control) 0 0; box-shadow: none; border-bottom: 1px solid var(--fb-border); }
+
+.tag-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.tag-panel::-webkit-scrollbar { width: 6px; }
+.tag-panel::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 999px; }
+
+.tag-card { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; }
+.tag-card:hover { border-color: var(--fb-accent); }
+.tag-card:active { transform: translateY(1px); }
+.tag-desc { font-size: 12px; color: var(--fb-text-muted); line-height: 1.4; grid-column: 1 / -1; }
+.tag-controls { display: inline-flex; align-items: center; gap: 6px; justify-self: end; grid-row: 1; grid-column: 2; }
+.tag-pill { cursor: pointer; display: inline-flex; align-items: center; }
+.tag-pill input { position: absolute; opacity: 0; pointer-events: none; }
+.tag-pill span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); box-shadow: var(--fb-neo-sm); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.tag-pill span.is-active { border-color: var(--fb-accent); background: var(--fb-accent-muted); color: var(--fb-text); }
+.tag-gear { border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); border-radius: 999px; padding: 4px 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--fb-neo-sm); }
+.tag-gear:hover { color: var(--fb-text); box-shadow: var(--fb-neo-lg); }
+.tag-gear svg { width: 14px; height: 14px; }
+
+.tag-details { display: grid; gap: 10px; }
+.tag-config-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.tag-config { display: grid; gap: 6px; min-width: 0; }
+.tag-config .text-input { width: 100%; }
+.tag-section { display: grid; gap: 6px; }
+.tag-section-title { font-size: 11px; color: var(--fb-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.tag-cycle-row { margin-top: 8px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.tag-color-picker { margin-right: auto; display: inline-flex; align-items: center; gap: 8px; }
+.tag-color-picker input[type="color"] { width: 28px; height: 28px; border: 0; padding: 0; background: transparent; border-radius: 50%; box-shadow: var(--fb-neo-sm); cursor: pointer; appearance: none; -webkit-appearance: none; overflow: hidden; }
+.tag-color-picker input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.tag-color-picker input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.tag-color-picker input[type="color"]::-moz-color-swatch { border: 0; border-radius: 50%; }
+
+.tag-delete-btn { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--tag-delete-border); background: var(--tag-delete-bg); color: var(--tag-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; box-shadow: var(--fb-neo-sm); }
+.tag-delete-btn:hover { border-color: var(--red); color: var(--red); box-shadow: var(--tag-delete-hover-shadow); }
+.tag-delete-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ====================================================================================================
    16) Pomodoro, Timer layout and controls.
@@ -452,214 +590,304 @@ body.modal-open { overflow: hidden; }
 .pomodoro-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; }
 .pomodoro-title { min-width: 0; }
 .pomodoro-title h3 { font-size: 1.5em; }
+.pomodoro-status-row { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.pomodoro-status-stack { display: grid; gap: 6px; justify-items: start; }
+.pomodoro-tag-pill { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pomodoro-controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
 .pomodoro-control { border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; color: inherit; }
-.pomodoro-control.secondary {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--pomodoro-bg);
-    box-shadow: var(--pomodoro-shadow-sm);
-    /*color: var(--pomodoro-muted-foreground);*/
-}
-
-.pomodoro-control.secondary:hover {
-    color: var(--pomodoro-foreground);
-}
-
-.pomodoro-control.secondary:active {
-    box-shadow: var(--pomodoro-shadow-inset);
-}
-
-.pomodoro-control.primary {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: var(--pomodoro-accent);
-    color: var(--pomodoro-foreground);
-    box-shadow: 0 4px 16px var(--pomodoro-shadow);
-}
-
-.pomodoro-control.primary:hover {
-    transform: scale(1.05);
-}
-
-.pomodoro-control.primary:active {
-    transform: scale(0.95);
-}
-
-.pomodoro-control svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-}
-
-.pomodoro-control.primary svg {
-    width: 24px;
-    height: 24px;
-}
-
-.pomodoro-control[disabled] {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.pomodoro-fields {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-}
+.pomodoro-control.secondary { width: 48px; height: 48px; border-radius: 50%; background: var(--pomodoro-bg); box-shadow: var(--pomodoro-shadow-sm); }
+.pomodoro-control.secondary:hover { color: var(--pomodoro-foreground); }
+.pomodoro-control.secondary:active { box-shadow: var(--pomodoro-shadow-inset); }
+.pomodoro-control.primary { width: 64px; height: 64px; border-radius: 50%; background: var(--pomodoro-accent); color: var(--pomodoro-foreground); box-shadow: 0 4px 16px var(--pomodoro-shadow); }
+.pomodoro-control.primary:hover { transform: scale(1.05); }
+.pomodoro-control.primary:active { transform: scale(0.95); }
+.pomodoro-control svg { width: 20px; height: 20px; fill: currentColor; }
+.pomodoro-control.primary svg { width: 24px; height: 24px; }
+.pomodoro-control[disabled] { opacity: 0.45; cursor: not-allowed; }
+.pomodoro-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pomodoro-toggle-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pomodoro-toggle { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border-radius: var(--r-control); background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); }
+.pomodoro-toggle .list-sub { line-height: 1.3; min-height: 2.6em; margin: 0; }
+.pomodoro-toggle .toggle.small { flex: 0 0 auto; width: 44px; height: 24px; }
+.pomodoro-toggle .toggle.small span::after { width: 16px; height: 16px; top: 4px; left: 4px; }
+.pomodoro-toggle .toggle.small input:checked + span::after { transform: translateX(20px); }
+.pomodoro-config-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pomodoro-config-col { padding: 10px 12px; border-radius: var(--r-control); background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); display: grid; gap: 4px; text-align: center; }
+.pomodoro-config-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fb-text-muted); }
+.pomodoro-config-value { font-size: 16px; font-weight: 600; color: var(--pomodoro-foreground); }
 
 /* =========================
    17) Neumorphic timer (reusable)
-   Shared circular timer used by Pomodoro and Strict mode.
    ========================= */
-.neo-timer {
-    position: relative;
-    width: 240px;
-    height: 240px;
-    margin: 0 auto;
+.neo-timer { position: relative; width: 240px; height: 240px; margin: 0 auto; }
+.neo-timer-outer { position: absolute; inset: 0; border-radius: 50%; background: var(--pomodoro-bg); box-shadow: var(--pomodoro-shadow); }
+.neo-timer-inner { position: absolute; inset: 20px; border-radius: 50%; background: var(--pomodoro-bg); box-shadow: var(--pomodoro-shadow-inset); }
+.neo-timer-svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.neo-timer-track { fill: none; stroke: var(--pomodoro-muted); stroke-width: 12; stroke-linecap: round; }
+.neo-timer-progress { fill: none; stroke: var(--pomodoro-accent); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.3s ease-out; filter: var(--timer-progress-shadow); }
+.neo-timer-time { position: absolute; inset: 0; pointer-events: none; }
+.neo-timer-value { font-size: 40px; font-weight: 600; letter-spacing: -1px; color: var(--pomodoro-foreground); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.neo-timer-label { margin-top: 8px; font-size: 12px; color: var(--pomodoro-muted-foreground); }
+.neo-timer-meta { position: absolute; inset: 0; }
+.neo-timer-meta .timer-pill { position: absolute; left: 50%; transform: translateX(-50%); }
+#pomodoroPhasePill { top: 50%; transform: translate(-50%, -66px); }
+#pomodoroCyclePill { top: 50%; transform: translate(-50%, 34px); }
+.timer-pill { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text); box-shadow: var(--fb-neo-sm); white-space: nowrap; }
+#pomodoroCyclePill { color: var(--pomodoro-muted-foreground); border-color: var(--fb-border); }
+.timer-sep { font-size: 11px; color: var(--fb-text-muted); opacity: 0.6; }
+
+.pomodoro-timer { --neo-timer-bg: var(--pomodoro-bg); --neo-timer-foreground: var(--pomodoro-foreground); --neo-timer-muted: var(--pomodoro-muted); --neo-timer-muted-foreground: var(--pomodoro-muted-foreground); --neo-timer-accent: var(--pomodoro-accent); --neo-timer-shadow: var(--pomodoro-shadow); --neo-timer-shadow-inset: var(--pomodoro-shadow-inset); }
+.strict-timer { --neo-timer-bg: var(--strict-overlay-bg); --neo-timer-foreground: var(--strict-overlay-text); --neo-timer-muted: var(--strict-ring-track); --neo-timer-muted-foreground: var(--strict-overlay-muted); --neo-timer-accent: var(--strict-ring-progress); --neo-timer-shadow: var(--fb-shadow-lg); --neo-timer-shadow-inset: var(--fb-shadow-inset); }
+
+/* ====================================================================================================
+   18) Interventions (friction modes)
+   ==================================================================================================== */
+.intervention-disclosure { display: grid; gap: 10px; }
+.intervention-toggle { border: 0; background: var(--fb-surface-2); color: inherit; width: 100%; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-control); box-shadow: var(--fb-neo-sm); cursor: pointer; text-align: left; }
+.intervention-toggle:hover { box-shadow: var(--fb-neo-lg); }
+.intervention-current { font-size: 10px; color: var(--fb-text); text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); white-space: nowrap; }
+.intervention-chevron { font-size: 18px; color: var(--fb-text-muted); display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: var(--fb-bg); box-shadow: var(--fb-neo-sm); transition: transform 200ms ease; }
+.intervention-chevron svg { width: 16px; height: 16px; }
+.intervention-panel { max-height: 0; opacity: 0; overflow: hidden; margin: 0; padding: 0; border-radius: 12px; transition: max-height 220ms ease, opacity 220ms ease, margin-top 220ms ease, padding-top 220ms ease, padding-bottom 220ms ease; }
+.intervention-disclosure.is-open .intervention-panel { max-height: 520px; opacity: 1; margin-left: calc(-1 * var(--space-3)); margin-right: calc(-1 * var(--space-3)); margin-top: 10px; padding-left: var(--space-3); padding-right: var(--space-3); padding-top: 12px; padding-bottom: 12px; background: var(--fb-surface-2); }
+.intervention-disclosure.is-open p { padding: 0 0 10px 0 ; }
+.intervention-disclosure.is-open .intervention-chevron { transform: rotate(90deg); }
+.intervention-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.intervention-card { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; }
+.intervention-panel .intervention-card { background: var(--fb-bg); }
+.intervention-panel .intervention-card  p{ padding: 10px 0 0 0; }
+.intervention-card:hover { border-color: var(--fb-accent); }
+.intervention-card:active { transform: translateY(1px); }
+.intervention-title { font-weight: 600; font-size: 13px; }
+.intervention-desc { font-size: 12px; color: var(--fb-text-muted); line-height: 1.4; grid-column: 1 / -1; }
+.intervention-controls { display: inline-flex; align-items: center; gap: 6px; justify-self: end; grid-row: 1; grid-column: 2; }
+.intervention-pill { cursor: pointer; display: inline-flex; align-items: center; }
+.intervention-pill input { position: absolute; opacity: 0; pointer-events: none; }
+.intervention-pill span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); box-shadow: var(--fb-neo-sm); }
+.intervention-pill span.is-active { border-color: var(--fb-accent); background: var(--fb-accent-muted); color: var(--fb-text); }
+.intervention-gear { border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); border-radius: 999px; padding: 4px 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--fb-neo-sm); }
+.intervention-gear:hover { color: var(--fb-text); box-shadow: var(--fb-neo-lg); }
+.intervention-gear svg { width: 14px; height: 14px; }
+.intervention-details { display: grid; gap: 10px; }
+.intervention-section { display: grid; gap: 6px; }
+.intervention-section-title { font-size: 11px; color: var(--fb-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+@media (max-width: 360px) { .intervention-grid { grid-template-columns: 1fr; } }
+
+/* ====================================================================================================
+   19) Intervention behaviors (tab.html)
+   ==================================================================================================== */
+.intervention-stage { display: grid; gap: 10px; }
+.hold-stage { display: grid; gap: 10px; }
+.hold-progress { height: 6px; background: var(--fb-bg); border-radius: 999px; overflow: hidden; }
+.hold-progress span { display: block; height: 100%; width: 0%; background: var(--fb-accent); }
+.gate-stage { position: relative; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); height: 80px; overflow: hidden; display: grid; place-items: center; }
+.gate-panel { position: absolute; inset: 0; background: var(--gate-gradient); animation: gate-slide var(--gate-duration, 8s) ease-in-out forwards; }
+@keyframes gate-slide { to { transform: translateX(100%); } }
+.breath-stage { display: grid; gap: 10px; place-items: center; text-align: center; }
+.breath-circle { width: 100px; height: 100px; border-radius: 50%; background: var(--breath-gradient); transform: scale(0.6); transition: transform 4s ease-in-out; }
+
+/* ====================================================================================================
+   20) Schedule UI
+   ==================================================================================================== */
+.schedule-days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--schedule-days-gap); margin-top: 6px; }
+.schedule-item { cursor: pointer; }
+.schedule-meta { display: grid; gap: 6px; min-width: 0; }
+.schedule-title { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.schedule-actions { display: grid; align-items: center; justify-items: end; gap: 10px; }
+.schedule-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fb-text); }
+.time-pill { flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; border: 0; background: var(--fb-accent-stale);color: var(--fb-bg); font-size: 10px; white-space: nowrap; box-shadow: var(--fb-neo-sm); }
+.day-pill { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: var(--r-segment); font-size: 10px; border: 0; color: var(--fb-text-muted); background: var(--fb-accent-muted); box-shadow: var(--fb-neo-sm); }
+.schedule-actions .icon-btn[data-delete-schedule] { width: 20px; height: 20px; padding: 0; border-radius: 12px; border: 1px solid var(--schedule-delete-border); background: var(--schedule-delete-bg); color: var(--schedule-delete-color); transition: border-color 200ms ease, box-shadow 200ms ease, color 200ms ease; }
+.schedule-actions .icon-btn[data-delete-schedule]:hover { border-color: var(--red); color: var(--red); box-shadow: var(--schedule-delete-hover-shadow); }
+
+/* ====================================================================================================
+   21) Stats and analytics
+   ==================================================================================================== */
+.stats-row { display: grid; gap: 6px; }
+.stats-tag-row { cursor: pointer; background: var(--fb-surface-2); border: 1px solid var(--fb-border); }
+.stats-tag-row:hover { border-color: var(--fb-accent); }
+.stats-tag-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stats-tag-card { display: grid; gap: 6px; padding: 12px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); cursor: pointer; }
+.stats-tag-card:hover { border-color: var(--fb-accent); }
+.stats-tag-title { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.stats-tag-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: var(--fb-neo-sm); flex: 0 0 auto; }
+.stats-tag-meta { font-size: 11px; color: var(--fb-text-muted); display: flex; gap: 6px; flex-wrap: wrap; }
+.stats-stack { position: relative; }
+.stats-summary-header { display: flex; align-items: center; justify-content: space-between; }
+.stats-summary-header h2 { font-size: 22px; }
+.stats-summary-controls { margin-top: 10px; display: grid; gap: 10px; }
+.stats-summary-controls .segmented { background: var(--fb-surface-2); }
+.stats-hero-card { padding: 16px; background: var(--fb-surface-2); }
+.stats-hero-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.stats-hero-grid .pomodoro-full-time { grid-column: span 2; }
+.focus-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.focus-summary-grid .focus-summary-first-pause { grid-column: span 2; }
+.focus-summary-grid .focus-summary-total { grid-column: span 2; }
+.stats-hero-card .metric-card { background: var(--fb-surface-2); border: 1px solid var(--fb-border); }
+.stats-subview { transition: transform 240ms ease, opacity 240ms ease; opacity: 0; pointer-events: none; transform: translateX(12px); position: absolute; inset: 0; }
+.stats-subview.active { opacity: 1; pointer-events: auto; transform: translateX(0); position: relative; }
+.stats-subview.active > * + * { margin-top: 12px; }
+.stats-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stats-back-btn { white-space: nowrap; }
+.stats-range-pill { margin: 0; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); font-size: 12px; }
+.stats-topbar .stats-range-pill { margin-left: auto; }
+.stats-range-pill button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 14px; }
+.stats-title { margin-top: 10px; font-size: 22px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stats-range-toggle { margin-top: 10px; background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); }
+.stats-segment { display: none; }
+.stats-segment.active { display: block; }
+.stats-trend-card { cursor: pointer; background: var(--fb-surface-2); }
+.stats-trend-card:hover { box-shadow: var(--fb-neo-lg); }
+.stats-card-link { font-size: 10px; color: var(--fb-text-muted); text-transform: none; letter-spacing: 0.02em; white-space: nowrap; border: 1px solid var(--fb-border); background: transparent; border-radius: 999px; padding: 3px 8px; box-shadow: none; opacity: 0.7; display: inline-flex; align-items: center; }
+.stats-trend-card:hover .stats-card-link { opacity: 1; }
+.secondary-icon { display: inline-flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1; opacity: 0.7; margin-left: 4px; }
+.stats-card-link .secondary-icon { font-size: 16px; margin-left: 6px; line-height: 1; }
+.nudge-icon { animation: stats-nudge 1.6s ease-in-out infinite; }
+.nudge-down { animation: stats-nudge-down 1.6s ease-in-out infinite; }
+@keyframes stats-nudge {
+    0%, 70%, 100% { transform: translateX(0); opacity: 0.6; }
+    85% { transform: translateX(4px); opacity: 1; }
 }
-
-.neo-timer-outer {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: var(--neo-timer-bg, var(--neo-bg));
-    box-shadow: var(--neo-timer-shadow, var(--neo-shadow));
+@keyframes stats-nudge-down {
+    0%, 70%, 100% { transform: translateY(0); opacity: 0.6; }
+    85% { transform: translateY(3px); opacity: 1; }
 }
-
-.neo-timer-inner {
-    position: absolute;
-    inset: 20px;
-    border-radius: 50%;
-    background: var(--neo-timer-bg, var(--neo-bg));
-    box-shadow: var(--neo-timer-shadow-inset, var(--neo-shadow-inset));
+@media (prefers-reduced-motion: reduce) {
+    .nudge-icon,
+    .nudge-down { animation: none; }
 }
+.stats-trend-card .row { margin-bottom: 10px; }
+.stats-trend-card .segmented.two { background: var(--fb-surface-2); }
+.stats-trend-split { border-bottom: 1px solid var(--fb-border); padding-bottom: 10px; margin-bottom: 10px; }
+.stats-summary-avg { display: grid; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--fb-border); margin-bottom: 10px; }
+.stats-trend-card #statsStacked { background: var(--fb-bg); border-radius: 16px; padding: 8px 10px; }
 
-.neo-timer-svg {
-    position: absolute;
-    inset: 0;
-    transform: rotate(-90deg);
-}
+.trend-chart { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: end; }
+.trend-axis { display: flex; flex-direction: column; justify-content: space-between; height: 190px; padding: 12px 0 18px; font-size: 10px; color: var(--fb-text-muted); text-align: right; min-width: 32px; }
+.trend-bars { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(26px, 1fr)); gap: 10px; align-items: end; height: 190px; padding: 12px 6px 0; }
+.trend-grid { position: absolute; inset: 12px 6px 18px; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+.trend-grid span { height: 1px; background: var(--fb-border); opacity: 0.6; }
+.trend-bar { display: grid; grid-template-rows: 1fr auto; gap: 6px; justify-items: center; height: 100%; min-width: 0; position: relative; z-index: 1; }
+.trend-bar-track { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+.trend-bar-stack { width: 100%; height: 100%; display: flex; flex-direction: column-reverse; justify-content: flex-start; }
+.trend-segment { width: 100%; border-radius: 0; min-height: 4px; transition: height 200ms ease; }
+.trend-segment.is-top { border-top-left-radius: 999px; border-top-right-radius: 999px; }
+.trend-segment.is-bottom { border-bottom-left-radius: 999px; border-bottom-right-radius: 999px; }
+.trend-bar-stack > .trend-segment:first-child { border-bottom-left-radius: 999px; border-bottom-right-radius: 999px; }
+.trend-bar-stack > .trend-segment:last-child { border-top-left-radius: 999px; border-top-right-radius: 999px; }
+.trend-bar-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--black-light); box-shadow: var(--fb-neo-sm); margin-bottom: 2px; }
 
-.neo-timer-track {
-    fill: none;
-    stroke: var(--neo-timer-muted, var(--neo-bg-alt));
-    stroke-width: 12;
-    stroke-linecap: round;
-}
+.stats-usage-trend,
+.stats-usage-colors { --usage-allowed: var(--chart-allowed); --usage-blocked: var(--chart-blocked); --usage-other: var(--chart-other); }
+#statsUsageTrendFilter, #statsUsageTrendRange { width: 100%; }
+#statsUsageTrendFilter button, #statsUsageTrendRange button { padding: 6px 8px; font-size: 11px; }
 
-.neo-timer-progress {
-    fill: none;
-    stroke: var(--neo-timer-accent, var(--color-accent));
-    stroke-width: 12;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.3s ease-out;
-    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
-}
+.stats-usage-ring .stats-ring-row { display: grid; justify-items: center; gap: 14px; }
+.stats-usage-controls { display: grid; gap: 8px; width: 100%; }
+.stats-usage-controls .segmented { background: var(--fb-surface-2); box-shadow: var(--fb-neo-sm); width: 100%; display: flex; }
+.stats-usage-controls .segmented button { padding: 5px 10px; font-size: 11px; flex: 1; }
 
-.neo-timer-time {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+.stats-ring { width: 160px; height: 160px; display: grid; place-items: center; border-radius: 50%; background: var(--fb-bg); box-shadow: var(--fb-shadow-lg), var(--fb-shadow-inset); }
+.stats-ring svg { width: 160px; height: 160px; }
+.stats-ring-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; width: 100%; }
+.stats-ring-legend .legend-item { justify-content: flex-start; gap: 6px; }
+.stats-ring-legend .legend-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stats-ring-show-all { width: 100%; margin-top: 10px; }
+.tag-show-all,
+#statsShowAll,
+.stats-ring-show-all,
+.stats-export-card .btn { background: transparent; box-shadow: none; border: 1px solid var(--fb-border); color: var(--fb-text-muted); }
+.tag-show-all:hover,
+#statsShowAll:hover,
+.stats-ring-show-all:hover,
+.stats-export-card .btn:hover { color: var(--fb-text); background: var(--fb-bg); box-shadow: var(--fb-neo-sm); }
 
-.neo-timer-value {
-    font-size: 40px;
-    font-weight: 600;
-    letter-spacing: -1px;
-    color: var(--neo-timer-foreground, var(--color-text));
-}
+.trend-label { font-size: 10px; color: var(--fb-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 32px; }
 
-.neo-timer-label {
-    margin-top: 8px;
-    font-size: 12px;
-    color: var(--neo-timer-muted-foreground, var(--color-muted));
-}
+.stats-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--fb-border); margin-bottom: 12px; }
 
-.pomodoro-timer {
-    --neo-timer-bg: var(--pomodoro-bg);
-    --neo-timer-foreground: var(--pomodoro-foreground);
-    --neo-timer-muted: var(--pomodoro-muted);
-    --neo-timer-muted-foreground: var(--pomodoro-muted-foreground);
-    --neo-timer-accent: var(--pomodoro-accent);
-    --neo-timer-shadow: var(--pomodoro-shadow);
-    --neo-timer-shadow-inset: var(--pomodoro-shadow-inset);
-}
+.stats-bar { height: 6px; border-radius: 999px; background: var(--chart-accent-soft); border: 1px solid var(--chart-accent-border); }
+.stats-bar span { display: block; height: 100%; border-radius: inherit; background: var(--chart-accent-strong); }
+.stats-bar.fixed { width: 100%; max-width: 160px; }
+@media (max-width: 430px) { .stats-bar.fixed { max-width: 140px; } }
 
-.strict-timer {
-    --neo-timer-bg: var(--strict-overlay-bg);
-    --neo-timer-foreground: var(--strict-overlay-text);
-    --neo-timer-muted: var(--strict-ring-track);
-    --neo-timer-muted-foreground: var(--strict-overlay-muted);
-    --neo-timer-accent: var(--strict-ring-progress);
-    --neo-timer-shadow: var(--neo-shadow);
-    --neo-timer-shadow-inset: var(--neo-shadow-inset);
-}
+.stats-grid { display: grid; column-gap: 12px; row-gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+.stats-column { display: grid; gap: 8px; min-width: 0; overflow: visible; }
+.stats-item { display: grid; gap: 6px; width: 100%; }
+.stats-label { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px; overflow: visible; }
+.stats-pill { padding: 2px 8px; border-radius: 999px; background: var(--fb-accent-muted); border: 1px solid var(--fb-border); color: var(--fb-text); font-size: 11px; white-space: nowrap; }
+.stats-domain { font-size: var(--font-small); color: var(--fb-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; display: inline-block; max-width: 100%; }
 
+.metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.metric-card { padding: 12px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); }
+.metric-value { font-size: 18px; font-weight: 600; margin-top: 4px; }
 
+.chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.session-item { display: grid; gap: 6px; }
+.session-title { font-weight: 600; font-size: 13px; }
+.session-meta { display: flex; gap: 8px; flex-wrap: wrap; color: var(--fb-text-muted); font-size: 12px; }
 
+.settings-link { display: block; padding: 10px 12px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); color: var(--fb-text); text-decoration: none; font-size: 13px; }
+.settings-link[aria-disabled="true"] { opacity: 0.6; cursor: default; }
+.settings-footer { margin-top: 16px; display: grid; justify-items: center; gap: 6px; text-align: center; }
+.footer-link { color: var(--fb-text); text-decoration: none; font-size: 12px; }
+.footer-link:hover { text-decoration: underline; }
 
+.timeline-row { display: grid; gap: 6px; margin-bottom: 10px; }
+.timeline-bar { height: 8px; border-radius: 999px; background: var(--black-light); overflow: hidden; }
+.timeline-bar span { display: block; height: 100%; background: var(--fb-accent); }
 
+.stacked-list { display: grid; gap: 8px; }
+.stacked-row { display: grid; gap: 6px; font-size: var(--font-small); }
+.stacked-bars { display: flex; height: 10px; border-radius: 999px; overflow: hidden; border: 1px solid var(--chart-accent-border); background: var(--black-muted); }
+.stacked-bars .focus { background: var(--chart-accent-strong); }
+.stacked-bars .blocked { background: var(--red); }
 
+.stacked-vertical { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; height: 140px; overflow-x: hidden; }
+.stacked-vertical.month { height: auto; overflow-x: hidden; }
+.stacked-col { display: grid; grid-template-rows: 1fr auto; gap: 6px; justify-items: center; height: 100%; align-content: end; }
+.stacked-pillar { width: 100%; max-width: 10px; display: flex; flex-direction: column; justify-content: flex-end; border-radius: 999px; overflow: hidden; border: 1px solid var(--chart-accent-border); background: var(--black-muted); }
+.stacked-pillar .focus { background: var(--chart-accent-strong); }
+.stacked-pillar .blocked { background: var(--red); }
 
+.month-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; }
+.month-scroll::-webkit-scrollbar { height: 6px; }
+.month-scroll::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 999px; }
 
+.month-bars { display: flex; align-items: flex-end; gap: 8px; height: 160px; }
+.month-bar { display: grid; grid-template-rows: 1fr auto; gap: 6px; justify-items: center; min-width: 18px; }
+.stacked-label { font-size: 10px; color: var(--fb-text-muted); }
 
+.legend { display: inline-flex; align-items: center; gap: 6px; font-size: var(--font-small); color: var(--fb-text-muted); }
+.legend .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
+.legend .dot.focus { background: var(--chart-accent-strong); }
+.legend .dot.blocked { background: var(--red); }
 
+.donut-wrap { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.donut { width: 140px; height: 140px; display: grid; place-items: center; position: relative; }
+.donut-svg { position: absolute; inset: 0; }
+.donut-svg svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; pointer-events: none; }
+.donut-total-value { font-size: clamp(12px, 3.5vw, 18px); font-weight: 600; color: var(--fb-text); max-width: 110px; text-align: center; word-break: break-word; }
+.legend-list { display: grid; gap: 8px; font-size: var(--font-small); }
+.legend-item { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; font-size: 11px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 999px; }
+.legend-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.legend-value { color: var(--fb-text); font-weight: 600; }
 
+.heatmap { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.heat-cell { border-radius: 8px; height: 28px; display: grid; place-items: center; font-size: 10px; color: var(--fb-text); border: 1px solid var(--fb-border); }
 
+/* ====================================================================================================
+   22) Utilities
+   ==================================================================================================== */
+.hidden { display: none; }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================
-   20) Utilities
-   Small helpers used throughout the UI.
-   ========================= */
-.hidden {
-    display: none;
-}
-
-/* =========================
-   22) Responsive adjustments
-   Larger screens: more breathing room for the layout.
-   ========================= */
+/* ====================================================================================================
+   23) Responsive adjustments
+   ==================================================================================================== */
 @media (min-width: 900px) {
-    .app-main {
-        padding: 28px;
-        gap: 20px;
-    }
-    .card {
-        padding: 22px 24px;
-    }
-    .app-title {
-        font-size: 20px;
-    }
+    .app-main { padding: 28px; gap: 20px; }
+    .card { padding: 22px 24px; }
+    .app-title { font-size: 20px; }
 }

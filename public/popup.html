@@ -335,90 +335,98 @@
                     <button data-range="week">Week</button>
                     <button data-range="month">Month</button>
                   </div>
-                  <div class="stats-hero-grid ">
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Pomo' reliability
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="pomodoroReliabilityInfo"
-                          aria-label="Pomodoro reliability info"
-                        >i</button>
-                      </p>
-                      <div id="metricPomodoroReliability" class="metric-value">0%</div>
+                  <div class="segmented stats-range-control pomodoro-summary-tabs" id="pomodoroSummaryTabs" style="margin-bottom: 10px;">
+                    <button data-tab="quality">Quality</button>
+                    <button data-tab="volume">Volume</button>
+                  </div>
+                  <div class="pomodoro-summary-groups">
+                    <div class="stats-hero-grid pomodoro-summary-group" data-tab="quality">
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Pomo' reliability</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="pomodoroReliabilityInfo"
+                            aria-label="Pomodoro reliability info"
+                          >i</button>
+                        </p>
+                        <div id="metricPomodoroReliability" class="metric-value">0%</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Pause burden</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="pomodoroPauseBurdenInfo"
+                            aria-label="Pause burden info"
+                          >i</button>
+                        </p>
+                        <div id="metricPomodoroPauseBurden" class="metric-value">0%</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Tags completed</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="pomodoroTagsCompletedInfo"
+                            aria-label="Tags completed info"
+                          >i</button>
+                        </p>
+                        <div id="metricTags" class="metric-value">0</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Tags interrupted</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="pomodoroTagsInterruptedInfo"
+                            aria-label="Tags interrupted info"
+                          >i</button>
+                        </p>
+                        <div id="metricTagsInterrupted" class="metric-value">0</div>
+                      </div>
                     </div>
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Pause burden
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="pomodoroPauseBurdenInfo"
-                          aria-label="Pause burden info"
-                        >i</button>
-                      </p>
-                      <div id="metricPomodoroPauseBurden" class="metric-value">0%</div>
-                    </div>
-                    <div class="metric-card pomodoro-full-time">
-                      <p class="list-sub">
-                        Total pomodoro time
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="pomodoroTotalTimeInfo"
-                          aria-label="Total pomodoro time info"
-                        >i</button>
-                      </p>
-                      <div id="metricPomodoroTime" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card focus-full-time">
-                      <p class="list-sub">
-                        Focus time
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="pomodoroFocusTimeInfo"
-                          aria-label="Focus time info"
-                        >i</button>
-                      </p>
-                      <div id="metricFocus" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Break time (est.)
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="pomodoroBreakTimeInfo"
-                          aria-label="Break time info"
-                        >i</button>
-                      </p>
-                      <div id="metricBreak" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Tags completed
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="pomodoroTagsCompletedInfo"
-                          aria-label="Tags completed info"
-                        >i</button>
-                      </p>
-                      <div id="metricTags" class="metric-value">0</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Tags interrupted
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="pomodoroTagsInterruptedInfo"
-                          aria-label="Tags interrupted info"
-                        >i</button>
-                      </p>
-                      <div id="metricTagsInterrupted" class="metric-value">0</div>
+                    <div class="stats-hero-grid pomodoro-summary-group" data-tab="volume">
+                      <div class="metric-card pomodoro-full-time">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Total pomodoro time</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="pomodoroTotalTimeInfo"
+                            aria-label="Total pomodoro time info"
+                          >i</button>
+                        </p>
+                        <div id="metricPomodoroTime" class="metric-value">0m</div>
+                      </div>
+                      <div class="metric-card focus-full-time">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Focus time</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="pomodoroFocusTimeInfo"
+                            aria-label="Focus time info"
+                          >i</button>
+                        </p>
+                        <div id="metricFocus" class="metric-value">0m</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Break time (est.)</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="pomodoroBreakTimeInfo"
+                            aria-label="Break time info"
+                          >i</button>
+                        </p>
+                        <div id="metricBreak" class="metric-value">0m</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -500,90 +508,131 @@
                     <button data-range="week">Week</button>
                     <button data-range="month">Month</button>
                   </div>
-                  <div class="focus-summary-grid">
-                    <div class="metric-card focus-summary-reliability">
-                      <p class="list-sub">
-                        Focus reliability
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="focusReliabilityInfo"
-                          aria-label="Focus reliability info"
-                        >i</button>
-                      </p>
-                      <div id="statsFocusReliability" class="metric-value">0%</div>
+                  <div class="segmented stats-range-control focus-summary-tabs" id="focusSummaryTabs" style="margin-bottom: 10px;">
+                    <button data-tab="quality">Quality</button>
+                    <button data-tab="volume">Volume</button>
+                    <button data-tab="interruptions">Interruptions</button>
+                  </div>
+                  <div class="focus-summary-groups">
+                    <div class="focus-summary-group" data-tab="quality">
+                      <div class="metric-card focus-summary-reliability">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Focus reliability</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusReliabilityInfo"
+                            aria-label="Focus reliability info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusReliability" class="metric-value">0%</div>
+                      </div>
+                      <div class="metric-card focus-summary-reliability">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Schedule reliability</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusScheduleReliabilityInfo"
+                            aria-label="Schedule reliability info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusScheduleReliability" class="metric-value">--</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Longest focus streak</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusLongestStreakInfo"
+                            aria-label="Longest focus streak info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusLongestStreak" class="metric-value">--</div>
+                      </div>
                     </div>
-                    <div class="metric-card focus-summary-total">
-                      <p class="list-sub">
-                        Total focus time
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="focusTotalTimeInfo"
-                          aria-label="Total focus time info"
-                        >i</button>
-                      </p>
-                      <div id="statsFocusTotalTime" class="metric-value">0m</div>
+                    <div class="focus-summary-group" data-tab="volume">
+                      <div class="metric-card focus-summary-total">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Total focus time</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusTotalTimeInfo"
+                            aria-label="Total focus time info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusTotalTime" class="metric-value">0m</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Manual focus</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusManualTimeInfo"
+                            aria-label="Manual focus info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusManualTime" class="metric-value">0m</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Manual sessions</span>
+                        </p>
+                        <div id="statsFocusManualCount" class="metric-value">0</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Strict time</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusStrictTimeInfo"
+                            aria-label="Strict time info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusStrictTime" class="metric-value">0m</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Strict sessions</span>
+                        </p>
+                        <div id="statsFocusStrictCount" class="metric-value">0</div>
+                      </div>
                     </div>
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Manual focus
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="focusManualTimeInfo"
-                          aria-label="Manual focus info"
-                        >i</button>
-                      </p>
-                      <div id="statsFocusManualTime" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Manual sessions</p>
-                      <div id="statsFocusManualCount" class="metric-value">0</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Strict time
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="focusStrictTimeInfo"
-                          aria-label="Strict time info"
-                        >i</button>
-                      </p>
-                      <div id="statsFocusStrictTime" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Strict sessions</p>
-                      <div id="statsFocusStrictCount" class="metric-value">0</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">
-                        Pause time
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="focusPauseTimeInfo"
-                          aria-label="Pause time info"
-                        >i</button>
-                      </p>
-                      <div id="statsFocusPauseTime" class="metric-value">0m</div>
-                    </div>
-                    <div class="metric-card">
-                      <p class="list-sub">Total pauses</p>
-                      <div id="statsFocusPauseCount" class="metric-value">0</div>
-                    </div>
-                    <div class="metric-card focus-summary-first-pause">
-                      <p class="list-sub">
-                        Time to first pause
-                        <button
-                          class="icon-btn icon-only info-icon"
-                          type="button"
-                          data-open-modal="focusFirstPauseInfo"
-                          aria-label="Time to first pause info"
-                        >i</button>
-                      </p>
-                      <div id="statsFocusFirstPause" class="metric-value">--</div>
+                    <div class="focus-summary-group" data-tab="interruptions">
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Pause time</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusPauseTimeInfo"
+                            aria-label="Pause time info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusPauseTime" class="metric-value">0m</div>
+                      </div>
+                      <div class="metric-card">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Total pauses</span>
+                        </p>
+                        <div id="statsFocusPauseCount" class="metric-value">0</div>
+                      </div>
+                      <div class="metric-card focus-summary-first-pause">
+                        <p class="list-sub">
+                          <span class="metric-label-text">Time to first pause</span>
+                          <button
+                            class="icon-btn icon-only info-icon"
+                            type="button"
+                            data-open-modal="focusFirstPauseInfo"
+                            aria-label="Time to first pause info"
+                          >i</button>
+                        </p>
+                        <div id="statsFocusFirstPause" class="metric-value">--</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1333,6 +1382,66 @@
                 (focus time - pause time) / (focus time + pause time)
               </p>
               <p class="metric-info-note">Pauses include manual and timed pauses during focus.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusScheduleReliabilityInfoModal" class="modal hidden" data-modal="focusScheduleReliabilityInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Schedule reliability</h3>
+            <p class="metric-info-sub">How much of your scheduled focus time was actually spent focusing.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Focus and strict sessions that overlap your enabled schedule windows.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">How it is calculated</p>
+              <p class="metric-info-text metric-info-math">
+                focus time during scheduled windows / total scheduled time
+              </p>
+              <p class="metric-info-note">Shows “--” if no schedule is active in the range.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-danger" data-close-modal="true">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="focusLongestStreakInfoModal" class="modal hidden" data-modal="focusLongestStreakInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="metric-info">
+          <div class="metric-info-header">
+            <p class="metric-info-kicker">Focus summary metric</p>
+            <h3 class="metric-info-title">Longest focus streak</h3>
+            <p class="metric-info-sub">The longest continuous stretch of focus within the selected range.</p>
+          </div>
+          <div class="metric-info-grid">
+            <div class="metric-info-card">
+              <p class="metric-info-label">What it includes</p>
+              <p class="metric-info-text">
+                Focus, strict, and pomodoro sessions are included. Pauses do not break the streak.
+              </p>
+            </div>
+            <div class="metric-info-card">
+              <p class="metric-info-label">What breaks it</p>
+              <p class="metric-info-text">
+                Gaps between sessions end the streak and start a new one.
+              </p>
+              <p class="metric-info-note">Uses the same today/week/month selector.</p>
             </div>
           </div>
         </div>

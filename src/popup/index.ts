@@ -111,6 +111,8 @@ const statsFocusStrictCount = document.getElementById("statsFocusStrictCount");
 const statsFocusPomodoroTime = document.getElementById("statsFocusPomodoroTime");
 const statsFocusPomodoroCount = document.getElementById("statsFocusPomodoroCount");
 const statsFocusReliability = document.getElementById("statsFocusReliability");
+const statsFocusScheduleReliability = document.getElementById("statsFocusScheduleReliability");
+const statsFocusLongestStreak = document.getElementById("statsFocusLongestStreak");
 const statsFocusFirstPause = document.getElementById("statsFocusFirstPause");
 const usageTotal = document.getElementById("usageTotal");
 const usageBlocked = document.getElementById("usageBlocked");
@@ -128,6 +130,18 @@ const statsUsageTrendTotal = document.getElementById("statsUsageTrendTotal");
 const statsUsageTrendChange = document.getElementById("statsUsageTrendChange");
 const statsUsageTrendAvg = document.getElementById("statsUsageTrendAvg");
 const statsUsageTrendAvgChange = document.getElementById("statsUsageTrendAvgChange");
+const pomodoroSummaryTabButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#pomodoroSummaryTabs button")
+);
+const pomodoroSummaryGroups = Array.from(
+  document.querySelectorAll<HTMLElement>(".pomodoro-summary-group")
+);
+const focusSummaryTabButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("#focusSummaryTabs button")
+);
+const focusSummaryGroups = Array.from(
+  document.querySelectorAll<HTMLElement>(".focus-summary-group")
+);
 const statsUsageTrendChart = document.getElementById("statsUsageTrendChart");
 const statsUsageTrendRangeButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("#statsUsageTrendRange button")
@@ -660,6 +674,8 @@ let currentStatsTheme: "default" | "citrus" | "ocean" | "warm" = "default";
 let currentStatsPanel: "usage" | "domains" = "usage";
 let currentStatsSubview: "summary" | "trend" | "usage-trend" | "tag" = "summary";
 let currentStatsSegment: "pomodoro" | "focus" | "usage" = "focus";
+let currentPomodoroSummaryTab: "quality" | "volume" = "quality";
+let currentFocusSummaryTab: "quality" | "volume" | "interruptions" = "quality";
 let currentUsageRange: "today" | "week" | "month" = "week";
 let currentStatsTagId: string | null = null;
 type TrendRange = "day" | "week" | "month" | "year" | "3m" | "6m";
@@ -1869,6 +1885,49 @@ const getDayKey = (date = new Date()): string => {
   return `${year}-${month}-${day}`;
 };
 
+const parseDayKey = (key: string): Date => {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const buildScheduleIntervals = (
+  schedule: StorageSchema["schedule"],
+  keys: string[]
+): Array<{ start: number; end: number }> => {
+  const entries = schedule.entries.filter((entry) => entry.enabled && entry.days.length > 0);
+  if (entries.length === 0 || keys.length === 0) {
+    return [];
+  }
+  const keySet = new Set(keys);
+  const intervals: Array<{ start: number; end: number }> = [];
+  keys.forEach((key) => {
+    const date = parseDayKey(key);
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    const dayOfWeek = date.getDay();
+    entries.forEach((entry) => {
+      if (!entry.days.includes(dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6)) {
+        return;
+      }
+      const startMin = entry.startMin;
+      const endMin = entry.endMin;
+      const start = dayStart + startMin * 60 * 1000;
+      if (endMin > startMin) {
+        intervals.push({ start, end: dayStart + endMin * 60 * 1000 });
+        return;
+      }
+      if (endMin < startMin) {
+        const dayEnd = dayStart + 24 * 60 * 60 * 1000;
+        intervals.push({ start, end: dayEnd });
+        const nextKey = getDayKey(new Date(dayEnd));
+        if (keySet.has(nextKey)) {
+          intervals.push({ start: dayEnd, end: dayEnd + endMin * 60 * 1000 });
+        }
+      }
+    });
+  });
+  return intervals;
+};
+
 
 const getRangeKeys = (range: "today" | "week" | "month") => {
   const days = range === "today" ? 1 : range === "week" ? 7 : 30;
@@ -2327,6 +2386,54 @@ const renderFocusSummary = (state: StorageSchema) => {
     firstPauseDeltas.length > 0
       ? Math.round(firstPauseDeltas.reduce((sum, value) => sum + value, 0) / firstPauseDeltas.length)
       : null;
+  const scheduleIntervals = buildScheduleIntervals(state.schedule, keys);
+  const scheduleTotalMs = scheduleIntervals.reduce(
+    (sum, interval) => sum + Math.max(0, interval.end - interval.start),
+    0
+  );
+  const focusDuringScheduleMs = scheduleIntervals.length
+    ? [...focusSessions, ...strictSessions].reduce((sum, session) => {
+        const sessionStart = session.startedAt;
+        const sessionEnd = session.endedAt;
+        if (sessionEnd <= sessionStart) {
+          return sum;
+        }
+        const overlap = scheduleIntervals.reduce((acc, interval) => {
+          const start = Math.max(sessionStart, interval.start);
+          const end = Math.min(sessionEnd, interval.end);
+          return acc + Math.max(0, end - start);
+        }, 0);
+        return sum + overlap;
+      }, 0)
+    : 0;
+  const scheduleReliability =
+    scheduleTotalMs > 0 ? clamp(focusDuringScheduleMs / scheduleTotalMs, 0, 1) : null;
+  const streakSessions = sessions
+    .filter((session) =>
+      ["focus", "strict", "pomodoro", "pause"].includes(session.type)
+    )
+    .map((session) => ({
+      start: session.startedAt,
+      end: Math.max(session.startedAt, session.endedAt)
+    }))
+    .filter((session) => session.end > session.start)
+    .sort((a, b) => a.start - b.start);
+  let longestStreakMs = 0;
+  if (streakSessions.length > 0) {
+    let currentStart = streakSessions[0].start;
+    let currentEnd = streakSessions[0].end;
+    for (let i = 1; i < streakSessions.length; i += 1) {
+      const next = streakSessions[i];
+      if (next.start <= currentEnd) {
+        currentEnd = Math.max(currentEnd, next.end);
+      } else {
+        longestStreakMs = Math.max(longestStreakMs, currentEnd - currentStart);
+        currentStart = next.start;
+        currentEnd = next.end;
+      }
+    }
+    longestStreakMs = Math.max(longestStreakMs, currentEnd - currentStart);
+  }
 
   if (statsFocusTotalTime) statsFocusTotalTime.textContent = formatDuration(totalFocusMs);
   if (statsFocusManualTime) statsFocusManualTime.textContent = formatDuration(manualFocusMs);
@@ -2339,6 +2446,14 @@ const renderFocusSummary = (state: StorageSchema) => {
   if (statsFocusPomodoroCount) statsFocusPomodoroCount.textContent = String(pomodoroSessions.length);
   if (statsFocusReliability) {
     statsFocusReliability.textContent = `${Math.round(reliability * 100)}%`;
+  }
+  if (statsFocusScheduleReliability) {
+    statsFocusScheduleReliability.textContent =
+      scheduleReliability === null ? "--" : `${Math.round(scheduleReliability * 100)}%`;
+  }
+  if (statsFocusLongestStreak) {
+    statsFocusLongestStreak.textContent =
+      longestStreakMs > 0 ? formatDuration(longestStreakMs) : "--";
   }
   if (statsFocusFirstPause) {
     statsFocusFirstPause.textContent =
@@ -2361,6 +2476,8 @@ const renderStats = (state: StorageSchema) => {
   statsPomodoroRangeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.range === currentPomodoroSummaryRange);
   });
+  setPomodoroSummaryTab(currentPomodoroSummaryTab);
+  setFocusSummaryTab(currentFocusSummaryTab);
   statsUsageSummaryRangeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.range === currentUsageSummaryRange);
   });
@@ -3365,6 +3482,26 @@ const setStatsSegment = (segment: "pomodoro" | "focus" | "usage") => {
   statsUsageSegment?.classList.toggle("active", segment === "usage");
 };
 
+const setPomodoroSummaryTab = (tab: "quality" | "volume") => {
+  currentPomodoroSummaryTab = tab;
+  pomodoroSummaryTabButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === tab);
+  });
+  pomodoroSummaryGroups.forEach((group) => {
+    group.classList.toggle("is-active", group.dataset.tab === tab);
+  });
+};
+
+const setFocusSummaryTab = (tab: "quality" | "volume" | "interruptions") => {
+  currentFocusSummaryTab = tab;
+  focusSummaryTabButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === tab);
+  });
+  focusSummaryGroups.forEach((group) => {
+    group.classList.toggle("is-active", group.dataset.tab === tab);
+  });
+};
+
 const openTagStats = async (tagId: string) => {
   const state = await getState();
   const tag = state.tags.items.find((item) => item.id === tagId);
@@ -4318,6 +4455,26 @@ const bindEvents = () => {
       currentFocusView = mode;
       const state = await getState();
       renderStats(state);
+    });
+  });
+
+  pomodoroSummaryTabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.tab as "quality" | "volume" | undefined;
+      if (!tab) {
+        return;
+      }
+      setPomodoroSummaryTab(tab);
+    });
+  });
+
+  focusSummaryTabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.tab as "quality" | "volume" | "interruptions" | undefined;
+      if (!tab) {
+        return;
+      }
+      setFocusSummaryTab(tab);
     });
   });
 
