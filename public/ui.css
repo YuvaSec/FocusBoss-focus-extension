@@ -484,11 +484,16 @@ body.modal-open { overflow: hidden; }
 /* ====================================================================================================
    14) Strict session overlay
    ==================================================================================================== */
-.strict-overlay { position: absolute; inset: 0; z-index: 5000; background: var(--strict-overlay-bg);backdrop-filter: blur(56px) saturate(180%); display: grid; place-items: center; padding: 24px; color: var(--strict-overlay-text);}
+.strict-overlay { position: absolute; inset: 0; z-index: 5000; background: var(--fb-surface);backdrop-filter: blur(56px) saturate(180%); display: grid; place-items: center; padding: 24px; color: var(--strict-overlay-text);}
 .strict-overlay.hidden { display: none; }
-.strict-overlay-content { text-align: left; display: grid; gap: 8px; max-width: 320px; width: 100%; }
+.strict-overlay-card { position: relative; width: 100%; max-width: 340px; border-radius: 24px; padding: 20px 18px 52px; background: var(--fb-surface-2); box-shadow: var(--fb-neo-inset); }
+.strict-overlay-content { text-align: center; display: grid; gap: 12px; align-items: center; }
+.strict-overlay-header { display: grid; gap: 6px; }
 .strict-overlay .list-sub { color: var(--strict-overlay-muted); }
-.strict-overlay-close { position: absolute; top: 12px; right: 12px; }
+.strict-overlay-close { position: absolute; top: 10px; right: 10px; }
+.strict-overlay .neo-timer { margin-top: 6px; }
+.strict-overlay-until { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+.strict-overlay-hint { font-size: 13px; line-height: 1.4; }
 
 /* ====================================================================================================
    15) Tags

@@ -1025,22 +1025,26 @@
       <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
         <div id="strictOverlay" class="strict-overlay hidden" aria-hidden="true">
-          <button id="strictOverlayClose" class="icon-btn icon-only strict-overlay-close" type="button" aria-label="Close">
-            ✕
-          </button>
-          <div class="strict-overlay-content">
-            <h2>Strict Mode</h2>
-          <p id="strictOverlayHint" class="list-sub">You can't access distracting websites until the timer ends.</p>
-            <div class="neo-timer strict-timer" style="margin-top: 24px;">
-              <div class="neo-timer-outer"></div>
-              <div class="neo-timer-inner"></div>
-              <svg class="neo-timer-svg" viewBox="0 0 240 240" aria-hidden="true">
-                <circle class="neo-timer-track" cx="120" cy="120" r="108"></circle>
-                <circle id="strictRing" class="neo-timer-progress" cx="120" cy="120" r="108"></circle>
-              </svg>
-              <div class="neo-timer-time">
-                <span id="strictOverlayTime" class="neo-timer-value">00:00</span>
-                <span class="neo-timer-label">remaining time</span>
+          <div class="strict-overlay-card">
+            <button id="strictOverlayClose" class="icon-btn icon-only strict-overlay-close" type="button" aria-label="Close">
+              ✕
+            </button>
+            <div class="strict-overlay-content">
+              <div class="strict-overlay-header">
+                <h2>Strict Mode</h2>
+                <p id="strictOverlayUntil" class="list-sub strict-overlay-until">Strict session</p>
+                <p id="strictOverlayHint" class="list-sub strict-overlay-hint">Focus is locked until the strict timer ends.</p>
+              </div>
+              <div class="neo-timer strict-timer">
+                <div class="neo-timer-outer"></div>
+                <div class="neo-timer-inner"></div>
+                <svg class="neo-timer-svg" viewBox="0 0 240 240" aria-hidden="true">
+                  <circle class="neo-timer-track" cx="120" cy="120" r="108"></circle>
+                  <circle id="strictRing" class="neo-timer-progress" cx="120" cy="120" r="108"></circle>
+                </svg>
+                <div class="neo-timer-time">
+                  <span id="strictOverlayTime" class="neo-timer-value">00:00</span>
+                </div>
               </div>
             </div>
           </div>

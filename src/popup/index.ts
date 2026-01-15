@@ -228,6 +228,7 @@ const strictOverlay = document.getElementById("strictOverlay");
 const strictOverlayTime = document.getElementById("strictOverlayTime");
 const strictOverlayClose = document.getElementById("strictOverlayClose");
 const strictRing = document.getElementById("strictRing");
+const strictOverlayUntil = document.getElementById("strictOverlayUntil");
 const strictOverlayHint = document.getElementById("strictOverlayHint");
 const tempOffButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-temp-off]")
@@ -904,8 +905,13 @@ const renderStrictOverlay = (
   if (strictOverlayTime) {
     strictOverlayTime.textContent = formatCountdown(remainingMs);
   }
+  const hintText = currentStatusDetail || "Strict session in progress.";
+  const [untilText, detailText] = hintText.split(" · ");
+  if (strictOverlayUntil) {
+    strictOverlayUntil.textContent = untilText || "Strict session";
+  }
   if (strictOverlayHint) {
-    strictOverlayHint.textContent = currentStatusDetail || "Strict session in progress.";
+    strictOverlayHint.textContent = detailText || untilText || hintText;
   }
   if (strictRing) {
     const radius = Number(strictRing.getAttribute("r") ?? "0");
@@ -3525,7 +3531,30 @@ const bindEvents = () => {
   });
 
   pomodoroStop?.addEventListener("click", async () => {
-    await setState({ pomodoro: { running: null } });
+    const state = await getState();
+    const running = state.pomodoro.running;
+    if (!running) {
+      return;
+    }
+    const cycleIndex = running.cycleIndex ?? 0;
+    const completedCycles = Math.max(0, cycleIndex);
+    const elapsedMs = running.startedAt ? Math.max(0, Date.now() - running.startedAt) : 0;
+    const perCycleMs = (state.pomodoro.workMin + state.pomodoro.breakMin) * 60 * 1000;
+    const totalMs = completedCycles * perCycleMs + elapsedMs;
+    const completionMinutes = Math.max(1, Math.ceil(totalMs / 60000));
+    const completionCycles = Math.max(0, completedCycles);
+    await setState({
+      pomodoro: {
+        running: null,
+        lastCompletion: {
+          mode: "interrupted",
+          minutes: completionMinutes,
+          cycles: completionCycles,
+          endedAt: Date.now(),
+          tagId: running.linkedTagId ?? null
+        }
+      }
+    });
   });
 
   pomodoroAutoBlock?.addEventListener("change", async () => {
