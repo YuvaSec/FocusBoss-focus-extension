@@ -969,6 +969,19 @@
           </div>
 
           <div class="card" style="margin-top: 12px;">
+            <div class="row row-wrap">
+              <div>
+                <h3>Emergency access in strict</h3>
+                <p class="list-sub">Allow temporary access while strict is active.</p>
+              </div>
+              <label class="toggle">
+                <input id="strictEmergencyToggle" type="checkbox" />
+                <span></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 12px;">
             <div class="row">
               <div>
                 <h3>Sound alerts</h3>
@@ -1144,13 +1157,12 @@
           </div>
           <div id="pausableRow" class="intervention-section">
             <div class="row">
-              <div class="intervention-section-title">Behavior</div>
+              <p class="list-sub">Allow pause</p>
               <label class="toggle small">
                 <input id="interventionPausable" type="checkbox" />
                 <span></span>
               </label>
             </div>
-            <p class="list-sub">Allow pause</p>
           </div>
         </div>
         <div class="modal-actions" style="margin-top: 14px;">

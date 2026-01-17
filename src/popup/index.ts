@@ -36,6 +36,9 @@ const TRASH_ICON_SVG = `
   </svg>
 `;
 const confirmToggle = document.getElementById("confirmToggle") as HTMLInputElement | null;
+const strictEmergencyToggle = document.getElementById(
+  "strictEmergencyToggle"
+) as HTMLInputElement | null;
 const focusOffConfirm = document.getElementById("focusOffConfirm") as HTMLButtonElement | null;
 const focusOffCancel = document.getElementById("focusOffCancel") as HTMLButtonElement | null;
 const reviewLink = document.getElementById("reviewLink") as HTMLAnchorElement | null;
@@ -3457,6 +3460,10 @@ const bindEvents = () => {
     await setState({ confirmationPrompt: confirmToggle.checked });
   });
 
+  strictEmergencyToggle?.addEventListener("change", async () => {
+    await setState({ ui: { allowEmergencyInStrict: strictEmergencyToggle.checked } });
+  });
+
 
   tempOffButtons.forEach((button) => {
     button.addEventListener("click", async () => {
@@ -5178,6 +5185,9 @@ const syncUiFromState = (state: Awaited<ReturnType<typeof getState>>) => {
   renderTheme(state.ui.theme);
   renderOverlayMode(state.overlayMode);
   renderConfirmationPrompt(state.confirmationPrompt);
+  if (strictEmergencyToggle) {
+    strictEmergencyToggle.checked = Boolean(state.ui.allowEmergencyInStrict);
+  }
   if (analyticsRetention) {
     analyticsRetention.value = String(state.analytics.retentionDays ?? 90);
   }

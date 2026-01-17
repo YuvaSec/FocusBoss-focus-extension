@@ -175,6 +175,7 @@ export type StorageSchema = {
   };
   ui: {
     theme: "dark" | "light" | "system";
+    allowEmergencyInStrict?: boolean;
   };
   pro: { enabled: boolean };
 };
@@ -276,7 +277,8 @@ export const defaultState: StorageSchema = {
     retentionDays: 90
   },
   ui: {
-    theme: "dark"
+    theme: "dark",
+    allowEmergencyInStrict: false
   },
   pro: { enabled: false }
 };

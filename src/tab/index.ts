@@ -19,6 +19,8 @@ const tempAllowButtons = Array.from(
 );
 const pendingTimeouts: number[] = [];
 let currentLocked = false;
+let canEnableBack = false;
+let allowEmergencyInStrict = false;
 let currentThemeSetting: "dark" | "light" | "system" = "dark";
 
 const normalizeHost = (host: string): string => {
@@ -178,15 +180,17 @@ const withTimeout = (handler: () => void, delayMs: number) => {
 const setLocked = (locked: boolean, strictActive: boolean) => {
   currentLocked = locked;
   if (tempAllowSection) {
-    tempAllowSection.classList.toggle("hidden", strictActive || locked);
+    tempAllowSection.classList.toggle("hidden", locked || (strictActive && !allowEmergencyInStrict));
   }
+  updateBackButtonState(canEnableBack);
 };
 
 const updateBackButtonState = (canEnable: boolean) => {
+  canEnableBack = canEnable;
   if (!backButton) {
     return;
   }
-  backButton.disabled = !canEnable || currentLocked;
+  backButton.disabled = !canEnable && currentLocked;
   backButton.setAttribute("aria-disabled", backButton.disabled ? "true" : "false");
 };
 
@@ -387,6 +391,7 @@ const renderBreathingStage = (technique: string, strictActive: boolean) => {
 
 const render = async () => {
   const state = await getState();
+  allowEmergencyInStrict = Boolean(state.ui.allowEmergencyInStrict);
   renderTheme(state.ui.theme);
   const result = pickIntervention(state.interventions);
 
@@ -395,7 +400,7 @@ const render = async () => {
     return;
   }
 
-  if (state.strictSession.active) {
+  if (state.strictSession.active && !allowEmergencyInStrict) {
     tempAllowSection?.classList.add("hidden");
   } else {
     tempAllowSection?.classList.remove("hidden");
@@ -496,6 +501,7 @@ wireThemeButton();
 void render();
 subscribeState((state) => {
   updateBackButtonState(!state.focusEnabled || state.pause.isPaused);
+  allowEmergencyInStrict = Boolean(state.ui.allowEmergencyInStrict);
   renderTheme(state.ui.theme);
 });
 
