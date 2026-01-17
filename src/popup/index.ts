@@ -26,6 +26,7 @@ const blockingStyleButtons = Array.from(
 const STORAGE_KEY = "focusBossState";
 const POPUP_VIEW_KEY = "focusBossPopupView";
 const POPUP_TAG_SETTINGS_KEY = "focusBossPopupTagSettings";
+const POPUP_SETTINGS_SECTION_KEY = "focusBossPopupSettingsSection";
 const TRASH_ICON_SVG = `
   <svg class="list-delete-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M4 7h16" />
@@ -574,6 +575,8 @@ const interventionPausable = document.getElementById(
 ) as HTMLInputElement | null;
 const interventionSave = document.getElementById("interventionSave");
 const interventionClose = document.getElementById("interventionClose");
+const interventionInfoTitle = document.getElementById("interventionInfoTitle");
+const interventionInfoBody = document.getElementById("interventionInfoBody");
 const durationRow = document.getElementById("durationRow");
 const techniqueRow = document.getElementById("techniqueRow");
 const pausableRow = document.getElementById("pausableRow");
@@ -2989,9 +2992,19 @@ const renderInterventions = (
     const enabled = interventions.enabled[item.key];
     return `
       <div class="intervention-card" data-intervention="${item.key}">
-        <div class="intervention-title">${item.label}</div>
-        <p class="intervention-desc">${item.detail}</p>
-        <div class="intervention-controls">
+        <div class="intervention-card-header">
+          <div class="intervention-title">
+            <span>${item.label}</span>
+            <button class="icon-btn info-icon intervention-info" type="button" data-intervention-info="${item.key}" aria-label="More info">i</button>
+          </div>
+          <button class="intervention-gear" type="button" data-intervention-settings="${item.key}" aria-label="Open settings">
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+               <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /> 
+<!--              <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="currentColor" />-->
+            </svg>
+          </button>
+        </div>
+        <div class="intervention-status">
           <label class="intervention-pill">
             <input
               type="radio"
@@ -3001,12 +3014,6 @@ const renderInterventions = (
             />
             <span class="${enabled ? "is-active" : "is-inactive"}">${enabled ? "Active" : "Inactive"}</span>
           </label>
-          <button class="intervention-gear" type="button" data-intervention-settings="${item.key}" aria-label="Open settings">
-            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-               <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /> 
-<!--              <path d="M10 6.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm7.1 3.8a7 7 0 0 0-.1-1.2l2-1.5-1.8-3.1-2.4.9a7 7 0 0 0-2-1.2l-.4-2.6H7.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-.9L1 7.3l2 1.5a7 7 0 0 0 0 2.4L1 12.7l1.8 3.1 2.4-.9a7 7 0 0 0 2 1.2l.4 2.6h4.8l.4-2.6a7 7 0 0 0 2-1.2l2.4.9 1.8-3.1-2-1.5c.1-.4.1-.8.1-1.2Z" fill="currentColor" />-->
-            </svg>
-          </button>
         </div>
       </div>
     `;
@@ -3085,6 +3092,20 @@ const showInterventionDetail = (
   }
 
   openModal("intervention");
+};
+
+const showInterventionInfo = (key: InterventionKey) => {
+  const def = INTERVENTION_DEFS.find((item) => item.key === key);
+  if (!def) {
+    return;
+  }
+  if (interventionInfoTitle) {
+    interventionInfoTitle.textContent = def.label;
+  }
+  if (interventionInfoBody) {
+    interventionInfoBody.textContent = def.detail;
+  }
+  openModal("interventionInfo");
 };
 
 const hideInterventionDetail = () => {
@@ -3274,6 +3295,19 @@ const getPopupTagSettingsOnce = async (): Promise<string | null> => {
         return;
       }
       chrome.storage.local.remove(POPUP_TAG_SETTINGS_KEY, () => resolve(value));
+    });
+  });
+};
+
+const getPopupSettingsSectionOnce = async (): Promise<string | null> => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(POPUP_SETTINGS_SECTION_KEY, (stored) => {
+      const value = stored[POPUP_SETTINGS_SECTION_KEY];
+      if (typeof value !== "string" || !value) {
+        resolve(null);
+        return;
+      }
+      chrome.storage.local.remove(POPUP_SETTINGS_SECTION_KEY, () => resolve(value));
     });
   });
 };
@@ -5063,6 +5097,15 @@ const bindEvents = () => {
 
   interventionList?.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
+    const infoButton = target.closest<HTMLElement>("[data-intervention-info]");
+    if (infoButton) {
+      const key = infoButton.getAttribute("data-intervention-info") as InterventionKey | null;
+      if (!key) {
+        return;
+      }
+      showInterventionInfo(key);
+      return;
+    }
     const settingsButton = target.closest<HTMLElement>("[data-intervention-settings]");
     if (settingsButton) {
       const key = settingsButton.getAttribute("data-intervention-settings") as InterventionKey | null;
@@ -5218,6 +5261,16 @@ const bootstrap = async () => {
     const popupView = await getPopupViewOnce();
     if (popupView) {
       applyView(popupView, "auto");
+    }
+    const settingsSection = await getPopupSettingsSectionOnce();
+    if (settingsSection === "interventions") {
+      setTimeout(() => {
+        const el = document.getElementById("interventionToggle");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          el.focus();
+        }
+      }, 120);
     }
     const popupTagSettingsId = await getPopupTagSettingsOnce();
     if (popupTagSettingsId) {

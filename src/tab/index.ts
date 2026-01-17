@@ -12,6 +12,7 @@ const actionsEl = document.getElementById("interventionActions");
 const backButton = document.getElementById("interventionBack") as HTMLButtonElement | null;
 const tempAllowSection = document.getElementById("tempAllowSection");
 const themeButton = document.querySelector<HTMLButtonElement>(".intervention-theme-btn");
+const interventionChip = document.getElementById("interventionChip") as HTMLButtonElement | null;
 const appRoot = document.querySelector<HTMLElement>(".app");
 const rootEl = document.documentElement;
 const tempAllowButtons = Array.from(
@@ -163,6 +164,19 @@ const wireThemeButton = () => {
   });
 };
 
+const wireInterventionChip = () => {
+  interventionChip?.addEventListener("click", () => {
+    chrome.runtime.sendMessage(
+      { type: "openPopup", view: "home", settingsSection: "interventions" },
+      () => {
+        if (chrome.runtime.lastError) {
+          // Ignore; popup opening is best-effort.
+        }
+      }
+    );
+  });
+};
+
 const clearPendingTimeouts = () => {
   while (pendingTimeouts.length > 0) {
     const handle = pendingTimeouts.pop();
@@ -190,7 +204,7 @@ const updateBackButtonState = (canEnable: boolean) => {
   if (!backButton) {
     return;
   }
-  backButton.disabled = !canEnable && currentLocked;
+  backButton.disabled = !canEnable;
   backButton.setAttribute("aria-disabled", backButton.disabled ? "true" : "false");
 };
 
@@ -498,6 +512,7 @@ const render = async () => {
 wireBackButton();
 wireTempAllow();
 wireThemeButton();
+wireInterventionChip();
 void render();
 subscribeState((state) => {
   updateBackButtonState(!state.focusEnabled || state.pause.isPaused);

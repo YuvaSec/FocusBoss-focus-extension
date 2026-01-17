@@ -22,6 +22,12 @@
   --font-body: 13px;
   --font-small: 11px;
   --font-ui: "Poppins", Arial, sans-serif;
+  --app-main-padding: var(--space-3);
+  --app-main-gap: var(--space-3);
+  --card-padding: var(--space-3);
+  --stats-bar-max: 160px;
+  --intervention-body-columns: 1fr;
+  --intervention-body-align: stretch;
 }
 
 /* ========== THEME (light mode) ========== */
@@ -127,6 +133,35 @@
     --gate-gradient: linear-gradient(90deg, rgba(156, 255, 58, 0.2), rgba(0, 0, 0, 0.04));
     --breath-gradient: radial-gradient(circle, rgba(156, 255, 58, 0.4), rgba(156, 255, 58, 0.1));
     --timer-progress-shadow: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
+
+    --intervention-light-border: rgba(15, 23, 42, 0.08);
+    --intervention-light-border-soft: rgba(15, 23, 42, 0.1);
+    --intervention-light-border-strong: rgba(15, 23, 42, 0.12);
+    --intervention-light-border-dashed: rgba(15, 23, 42, 0.18);
+    --intervention-light-border-stronger: rgba(15, 23, 42, 0.2);
+    --intervention-light-heading: #0f172a;
+    --intervention-light-text: rgba(15, 23, 42, 0.7);
+    --intervention-light-text-dim: rgba(15, 23, 42, 0.65);
+    --intervention-light-text-muted: rgba(15, 23, 42, 0.6);
+    --intervention-light-text-subtle: rgba(15, 23, 42, 0.55);
+    --intervention-light-text-strong: rgba(15, 23, 42, 0.95);
+    --intervention-light-surface: rgba(255, 255, 255, 0.9);
+    --intervention-light-surface-soft: rgba(255, 255, 255, 0.8);
+    --intervention-light-surface-strong: rgba(255, 255, 255, 1);
+    --intervention-light-surface-muted: rgba(255, 255, 255, 0.75);
+    --intervention-light-shell: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.98));
+    --intervention-light-shell-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+    --intervention-light-card-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    --intervention-light-card-shadow-sm: 0 6px 14px rgba(15, 23, 42, 0.08);
+    --intervention-light-accent: rgba(251, 191, 36, 0.9);
+    --intervention-light-accent-deep: rgba(202, 138, 4, 0.9);
+    --intervention-light-accent-soft: rgba(251, 191, 36, 0.25);
+    --intervention-light-accent-core: rgba(251, 191, 36, 0.45);
+    --intervention-light-accent-border: rgba(234, 179, 8, 0.65);
+    --intervention-light-accent-glow: rgba(234, 179, 8, 0.25);
+    --intervention-light-accent-blue: rgba(56, 189, 248, 0.18);
+    --intervention-light-stage: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98));
+    --intervention-light-stage-soft: rgba(241, 245, 249, 0.95);
   }
 }
 
@@ -253,7 +288,7 @@ p {margin: 0;color: var(--fb-text-muted);}
 .app {display: flex; flex-direction: column; height: 100%; min-height: 0; width: 100%; overflow: hidden; position: relative;}
 .app-header {padding: var(--space-3); display: flex; align-items: center; justify-content: space-between; background: var(--fb-bg); border-bottom: 1px solid var(--fb-border);}
 .app-title {font-size: var(--font-title);}
-.app-main {flex: 1; padding: var(--space-3); display: grid; gap: var(--space-3);overflow-y: auto; align-content: start; justify-items: center;width: 100%; min-height: 0; background: var(--fb-bg); }
+.app-main {flex: 1; padding: var(--app-main-padding); display: grid; gap: var(--app-main-gap);overflow-y: auto; align-content: start; justify-items: center;width: 100%; min-height: 0; background: var(--fb-bg); }
 
 .app.popup .app-main {justify-items: stretch;}
 .app.popup .card {max-width: 100%;}
@@ -294,7 +329,7 @@ p {margin: 0;color: var(--fb-text-muted);}
 /* ====================================================================================================
       7) Cards and layout helpers, Reusable surfaces and row alignment utilities.
    ==================================================================================================== */
-.card {background: var(--fb-surface-2);border-radius: var(--r-card);box-shadow:var(--fb-glass2-inset);padding: var(--space-3);max-width: 720px;width: 100%;}
+.card {background: var(--fb-surface-2);border-radius: var(--r-card);box-shadow:var(--fb-glass2-inset);padding: var(--card-padding);max-width: 720px;width: 100%;}
 
 .row {display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);}
 .row + .row {margin-top: var(--space-2);}
@@ -675,9 +710,8 @@ body.modal-open { overflow: hidden; }
 .neo-timer-meta .timer-pill { position: absolute; left: 50%; transform: translateX(-50%); }
 
 #pomodoroPhasePill { top: 50%; transform: translate(-50%, -66px); }
-#pomodoroCyclePill { top: 50%; transform: translate(-50%, 34px); }
+#pomodoroCyclePill { top: 50%; transform: translate(-50%, 34px); color: var(--pomodoro-muted-foreground); border-color: var(--fb-border); }
 .timer-pill { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text); box-shadow: var(--fb-neo-sm); white-space: nowrap; }
-#pomodoroCyclePill { color: var(--pomodoro-muted-foreground); border-color: var(--fb-border); }
 .timer-sep { font-size: 11px; color: var(--fb-text-muted); opacity: 0.6; }
 
 .pomodoro-timer { --neo-timer-bg: var(--pomodoro-bg); --neo-timer-foreground: var(--pomodoro-foreground); --neo-timer-muted: var(--pomodoro-muted); --neo-timer-muted-foreground: var(--pomodoro-muted-foreground); --neo-timer-accent: var(--pomodoro-accent); --neo-timer-shadow: var(--pomodoro-shadow); --neo-timer-shadow-inset: var(--pomodoro-shadow-inset); }
@@ -704,28 +738,30 @@ body.modal-open { overflow: hidden; }
 .intervention-chevron svg { width: 16px; height: 16px; }
 .intervention-panel { max-height: 0; opacity: 0; overflow: hidden; margin: 0; padding: 0; border-radius: 12px; transition: max-height 220ms ease, opacity 220ms ease, margin-top 220ms ease, padding-top 220ms ease, padding-bottom 220ms ease; }
 .intervention-disclosure.is-open .intervention-panel { max-height: 520px; opacity: 1; margin-left: calc(-1 * var(--space-3)); margin-right: calc(-1 * var(--space-3)); margin-top: 10px; padding-left: var(--space-3); padding-right: var(--space-3); padding-top: 12px; padding-bottom: 12px; background: var(--fb-surface-2); }
-.intervention-disclosure.is-open p { padding: 0 0 10px 0 ; }
 .intervention-disclosure.is-open .intervention-chevron { transform: rotate(90deg); }
-.intervention-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.intervention-card { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; }
+.intervention-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.intervention-card { display: grid; gap: 10px; padding: 14px; border-radius: var(--r-control); border: 1px solid var(--fb-border); background: var(--fb-surface-2); cursor: pointer; transition: border-color 200ms ease, transform 200ms ease; position: relative; }
 .intervention-panel .intervention-card { background: var(--fb-bg); }
-.intervention-panel .intervention-card  p{ padding: 10px 0 0 0; }
 .intervention-card:hover { border-color: var(--fb-accent); }
 .intervention-card:active { transform: translateY(1px); }
-.intervention-title { font-weight: 600; font-size: 13px; }
-.intervention-desc { font-size: 12px; color: var(--fb-text-muted); line-height: 1.4; grid-column: 1 / -1; }
-.intervention-controls { display: inline-flex; align-items: center; gap: 6px; justify-self: end; grid-row: 1; grid-column: 2; }
+.intervention-card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.intervention-title { font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.intervention-title span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.intervention-info { width: 18px; height: 18px; }
+.intervention-status { display: flex; align-items: center; }
+.intervention-controls { display: inline-flex; align-items: center; gap: 6px; justify-self: end; }
 .intervention-pill { cursor: pointer; display: inline-flex; align-items: center; }
 .intervention-pill input { position: absolute; opacity: 0; pointer-events: none; }
 .intervention-pill span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); box-shadow: var(--fb-neo-sm); }
 .intervention-pill span.is-active { border-color: var(--fb-accent); background: var(--fb-accent-muted); color: var(--fb-text); }
-.intervention-gear { border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); border-radius: 999px; padding: 4px 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--fb-neo-sm); }
+.intervention-gear { border: 1px solid var(--fb-border); background: var(--fb-bg); color: var(--fb-text-muted); border-radius: 999px; padding: 4px 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--fb-neo-sm); position: absolute; right: 12px; bottom: 12px; opacity: 0.45; transition: opacity 160ms ease, box-shadow 160ms ease, color 160ms ease, border-color 160ms ease; }
 .intervention-gear:hover { color: var(--fb-text); box-shadow: var(--fb-neo-lg); }
+.intervention-card:hover .intervention-gear { opacity: 1; }
 .intervention-gear svg { width: 14px; height: 14px; }
 .intervention-details { display: grid; gap: 10px; }
 .intervention-section { display: grid; gap: 6px; }
 .intervention-section-title { font-size: 11px; color: var(--fb-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-@media (max-width: 360px) { .intervention-grid { grid-template-columns: 1fr; } }
+@media (max-width: 340px) { .intervention-grid { grid-template-columns: 1fr; } }
 
 /* ====================================================================================================
    19) Intervention behaviors (tab.html)
@@ -734,7 +770,9 @@ body.modal-open { overflow: hidden; }
 .intervention-topbar-actions { display: inline-flex; align-items: center; gap: 12px; }
 .intervention-theme-btn { border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.04); color: rgba(255, 255, 255, 0.7); width: 36px; height: 36px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 160ms ease, color 160ms ease, border-color 160ms ease; }
 .intervention-theme-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.18); color: rgba(255, 255, 255, 0.95); }
-.intervention-chip { padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.18); color: rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.04); letter-spacing: 0.08em; text-transform: uppercase; }
+.intervention-chip { padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.18); color: rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.04); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.intervention-chip:hover { border-color: rgba(255, 255, 255, 0.35); color: rgba(255, 255, 255, 0.9); }
+html[data-theme="light"] .intervention-chip:hover { border-color: var(--intervention-light-border-stronger); color: var(--intervention-light-text-strong); }
 .intervention-icon { width: 18px; height: 18px; }
 .app.full { background: radial-gradient(900px 600px at 12% 10%, rgba(79, 209, 197, 0.12), transparent 60%), radial-gradient(800px 560px at 88% -10%, rgba(255, 214, 102, 0.16), transparent 55%), linear-gradient(160deg, #0b0d0f, #0f1316); color: #e5e7eb; position: relative; min-height: 100vh; overflow: hidden; }
 .app.full::before { content: ""; position: absolute; width: 620px; height: 620px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 214, 102, 0.14), transparent 65%); top: -280px; right: -180px; opacity: 0.8; filter: blur(10px); pointer-events: none; }
@@ -744,10 +782,9 @@ body.modal-open { overflow: hidden; }
 .app.full .intervention-shell { width: min(860px, 92vw); padding: 34px 38px; display: grid; gap: 22px; background: linear-gradient(160deg, rgba(20, 24, 27, 0.95), rgba(11, 14, 16, 0.98)); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); position: relative; overflow: hidden; isolation: isolate; }
 .app.full .intervention-shell::before { content: ""; position: absolute; inset: 0; background: radial-gradient(360px 240px at 20% 15%, rgba(255, 255, 255, 0.06), transparent 55%); opacity: 0.6; pointer-events: none; }
 .intervention-accent-bar { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, rgba(255, 214, 102, 0.65), transparent); opacity: 0.85; }
-.intervention-body { display: grid; gap: 22px; }
+.intervention-body { display: grid; gap: 22px; grid-template-columns: var(--intervention-body-columns); align-items: var(--intervention-body-align); }
 .intervention-left { display: grid; gap: 18px; }
 .intervention-right { display: grid; align-content: start; }
-@media (min-width: 900px) { .intervention-body { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: start; } }
 .intervention-header h2 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: 0.01em; }
 .intervention-header p { margin: 6px 0 0; color: rgba(226, 232, 240, 0.72); font-weight: 600; }
 .intervention-list { display: grid; gap: 12px; color: #9ca3af; }
@@ -799,41 +836,41 @@ body.modal-open { overflow: hidden; }
 @keyframes breath-drift { 0%, 100% { transform: scale(0.95); opacity: 0.65; } 50% { transform: scale(1.05); opacity: 0.9; } }
 @keyframes stop-pulse { 0% { transform: scale(0.85); opacity: 0.8; } 70% { transform: scale(1.15); opacity: 0; } 100% { opacity: 0; } }
 
-html[data-theme="light"] .intervention-topbar { border-bottom: 1px solid rgba(15, 23, 42, 0.08); background: rgba(248, 250, 252, 0.72); }
-html[data-theme="light"] .intervention-theme-btn { border: 1px solid rgba(15, 23, 42, 0.1); background: rgba(255, 255, 255, 0.75); color: rgba(15, 23, 42, 0.7); }
-html[data-theme="light"] .intervention-theme-btn:hover { background: rgba(255, 255, 255, 1); border-color: rgba(15, 23, 42, 0.2); color: rgba(15, 23, 42, 0.95); }
-html[data-theme="light"] .intervention-chip { border: 1px solid rgba(15, 23, 42, 0.12); color: rgba(15, 23, 42, 0.6); background: rgba(255, 255, 255, 0.75); }
+html[data-theme="light"] .intervention-topbar { border-bottom: 1px solid var(--intervention-light-border); background: rgba(248, 250, 252, 0.72); }
+html[data-theme="light"] .intervention-theme-btn { border: 1px solid var(--intervention-light-border-soft); background: var(--intervention-light-surface-muted); color: var(--intervention-light-text); }
+html[data-theme="light"] .intervention-theme-btn:hover { background: var(--intervention-light-surface-strong); border-color: var(--intervention-light-border-stronger); color: var(--intervention-light-text-strong); }
+html[data-theme="light"] .intervention-chip { border: 1px solid var(--intervention-light-border-strong); color: var(--intervention-light-text-muted); background: var(--intervention-light-surface-muted); }
 html[data-theme="light"] .app.full { background: radial-gradient(900px 600px at 8% 0%, rgba(56, 189, 248, 0.18), transparent 55%), radial-gradient(800px 560px at 92% -10%, rgba(250, 204, 21, 0.2), transparent 55%), linear-gradient(160deg, #f8fafc, #eef2f3); color: #0f172a; }
 html[data-theme="light"] .app.full::before { background: radial-gradient(circle, rgba(250, 204, 21, 0.18), transparent 65%); opacity: 0.6; }
 html[data-theme="light"] .app.full::after { background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%); opacity: 0.6; }
-html[data-theme="light"] .app.full .app-title { color: #0f172a; }
-html[data-theme="light"] .app.full .intervention-shell { background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.98)); border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12); }
-html[data-theme="light"] .app.full .intervention-shell::before { background: radial-gradient(360px 240px at 20% 10%, rgba(255, 255, 255, 0.8), transparent 60%); opacity: 0.7; }
-html[data-theme="light"] .intervention-accent-bar { background: linear-gradient(90deg, rgba(251, 191, 36, 0.9), transparent); }
-html[data-theme="light"] .intervention-header h2 { color: #0f172a; }
-html[data-theme="light"] .intervention-header p { color: rgba(15, 23, 42, 0.65); }
-html[data-theme="light"] .intervention-list-item { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06); }
-html[data-theme="light"] .intervention-list-icon { color: rgba(202, 138, 4, 0.9); }
-html[data-theme="light"] .intervention-list-item p { color: rgba(15, 23, 42, 0.7); }
-html[data-theme="light"] .intervention-context-extra .list-sub { color: rgba(15, 23, 42, 0.55); }
-html[data-theme="light"] .intervention-label { color: rgba(15, 23, 42, 0.6); }
-html[data-theme="light"] .intervention-chip-btn { border: 1px solid rgba(15, 23, 42, 0.12); background: rgba(255, 255, 255, 0.9); color: rgba(15, 23, 42, 0.7); box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08); }
-html[data-theme="light"] .intervention-chip-btn:hover { background: rgba(255, 255, 255, 1); border-color: rgba(15, 23, 42, 0.2); color: rgba(15, 23, 42, 0.95); }
-html[data-theme="light"] .intervention-primary-btn { color: #111827; box-shadow: 0 12px 26px rgba(234, 179, 8, 0.25); }
-html[data-theme="light"] .intervention-stage { border: 1px solid rgba(15, 23, 42, 0.08); background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98)); }
-html[data-theme="light"] .hold-progress { background: rgba(15, 23, 42, 0.08); }
-html[data-theme="light"] .gate-stage { border: 1px solid rgba(15, 23, 42, 0.08); background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.95)); }
-html[data-theme="light"] .gate-panel { background: linear-gradient(90deg, rgba(251, 191, 36, 0.3), rgba(56, 189, 248, 0.18), transparent); }
-html[data-theme="light"] .breath-orbit { border: 1px dashed rgba(15, 23, 42, 0.18); }
-html[data-theme="light"] .breath-halo { background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%); }
-html[data-theme="light"] .breath-core { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 1), rgba(251, 191, 36, 0.45), rgba(226, 232, 240, 0.2)); box-shadow: 0 0 24px rgba(234, 179, 8, 0.25); }
-html[data-theme="light"] .breath-label { color: #0f172a; }
-html[data-theme="light"] .breath-hint { color: rgba(15, 23, 42, 0.6); }
-html[data-theme="light"] .breath-step { border: 1px solid rgba(15, 23, 42, 0.12); background: rgba(255, 255, 255, 0.9); color: rgba(15, 23, 42, 0.65); }
-html[data-theme="light"] .stop-signal { border: 2px solid rgba(234, 179, 8, 0.65); background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(251, 191, 36, 0.25), rgba(241, 245, 249, 0.95)); box-shadow: inset 0 0 24px rgba(234, 179, 8, 0.2), 0 20px 40px rgba(15, 23, 42, 0.15); }
-html[data-theme="light"] .stop-text { color: #0f172a; }
-html[data-theme="light"] .stop-title { color: #0f172a; }
-html[data-theme="light"] .stop-sub { color: rgba(15, 23, 42, 0.6); }
+html[data-theme="light"] .app.full .app-title { color: var(--intervention-light-heading); }
+html[data-theme="light"] .app.full .intervention-shell { background: var(--intervention-light-shell); border: 1px solid var(--intervention-light-border); box-shadow: var(--intervention-light-shell-shadow); }
+html[data-theme="light"] .app.full .intervention-shell::before { background: radial-gradient(360px 240px at 20% 10%, var(--intervention-light-surface-soft), transparent 60%); opacity: 0.7; }
+html[data-theme="light"] .intervention-accent-bar { background: linear-gradient(90deg, var(--intervention-light-accent), transparent); }
+html[data-theme="light"] .intervention-header h2 { color: var(--intervention-light-heading); }
+html[data-theme="light"] .intervention-header p { color: var(--intervention-light-text-muted); }
+html[data-theme="light"] .intervention-list-item { background: var(--intervention-light-surface); border: 1px solid var(--intervention-light-border); box-shadow: var(--intervention-light-card-shadow); }
+html[data-theme="light"] .intervention-list-icon { color: var(--intervention-light-accent-deep); }
+html[data-theme="light"] .intervention-list-item p { color: var(--intervention-light-text); }
+html[data-theme="light"] .intervention-context-extra .list-sub { color: var(--intervention-light-text-subtle); }
+html[data-theme="light"] .intervention-label { color: var(--intervention-light-text-muted); }
+html[data-theme="light"] .intervention-chip-btn { border: 1px solid var(--intervention-light-border-strong); background: var(--intervention-light-surface); color: var(--intervention-light-text); box-shadow: var(--intervention-light-card-shadow-sm); }
+html[data-theme="light"] .intervention-chip-btn:hover { background: var(--intervention-light-surface-strong); border-color: var(--intervention-light-border-stronger); color: var(--intervention-light-text-strong); }
+html[data-theme="light"] .intervention-primary-btn { color: var(--intervention-light-heading); box-shadow: 0 12px 26px var(--intervention-light-accent-glow); }
+html[data-theme="light"] .intervention-stage { border: 1px solid var(--intervention-light-border); background: var(--intervention-light-stage); }
+html[data-theme="light"] .hold-progress { background: var(--intervention-light-border); }
+html[data-theme="light"] .gate-stage { border: 1px solid var(--intervention-light-border); background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), var(--intervention-light-stage-soft)); }
+html[data-theme="light"] .gate-panel { background: linear-gradient(90deg, rgba(251, 191, 36, 0.3), var(--intervention-light-accent-blue), transparent); }
+html[data-theme="light"] .breath-orbit { border: 1px dashed var(--intervention-light-border-dashed); }
+html[data-theme="light"] .breath-halo { background: radial-gradient(circle, var(--intervention-light-accent-soft), transparent 70%); }
+html[data-theme="light"] .breath-core { background: radial-gradient(circle at 30% 30%, var(--intervention-light-surface-strong), var(--intervention-light-accent-core), rgba(226, 232, 240, 0.2)); box-shadow: 0 0 24px var(--intervention-light-accent-glow); }
+html[data-theme="light"] .breath-label { color: var(--intervention-light-heading); }
+html[data-theme="light"] .breath-hint { color: var(--intervention-light-text-muted); }
+html[data-theme="light"] .breath-step { border: 1px solid var(--intervention-light-border-strong); background: var(--intervention-light-surface); color: var(--intervention-light-text-dim); }
+html[data-theme="light"] .stop-signal { border: 2px solid var(--intervention-light-accent-border); background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), var(--intervention-light-accent-soft), var(--intervention-light-stage-soft)); box-shadow: inset 0 0 24px rgba(234, 179, 8, 0.2), 0 20px 40px rgba(15, 23, 42, 0.15); }
+html[data-theme="light"] .stop-text { color: var(--intervention-light-heading); }
+html[data-theme="light"] .stop-title { color: var(--intervention-light-heading); }
+html[data-theme="light"] .stop-sub { color: var(--intervention-light-text-muted); }
 
 /* ====================================================================================================
    20) Schedule UI
@@ -958,8 +995,7 @@ html[data-theme="light"] .stop-sub { color: rgba(15, 23, 42, 0.6); }
 
 .stats-bar { height: 6px; border-radius: 999px; background: var(--chart-accent-soft); border: 1px solid var(--chart-accent-border); }
 .stats-bar span { display: block; height: 100%; border-radius: inherit; background: var(--chart-accent-strong); }
-.stats-bar.fixed { width: 100%; max-width: 160px; }
-@media (max-width: 430px) { .stats-bar.fixed { max-width: 140px; } }
+.stats-bar.fixed { width: 100%; max-width: var(--stats-bar-max); }
 
 .stats-grid { display: grid; column-gap: 12px; row-gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
 .stats-column { display: grid; gap: 8px; min-width: 0; overflow: visible; }
@@ -1028,7 +1064,12 @@ html[data-theme="light"] .stop-sub { color: rgba(15, 23, 42, 0.6); }
    23) Responsive adjustments
    ==================================================================================================== */
 @media (min-width: 900px) {
-  .app-main { padding: 28px; gap: 20px; }
-  .card { padding: 22px 24px; }
-  .app-title { font-size: 20px; }
+  :root {
+    --app-main-padding: 28px;
+    --app-main-gap: 20px;
+    --card-padding: 22px 24px;
+    --font-title: 20px;
+    --intervention-body-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    --intervention-body-align: start;
+  }
 }

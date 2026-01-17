@@ -1112,13 +1112,18 @@ chrome.runtime.onMessage.addListener(
 
 chrome.runtime.onMessage.addListener(
   (
-    message: { type?: string; tagId?: string | null; view?: string },
+    message: { type?: string; tagId?: string | null; view?: string; settingsSection?: string },
     sender,
     sendResponse: (response?: { ok: boolean }) => void
   ) => {
     if (message?.type === "openPopup") {
       const view = typeof message.view === "string" ? message.view : "";
-      const data = view ? { focusBossPopupView: view } : {};
+      const section =
+        typeof message.settingsSection === "string" ? message.settingsSection : "";
+      const data = {
+        ...(view ? { focusBossPopupView: view } : {}),
+        ...(section ? { focusBossPopupSettingsSection: section } : {})
+      };
       chrome.storage.local.set(data, () => {
         chrome.action.openPopup().then(
           () => sendResponse({ ok: true }),

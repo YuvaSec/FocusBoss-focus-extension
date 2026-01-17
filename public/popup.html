@@ -67,7 +67,6 @@
               </span>
             </button>
             <div id="interventionPanel" class="intervention-panel" aria-hidden="true">
-              <p class="list-sub">Pick how FocusBoss increases friction.</p>
               <div id="interventionList" class="intervention-grid"></div>
             </div>
           </div>
@@ -1168,6 +1167,19 @@
         <div class="modal-actions" style="margin-top: 14px;">
           <button id="interventionSave" class="btn btn-large btn-success">Save</button>
           <button class="btn btn-large btn-danger" data-close-modal="true">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="interventionInfoModal" class="modal hidden" data-modal="interventionInfo" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div>
+          <h3 id="interventionInfoTitle">Intervention</h3>
+          <p id="interventionInfoBody" class="list-sub">Details about this mode.</p>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button class="btn btn-large btn-success" data-close-modal="true">Got it</button>
         </div>
       </div>
     </div>
