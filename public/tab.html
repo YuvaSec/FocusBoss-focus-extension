@@ -8,30 +8,67 @@
   </head>
   <body>
     <div class="app full" data-theme="dark">
-      <header class="app-header">
+      <header class="app-header intervention-topbar">
         <h1 class="app-title">FocusBoss</h1>
-        <span class="chip">Intervention</span>
+        <div class="intervention-topbar-actions">
+          <button class="intervention-theme-btn" type="button" aria-label="Toggle theme">
+            <svg class="intervention-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none"></path>
+            </svg>
+          </button>
+          <span class="intervention-chip">Intervention</span>
+        </div>
       </header>
-      <main class="app-main">
-        <section class="card">
-          <h2 id="interventionName">Intervention</h2>
-          <p id="interventionMessage">Preparing your focus guard...</p>
-          <p id="interventionMeta" class="list-sub" style="margin-top: 10px;"></p>
-          <p id="interventionReason" class="list-sub" style="margin-top: 6px;"></p>
-          <p id="interventionUsage" class="list-sub" style="margin-top: 6px;"></p>
-          <div id="interventionStage" class="intervention-stage" style="margin-top: 16px;"></div>
-          <div id="tempAllowSection" style="margin-top: 14px;">
-            <p class="list-sub">Let me continue for</p>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
-              <button class="chip" data-allow-min="1">1m</button>
-              <button class="chip" data-allow-min="5">5m</button>
-              <button class="chip" data-allow-min="10">10m</button>
-              <button class="chip" data-allow-min="15">15m</button>
+      <main class="app-main intervention-main">
+        <section class="card intervention-shell">
+          <div class="intervention-accent-bar" aria-hidden="true"></div>
+          <div class="intervention-body">
+            <div class="intervention-left">
+              <div class="intervention-header">
+                <h2 id="interventionName">Hard Stop</h2>
+                <p id="interventionMessage">Get back to work!</p>
+              </div>
+              <div class="intervention-list">
+                <div class="intervention-list-item">
+                  <svg class="intervention-list-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none"></path>
+                  </svg>
+                  <p>Access is blocked during Focus Mode.</p>
+                </div>
+                <div class="intervention-list-item">
+                  <svg class="intervention-list-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none"></path>
+                  </svg>
+                  <p>Access is blocked until Focus Mode is turned off.</p>
+                </div>
+                <div class="intervention-context-extra">
+                  <p id="interventionMeta" class="list-sub"></p>
+                  <p id="interventionReason" class="list-sub"></p>
+                  <p id="interventionUsage" class="list-sub"></p>
+                </div>
+              </div>
+              <div id="tempAllowSection" class="intervention-escape">
+                <p class="intervention-label">Emergency access</p>
+                <div class="intervention-chips">
+                  <button class="intervention-chip-btn" data-allow-min="1">1m</button>
+                  <button class="intervention-chip-btn" data-allow-min="5">5m</button>
+                  <button class="intervention-chip-btn" data-allow-min="10">10m</button>
+                  <button class="intervention-chip-btn" data-allow-min="15">15m</button>
+                </div>
+              </div>
+            </div>
+            <div class="intervention-right">
+              <div id="interventionStage" class="intervention-stage"></div>
             </div>
           </div>
-          <div id="interventionActions" class="row" style="margin-top: 16px;">
+          <div id="interventionActions" class="intervention-actions">
             <div></div>
-            <button id="interventionBack" class="btn btn-small btn-primary">Go back</button>
+            <button id="interventionBack" class="intervention-primary-btn" type="button">
+              <span>Go back</span>
+              <svg class="intervention-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none"></path>
+              </svg>
+            </button>
           </div>
         </section>
       </main>

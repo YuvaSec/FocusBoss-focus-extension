@@ -996,6 +996,7 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
+
 chrome.runtime.onMessage.addListener(
   (
     message: { type?: string; prevUrl?: string; minutes?: number },
@@ -1386,6 +1387,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 });
 
 chrome.webNavigation.onCommitted.addListener((details) => {
+  if (details.frameId !== 0 || !details.url) {
+    return;
+  }
+  void recordBlockedNav(details.tabId, details.url);
+});
+
+chrome.webNavigation.onBeforeNavigate.addListener((details) => {
   if (details.frameId !== 0 || !details.url) {
     return;
   }

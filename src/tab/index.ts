@@ -1,4 +1,4 @@
-import { getState, setState } from "../shared/storage.js";
+import { getState, setState, subscribeState } from "../shared/storage.js";
 import { evaluateRules } from "../shared/rules.js";
 import { getInterventionLabel, pickIntervention } from "../shared/interventions.js";
 
@@ -15,6 +15,7 @@ const tempAllowButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-allow-min]")
 );
 const pendingTimeouts: number[] = [];
+let currentLocked = false;
 
 const normalizeHost = (host: string): string => {
   const lower = host.toLowerCase();
@@ -143,18 +144,34 @@ const withTimeout = (handler: () => void, delayMs: number) => {
 };
 
 const setLocked = (locked: boolean, strictActive: boolean) => {
-  if (backButton) {
-    backButton.disabled = locked;
-  }
+  currentLocked = locked;
   if (tempAllowSection) {
     tempAllowSection.classList.toggle("hidden", strictActive || locked);
   }
 };
 
-const renderInstantStage = () => {
-  if (stageEl) {
-    stageEl.innerHTML = `<p class="list-sub">Access is blocked until Focus Mode is turned off.</p>`;
+const updateBackButtonState = (canEnable: boolean) => {
+  if (!backButton) {
+    return;
   }
+  backButton.disabled = !canEnable || currentLocked;
+  backButton.setAttribute("aria-disabled", backButton.disabled ? "true" : "false");
+};
+
+const renderInstantStage = () => {
+  if (!stageEl) {
+    return;
+  }
+  stageEl.innerHTML = `
+    <div class="stop-stage">
+      <div class="stop-signal" aria-hidden="true">
+        <span class="stop-pulse"></span>
+        <span class="stop-text">STOP</span>
+      </div>
+      <p class="stop-title">Hard stop engaged.</p>
+      <p class="stop-sub list-sub">This site is blocked while Focus Mode is active.</p>
+    </div>
+  `;
 };
 
 const renderHoldStage = (durationSec: number, strictActive: boolean) => {
@@ -163,8 +180,9 @@ const renderHoldStage = (durationSec: number, strictActive: boolean) => {
   }
   stageEl.innerHTML = `
     <div class="hold-stage">
-      <button id="holdUnlock" class="btn btn-large btn-primary" type="button">Hold to unlock</button>
       <div class="hold-progress"><span></span></div>
+      <button id="holdUnlock" class="btn btn-extra-large btn-primary" type="button">Hold to unlock</button>
+      
       <p id="holdHint" class="list-sub">Hold for ${durationSec}s to continue.</p>
     </div>
   `;
@@ -277,25 +295,42 @@ const renderBreathingStage = (technique: string, strictActive: boolean) => {
   if (!stageEl) {
     return;
   }
+  const phases = getBreathPhases(technique);
   stageEl.innerHTML = `
-    <div class="breath-stage">
-      <div class="breath-circle" aria-hidden="true"></div>
-      <p id="breathLabel" class="list-sub">Get ready...</p>
+    <div class="breath-stage" data-phase="ready">
+      <div class="breath-visual">
+        <div class="breath-halo" aria-hidden="true"></div>
+        <div class="breath-orbit" aria-hidden="true"></div>
+        <div class="breath-core" aria-hidden="true"></div>
+      </div>
+      <div class="breath-status">
+        <p id="breathLabel" class="list-sub breath-label">Get ready...</p>
+        <p class="breath-hint">Slow your breath to reset attention.</p>
+      </div>
+      <div class="breath-steps" aria-hidden="true">
+        ${phases
+          .map(
+            (phase) =>
+              `<span class="breath-step">${phase.label} ${phase.seconds}s</span>`
+          )
+          .join("")}
+      </div>
     </div>
   `;
 
-  const circle = stageEl.querySelector<HTMLElement>(".breath-circle");
+  const stage = stageEl.querySelector<HTMLElement>(".breath-stage");
+  const circle = stageEl.querySelector<HTMLElement>(".breath-core");
   const label = stageEl.querySelector<HTMLElement>("#breathLabel");
   if (!circle || !label) {
     return;
   }
 
-  const phases = getBreathPhases(technique);
   setLocked(true, strictActive);
 
   const runPhase = (index: number) => {
     if (index >= phases.length) {
       label.textContent = "Unlocked. Choose what to do next.";
+      stage?.setAttribute("data-phase", "done");
       setLocked(false, strictActive);
       return;
     }
@@ -305,6 +340,7 @@ const renderBreathingStage = (technique: string, strictActive: boolean) => {
       return;
     }
     label.textContent = `${phase.label} ${phase.seconds}s`;
+    stage?.setAttribute("data-phase", phase.type);
     circle.style.transitionDuration = `${phase.seconds}s`;
     if (phase.type === "inhale") {
       circle.style.transform = "scale(1)";
@@ -345,7 +381,7 @@ const render = async () => {
 
   if (metaEl) {
     if (key === "instantBlock") {
-      metaEl.textContent = "Access is blocked during Focus Mode.";
+      metaEl.textContent = "";
     } else if (key === "breathing" && "technique" in config) {
       metaEl.textContent = `Technique: ${config.technique ?? "4-7-8"}`;
     } else if ("durationSec" in config) {
@@ -405,6 +441,7 @@ const render = async () => {
 
   actionsEl?.classList.remove("hidden");
   setLocked(key !== "instantBlock", state.strictSession.active);
+  updateBackButtonState(!state.focusEnabled || state.pause.isPaused);
 
   if (key === "instantBlock") {
     renderInstantStage();
@@ -423,3 +460,6 @@ const render = async () => {
 wireBackButton();
 wireTempAllow();
 void render();
+subscribeState((state) => {
+  updateBackButtonState(!state.focusEnabled || state.pause.isPaused);
+});
