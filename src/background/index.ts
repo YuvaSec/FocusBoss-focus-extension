@@ -869,6 +869,18 @@ const handlePomodoroPhaseEnd = async () => {
   pomodoroHandling = true;
   lastHandledPhase = running.phase;
   lastHandledEndsAt = running.endsAt;
+  const pendingConfig = state.pomodoro.pendingConfig ?? null;
+  const nextWorkMin = pendingConfig?.workMin ?? state.pomodoro.workMin;
+  const nextBreakMin = pendingConfig?.breakMin ?? state.pomodoro.breakMin;
+  const nextCycles = pendingConfig?.cycles ?? state.pomodoro.cycles;
+  const basePomodoroUpdate = pendingConfig
+    ? {
+        workMin: nextWorkMin,
+        breakMin: nextBreakMin,
+        cycles: nextCycles,
+        pendingConfig: null
+      }
+    : {};
   if (state.strictSession.active) {
     pomodoroHandling = false;
     return;
@@ -878,7 +890,7 @@ const handlePomodoroPhaseEnd = async () => {
     const startedAt = running.startedAt ?? now - state.pomodoro.workMin * 60 * 1000;
     await logPomodoroSession(state, startedAt, now);
     const nextCycle = running.cycleIndex + 1;
-    const nextEnd = now + state.pomodoro.breakMin * 60 * 1000;
+    const nextEnd = now + nextBreakMin * 60 * 1000;
     await setState({
       pomodoro: {
         running: {
@@ -889,7 +901,8 @@ const handlePomodoroPhaseEnd = async () => {
           paused: false,
           linkedTagId: running.linkedTagId ?? null,
           prevFocusEnabled: running.prevFocusEnabled
-        }
+        },
+        ...basePomodoroUpdate
       },
       focusEnabled: state.pomodoro.blockDuringBreak ? true : false
     });
@@ -898,18 +911,19 @@ const handlePomodoroPhaseEnd = async () => {
     return;
   }
 
-  if (state.pomodoro.cycles > 0 && running.cycleIndex >= state.pomodoro.cycles) {
+  if (nextCycles > 0 && running.cycleIndex >= nextCycles) {
     const desiredFocus = resolveFocusAfterPomodoroStop(state, running.prevFocusEnabled);
     await setState({
       pomodoro: {
         running: null,
         lastCompletion: {
           mode: "completed",
-          minutes: state.pomodoro.workMin * state.pomodoro.cycles,
-          cycles: state.pomodoro.cycles,
+          minutes: nextWorkMin * nextCycles,
+          cycles: nextCycles,
           endedAt: now,
           tagId: running.linkedTagId ?? null
-        }
+        },
+        ...basePomodoroUpdate
       },
       focusEnabled: desiredFocus
     });
@@ -917,7 +931,7 @@ const handlePomodoroPhaseEnd = async () => {
     return;
   }
 
-  const nextEnd = now + state.pomodoro.workMin * 60 * 1000;
+  const nextEnd = now + nextWorkMin * 60 * 1000;
   await setState({
     pomodoro: {
       running: {
@@ -928,7 +942,8 @@ const handlePomodoroPhaseEnd = async () => {
         paused: false,
         linkedTagId: running.linkedTagId ?? null,
         prevFocusEnabled: running.prevFocusEnabled
-      }
+      },
+      ...basePomodoroUpdate
     },
     focusEnabled: state.pomodoro.autoBlockDuringWork ? true : state.focusEnabled
   });
@@ -1097,18 +1112,32 @@ chrome.runtime.onMessage.addListener(
 
 chrome.runtime.onMessage.addListener(
   (
-    message: { type?: string; tagId?: string | null },
+    message: { type?: string; tagId?: string | null; view?: string },
     sender,
     sendResponse: (response?: { ok: boolean }) => void
   ) => {
+    if (message?.type === "openPopup") {
+      const view = typeof message.view === "string" ? message.view : "";
+      const data = view ? { focusBossPopupView: view } : {};
+      chrome.storage.local.set(data, () => {
+        chrome.action.openPopup().then(
+          () => sendResponse({ ok: true }),
+          () => sendResponse({ ok: false })
+        );
+      });
+      return true;
+    }
     if (message?.type !== "openTagSettings") {
       return;
     }
     const tagId = message.tagId ? String(message.tagId) : "";
-    const url = chrome.runtime.getURL(
-      `popup.html${tagId ? `?tagSettings=${encodeURIComponent(tagId)}` : ""}`
-    );
-    chrome.tabs.create({ url }, () => sendResponse({ ok: true }));
+    const data = tagId ? { focusBossPopupTagSettings: tagId } : {};
+    chrome.storage.local.set(data, () => {
+      chrome.action.openPopup().then(
+        () => sendResponse({ ok: true }),
+        () => sendResponse({ ok: false })
+      );
+    });
     return true;
   }
 );

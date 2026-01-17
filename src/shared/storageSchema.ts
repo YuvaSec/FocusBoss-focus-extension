@@ -89,6 +89,11 @@ export type StorageSchema = {
     workMin: number;
     breakMin: number;
     cycles: number;
+    pendingConfig?: {
+      workMin: number;
+      breakMin: number;
+      cycles: number;
+    } | null;
     autoBlockDuringWork: boolean;
     blockDuringBreak: boolean;
     sounds: boolean;
@@ -244,6 +249,7 @@ export const defaultState: StorageSchema = {
     workMin: 25,
     breakMin: 5,
     cycles: 0,
+    pendingConfig: null,
     autoBlockDuringWork: true,
     blockDuringBreak: false,
     sounds: true,

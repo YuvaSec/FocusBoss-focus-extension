@@ -24,6 +24,8 @@ const blockingStyleButtons = Array.from(
 );
 
 const STORAGE_KEY = "focusBossState";
+const POPUP_VIEW_KEY = "focusBossPopupView";
+const POPUP_TAG_SETTINGS_KEY = "focusBossPopupTagSettings";
 const TRASH_ICON_SVG = `
   <svg class="list-delete-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M4 7h16" />
@@ -593,6 +595,8 @@ const tagCycles = document.getElementById("tagCycles") as HTMLInputElement | nul
 const tagEndless = document.getElementById("tagEndless") as HTMLInputElement | null;
 const tagColor = document.getElementById("tagColor") as HTMLInputElement | null;
 const tagSave = document.getElementById("tagSave");
+const tagApplyNow = document.getElementById("tagApplyNow") as HTMLButtonElement | null;
+const tagApplyLater = document.getElementById("tagApplyLater") as HTMLButtonElement | null;
 const tagDelete = document.getElementById("tagDelete");
 const tagDeleteConfirm = document.getElementById("tagDeleteConfirm") as HTMLButtonElement | null;
 const tagDeleteCancel = document.getElementById("tagDeleteCancel") as HTMLButtonElement | null;
@@ -695,6 +699,9 @@ type ListDeleteKey = "blockedDomains" | "blockedKeywords" | "allowedDomains" | "
 let pendingListDeleteValue: string | null = null;
 let pendingListDeleteKey: ListDeleteKey | null = null;
 let pendingTagSelectId: string | null | undefined = undefined;
+let pendingTagApplyConfig:
+  | { workMin: number; breakMin: number; cycles: number; tagId: string | null }
+  | null = null;
 let lastPomodoroAdvanceKey = "";
 let lastPomodoroAdvanceAttemptAt = 0;
 
@@ -3232,6 +3239,42 @@ const setActiveView = (viewId: string) => {
   }
 };
 
+const validViews = new Set(["home", "timer", "lists", "stats", "settings"]);
+
+const applyView = (viewId: string, behavior: ScrollBehavior = "smooth") => {
+  if (!validViews.has(viewId)) {
+    return;
+  }
+  setActiveView(viewId);
+  scrollAppMainToTop(behavior);
+};
+
+const getPopupViewOnce = async (): Promise<string | null> => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(POPUP_VIEW_KEY, (stored) => {
+      const value = stored[POPUP_VIEW_KEY];
+      if (typeof value !== "string" || !validViews.has(value)) {
+        resolve(null);
+        return;
+      }
+      chrome.storage.local.remove(POPUP_VIEW_KEY, () => resolve(value));
+    });
+  });
+};
+
+const getPopupTagSettingsOnce = async (): Promise<string | null> => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(POPUP_TAG_SETTINGS_KEY, (stored) => {
+      const value = stored[POPUP_TAG_SETTINGS_KEY];
+      if (typeof value !== "string" || !value) {
+        resolve(null);
+        return;
+      }
+      chrome.storage.local.remove(POPUP_TAG_SETTINGS_KEY, () => resolve(value));
+    });
+  });
+};
+
 const scrollAppMainToTop = (behavior: ScrollBehavior = "smooth") => {
   const main = document.querySelector<HTMLElement>(".app-main");
   if (!main) {
@@ -3479,6 +3522,7 @@ const bindEvents = () => {
         workMin: config.workMin,
         breakMin: config.breakMin,
         cycles: config.cycles,
+        pendingConfig: null,
         autoBlockDuringWork: state.pomodoro.autoBlockDuringWork,
         blockDuringBreak: state.pomodoro.blockDuringBreak,
         lastTagId: activeTag?.id ?? null,
@@ -3543,6 +3587,15 @@ const bindEvents = () => {
     const totalMs = completedCycles * perCycleMs + elapsedMs;
     const completionMinutes = Math.max(1, Math.ceil(totalMs / 60000));
     const completionCycles = Math.max(0, completedCycles);
+    const pendingConfig = state.pomodoro.pendingConfig ?? null;
+    const baseUpdate = pendingConfig
+      ? {
+          workMin: pendingConfig.workMin,
+          breakMin: pendingConfig.breakMin,
+          cycles: pendingConfig.cycles,
+          pendingConfig: null
+        }
+      : {};
     await setState({
       pomodoro: {
         running: null,
@@ -3552,7 +3605,8 @@ const bindEvents = () => {
           cycles: completionCycles,
           endedAt: Date.now(),
           tagId: running.linkedTagId ?? null
-        }
+        },
+        ...baseUpdate
       }
     });
   });
@@ -3641,14 +3695,86 @@ const bindEvents = () => {
       };
       items.push(newTag);
     }
-    const isActive = state.pomodoro.lastTagId === currentTagEditId;
-    const pomodoroUpdate =
-      isActive && !state.pomodoro.running
-        ? { workMin: work, breakMin: rest, cycles, lastTagId: currentTagEditId }
-        : { lastTagId: state.pomodoro.lastTagId ?? null };
+    const isActive = Boolean(currentTagEditId && state.pomodoro.lastTagId === currentTagEditId);
+    const isRunning = Boolean(state.pomodoro.running);
+    if (isActive && isRunning) {
+      await setState({ tags: { items } });
+      pendingTagApplyConfig = { workMin: work, breakMin: rest, cycles, tagId: currentTagEditId };
+      closeModal("tag");
+      openModal("tagApplyPrompt");
+      showToast("Saved. Choose when to apply.");
+      return;
+    }
+    const pomodoroUpdate = isActive
+      ? { workMin: work, breakMin: rest, cycles, lastTagId: currentTagEditId, pendingConfig: null }
+      : { lastTagId: state.pomodoro.lastTagId ?? null };
     await setState({ tags: { items }, pomodoro: pomodoroUpdate });
     closeModal("tag");
     showToast("Saved!");
+  });
+
+  tagApplyNow?.addEventListener("click", async () => {
+    if (!pendingTagApplyConfig) {
+      closeModal("tagApplyPrompt");
+      return;
+    }
+    const { workMin, breakMin, cycles, tagId } = pendingTagApplyConfig;
+    const state = await getState();
+    const running = state.pomodoro.running;
+    const baseUpdate = {
+      workMin,
+      breakMin,
+      cycles,
+      lastTagId: tagId,
+      pendingConfig: null
+    };
+    if (running) {
+      const cycleIndex = running.cycleIndex ?? 0;
+      const completedCycles = Math.max(0, cycleIndex);
+      const elapsedMs = running.startedAt ? Math.max(0, Date.now() - running.startedAt) : 0;
+      const perCycleMs = (state.pomodoro.workMin + state.pomodoro.breakMin) * 60 * 1000;
+      const totalMs = completedCycles * perCycleMs + elapsedMs;
+      const completionMinutes = Math.max(1, Math.ceil(totalMs / 60000));
+      const completionCycles = Math.max(0, completedCycles);
+      await setState({
+        pomodoro: {
+          running: null,
+          lastCompletion: {
+            mode: "interrupted",
+            minutes: completionMinutes,
+            cycles: completionCycles,
+            endedAt: Date.now(),
+            tagId: running.linkedTagId ?? null
+          },
+          ...baseUpdate
+        }
+      });
+    } else {
+      await setState({ pomodoro: baseUpdate });
+    }
+    pendingTagApplyConfig = null;
+    closeModal("tagApplyPrompt");
+    showToast("Applied.");
+  });
+
+  tagApplyLater?.addEventListener("click", async () => {
+    if (!pendingTagApplyConfig) {
+      closeModal("tagApplyPrompt");
+      return;
+    }
+    const { workMin, breakMin, cycles } = pendingTagApplyConfig;
+    await setState({
+      pomodoro: {
+        pendingConfig: {
+          workMin,
+          breakMin,
+          cycles
+        }
+      }
+    });
+    pendingTagApplyConfig = null;
+    closeModal("tagApplyPrompt");
+    showToast("Will apply after this session.");
   });
 
   tagDelete?.addEventListener("click", (event) => {
@@ -5075,6 +5201,21 @@ const bootstrap = async () => {
     renderLinks();
     setActiveView("home");
     const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get("view");
+    if (viewParam) {
+      applyView(viewParam, "auto");
+    }
+    const popupView = await getPopupViewOnce();
+    if (popupView) {
+      applyView(popupView, "auto");
+    }
+    const popupTagSettingsId = await getPopupTagSettingsOnce();
+    if (popupTagSettingsId) {
+      const tag = state.tags.items.find((item) => item.id === popupTagSettingsId) ?? null;
+      if (tag) {
+        openTagModal(tag);
+      }
+    }
     const tagSettingsId = params.get("tagSettings");
     if (tagSettingsId) {
       const tag = state.tags.items.find((item) => item.id === tagSettingsId) ?? null;

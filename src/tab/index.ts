@@ -11,11 +11,15 @@ const stageEl = document.getElementById("interventionStage");
 const actionsEl = document.getElementById("interventionActions");
 const backButton = document.getElementById("interventionBack") as HTMLButtonElement | null;
 const tempAllowSection = document.getElementById("tempAllowSection");
+const themeButton = document.querySelector<HTMLButtonElement>(".intervention-theme-btn");
+const appRoot = document.querySelector<HTMLElement>(".app");
+const rootEl = document.documentElement;
 const tempAllowButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-allow-min]")
 );
 const pendingTimeouts: number[] = [];
 let currentLocked = false;
+let currentThemeSetting: "dark" | "light" | "system" = "dark";
 
 const normalizeHost = (host: string): string => {
   const lower = host.toLowerCase();
@@ -34,6 +38,24 @@ const formatUsage = (ms: number): string => {
   const minutes = Math.floor(totalSec / 60);
   const seconds = totalSec % 60;
   return `${minutes}m ${seconds}s`;
+};
+
+const getSystemTheme = (): "dark" | "light" => {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+};
+
+const watchSystemTheme = (callback: (theme: "dark" | "light") => void) => {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const handler = () => callback(getSystemTheme());
+  media.addEventListener("change", handler);
+  return () => media.removeEventListener("change", handler);
+};
+
+const renderTheme = (theme: "dark" | "light" | "system") => {
+  currentThemeSetting = theme;
+  const nextTheme = theme === "system" ? getSystemTheme() : theme;
+  rootEl.setAttribute("data-theme", nextTheme);
+  appRoot?.setAttribute("data-theme", nextTheme);
 };
 
 const renderEmpty = () => {
@@ -125,6 +147,16 @@ const wireTempAllow = () => {
           window.location.replace(prev);
         }
       });
+    });
+  });
+};
+
+const wireThemeButton = () => {
+  themeButton?.addEventListener("click", () => {
+    chrome.runtime.sendMessage({ type: "openPopup", view: "settings" }, () => {
+      if (chrome.runtime.lastError) {
+        // Ignore; popup opening is best-effort.
+      }
     });
   });
 };
@@ -355,6 +387,7 @@ const renderBreathingStage = (technique: string, strictActive: boolean) => {
 
 const render = async () => {
   const state = await getState();
+  renderTheme(state.ui.theme);
   const result = pickIntervention(state.interventions);
 
   if (!result) {
@@ -459,7 +492,15 @@ const render = async () => {
 
 wireBackButton();
 wireTempAllow();
+wireThemeButton();
 void render();
 subscribeState((state) => {
   updateBackButtonState(!state.focusEnabled || state.pause.isPaused);
+  renderTheme(state.ui.theme);
+});
+
+watchSystemTheme(() => {
+  if (currentThemeSetting === "system") {
+    renderTheme("system");
+  }
 });

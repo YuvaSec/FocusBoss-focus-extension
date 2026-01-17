@@ -43,6 +43,11 @@ type StorageState = {
     workMin: number;
     breakMin: number;
     cycles: number;
+    pendingConfig?: {
+      workMin: number;
+      breakMin: number;
+      cycles: number;
+    } | null;
     autoBlockDuringWork: boolean;
     blockDuringBreak: boolean;
     sounds?: boolean;
@@ -1440,6 +1445,7 @@ const initPomodoroWidget = async () => {
           workMin: config.workMin,
           breakMin: config.breakMin,
           cycles: config.cycles,
+          pendingConfig: null,
           autoBlockDuringWork: state.pomodoro.autoBlockDuringWork,
           blockDuringBreak: state.pomodoro.blockDuringBreak,
           lastTagId: activeTag?.id ?? null,
@@ -1511,6 +1517,15 @@ const initPomodoroWidget = async () => {
         widget.classList.toggle("is-minimized", false);
         widget.classList.toggle("is-ultra", false);
         await saveWidgetPrefs({ minimized: false, ultraMinimized: false });
+        const pendingConfig = state.pomodoro.pendingConfig ?? null;
+        const baseUpdate = pendingConfig
+          ? {
+              workMin: pendingConfig.workMin,
+              breakMin: pendingConfig.breakMin,
+              cycles: pendingConfig.cycles,
+              pendingConfig: null
+            }
+          : {};
         await setState({
           pomodoro: {
             running: null,
@@ -1520,7 +1535,8 @@ const initPomodoroWidget = async () => {
               cycles: completionCycles,
               endedAt: Date.now(),
               tagId: running?.linkedTagId ?? null
-            }
+            },
+            ...baseUpdate
           }
         });
       }
