@@ -1,80 +1,107 @@
 # FocusBoss
 
-FocusBoss is a MV3 Chrome extension that helps you reduce distractions with focus mode, Pomodoro sessions, and analytics. The UI is designed to be calm and minimal while still surfacing the right control at the right time.
+FocusBoss is a Manifest V3 Chrome extension built to help you protect focus. It combines fast site blocking, a polished Pomodoro workflow, and rich analytics into a single, calm interface that stays out of the way until you need it.
 
-## Features
+## Highlights
 
-- Focus Mode toggle with temporary off states.
-- Blocked/Allowed lists for domains and keywords, plus advanced rule patterns.
-- Pomodoro timer with auto‑block during work and optional blocking during breaks.
-- Tag-based Pomodoro presets and quick switching.
-- Strict Mode sessions that lock focus until the timer ends.
-- Intervention styles (overlay vs redirect) for blocked pages.
-- Usage analytics: trends, heatmaps, top sites, and tag breakdowns.
-- Schedules to auto-enable focus by time.
-- CSV export for sessions and usage data.
+- Focus Mode with domain/keyword allowlists and blocklists.
+- Advanced rule patterns, plus YouTube video/playlist exceptions.
+- Pomodoro cycles with optional auto-blocking and sound cues.
+- Strict Sessions that lock focus until the timer ends.
+- Interventions for blocked pages (instant block, hold-to-complete, slide gate, breathing reset).
+- Scheduling to auto-enable focus by time and day.
+- Analytics for usage trends, heatmaps, and tag performance.
+- CSV/JSON exports for sessions and usage data.
+
+## How It Works
+
+FocusBoss uses a background service worker to enforce rules, track usage, and manage timers. Content scripts apply overlays and interventions directly on pages. A dedicated "tab" UI handles the focused blocking experience, while the popup provides configuration, charts, and exports.
 
 ## Architecture
 
-- `public/` — UI markup, styles, and the MV3 manifest.
-- `src/popup/` — Popup UI logic (state, navigation, charts, modals).
-- `src/background/` — Service worker that tracks usage, schedules, and alarms.
-- `src/content/` — Content script that enforces blocking and overlays.
-- `src/tab/` — Blocking/redirect page logic.
-- `src/shared/` — Storage, rules engine, schema, and messaging utilities.
-
-## Tech stack
-
-- Manifest V3 Chrome extension
-- TypeScript (no framework)
-- Custom CSS UI
+- `public/` - Static UI assets, CSS, and `manifest.json`.
+- `src/background/` - Service worker logic (rules, alarms, analytics, schedule).
+- `src/content/` - Page-level blocking, overlays, and widget UI.
+- `src/popup/` - Popup UI, navigation, analytics views, exports.
+- `src/tab/` - Blocked/redirected page UI and interactions.
+- `src/shared/` - Storage schema, rules engine, and shared utilities.
 
 ## Permissions
 
-- `storage` for settings and analytics.
-- `tabs` for usage tracking and redirects.
-- `alarms` for Pomodoro, strict mode, and schedules.
-- `host_permissions: <all_urls>` for blocking and usage tracking.
+FocusBoss requests only what it needs:
 
-## Data & storage
+- `storage` - Settings, sessions, and analytics.
+- `tabs` - Usage tracking and redirects.
+- `alarms` - Pomodoro, strict sessions, and schedules.
+- `scripting` - Injecting content scripts when needed.
+- `declarativeNetRequest` - High-performance blocking rules.
+- `offscreen` - Audio playback for timer cues.
+- `webNavigation` - Track blocked navigations accurately.
+- `host_permissions: <all_urls>` - Required to evaluate and block any page.
 
-- Primary state is stored in `chrome.storage.local`.
-- Small UI preferences (e.g., widget placement) use `chrome.storage.sync` where applicable.
+## Data and Privacy
 
-## Development
+- All data is stored locally in `chrome.storage.local`.
+- Lightweight UI preferences may be synced via `chrome.storage.sync`.
+- No external services or analytics are used by default.
 
-Install dependencies:
+## Installation (Development)
 
-```bash
-npm install
-```
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Build the extension:
+   ```bash
+   npm run build
+   ```
+3. Load it in Chrome:
+   - Open `chrome://extensions`
+   - Enable **Developer mode**
+   - Click **Load unpacked**
+   - Select the `dist/` folder
 
-Build into `dist/`:
+## Development Workflow
 
-```bash
-npm run build
-```
+- Build once:
+  ```bash
+  npm run build
+  ```
+- Watch TypeScript changes:
+  ```bash
+  npm run watch
+  ```
+- Run tests:
+  ```bash
+  npm test
+  ```
 
-Watch mode:
+## Configuration Guide
 
-```bash
-npm run watch
-```
+FocusBoss is built around a few core systems:
 
-Load the extension:
+- Rules: Define domains/keywords to allow or block, plus advanced patterns.
+- Pomodoro: Configure work/break length, cycles, and sound cues.
+- Strict Sessions: Lock focus for a set duration.
+- Interventions: Choose how to interrupt access to blocked pages.
+- Scheduling: Automatically enable focus on a weekly schedule.
 
-1. Open `chrome://extensions`
-2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select the `dist/` folder
+## Exporting Data
 
-## Testing
+From the popup Analytics view, you can export:
 
-```bash
-npm test
-```
+- Pomodoro sessions (CSV/JSON)
+- Focus sessions (CSV/JSON)
+- Usage by site (CSV/JSON)
+- Blocked usage (CSV/JSON)
 
-## Notes
+## Tech Stack
 
-- The popup UI is built from `public/popup.html` + `public/ui.css`.
-- `scripts/copy.mjs` moves static assets into `dist/` after build.
+- TypeScript (no framework)
+- Chrome Extension Manifest V3
+- Custom CSS UI
+
+## Project Notes
+
+- Popup UI uses `public/popup.html` and `public/ui.css`.
+- Static assets are copied into `dist/` by `scripts/copy.mjs` after build.
